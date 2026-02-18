@@ -27,10 +27,7 @@ const services = [
 
 export default function Services() {
   return (
-    <section
-      id="services"
-      className="bg-[#fcfdfe] py-16 px-6 border-y border-slate-100"
-    >
+    <section id="services" className="bg-[#020617]  px-6 border-y py-25">
       <div className="max-w-7xl mx-auto">
         {/* Compact Header */}
         <div className="text-center mb-12 space-y-3">
@@ -41,7 +38,7 @@ export default function Services() {
             </span>
             <span className="w-8 h-[1.5px] bg-[#00e5fa]"></span>
           </div>
-          <h2 className="text-3xl md:text-4xl font-black text-slate-900">
+          <h2 className="text-3xl md:text-4xl font-black text-white">
             Our{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00e5fa] to-blue-600">
               Expertise

@@ -28,7 +28,7 @@ export default function Train() {
   return (
     <section
       id="training"
-      className="bg-[#030712] text-white py-15 px-4 lg:px-12 relative overflow-hidden"
+      className="bg-[#030712] text-white py-25 px-4 lg:px-12 relative overflow-hidden"
     >
       {/* Background Grid Pattern (For Unique Look) */}
       <div

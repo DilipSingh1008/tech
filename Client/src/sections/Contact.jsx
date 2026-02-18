@@ -20,7 +20,7 @@ export default function Contact() {
       !formData.email ||
       !formData.message
     ) {
-      alert("Bhai, saari details bharna zaroori hai!");
+      alert("fill all input ");
       return;
     }
     alert(`Thank you, ${formData.firstName}! We'll get back to you soon.`);

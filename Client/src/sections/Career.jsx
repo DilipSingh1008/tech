@@ -23,7 +23,7 @@ const jobs = [
 
 export default function Career() {
   return (
-    <section id="career" className="bg-[#020617] text-white py-10 px-6">
+    <section id="career" className="bg-[#020617] text-white py-25 px-6">
       <div className="max-w-6xl mx-auto">
         {/* Header - Minimalist */}
         <div className="flex flex-col md:flex-row justify-between items-center mb-16 gap-8">
