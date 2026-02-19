@@ -1,0 +1,8 @@
+{
+  "default": {
+    "primaryColor": "#4F46E5",
+    "secondaryColor": "#FBBF24",
+    "font": "'Poppins', sans-serif",
+    "background": "#F3F4F6"
+  }
+}

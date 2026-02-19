@@ -1,0 +1,61 @@
+@import "tailwindcss";
+
+/* Light mode variables (default) */
+:root {
+  --main-bg: #f3f4f6; /* Light background */
+  --sidebar-bg: #ffffff;
+  --card-bg: #ffffff;
+  --border-color: #e5e7eb;
+
+  --primary: #4f46e5;
+  --primary-glow: rgba(79, 70, 229, 0.15);
+
+  --text-main: #111827; /* Dark text */
+  --text-muted: #6b7280;
+  --danger: #dc2626;
+
+  --font-family: "Inter", sans-serif;
+}
+
+/* Dark mode overrides */
+.dark {
+  --main-bg: #0b0e14;
+  --sidebar-bg: #11141b;
+  --card-bg: #161b22;
+  --border-color: #21262d;
+
+  --primary: #38bdf8; /* Electric Cyan */
+  --primary-glow: rgba(56, 189, 248, 0.15);
+
+  --text-main: #e6edf3; /* Soft white for eyes */
+  --text-muted: #7d8590;
+  --danger: #f85149;
+}
+
+/* Apply variables to body */
+body {
+  background-color: var(--main-bg);
+  color: var(--text-main);
+  font-family: var(--font-family);
+  margin: 0;
+  transition: all 0.3s ease;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--main-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 10px;
+}
+
+/* Glassmorphism */
+.dark-glass {
+  background: rgba(22, 27, 34, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border-color);
+}
