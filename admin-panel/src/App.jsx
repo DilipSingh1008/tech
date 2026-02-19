@@ -8,6 +8,7 @@ import Dashboard from "./pages/dashboard/Dashboard";
 import NotFound from "./pages/NotFound";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import Profile from "./pages/dashboard/profile";
+import ManageCategories from "./pages/dashboard/ManageCategories";
 // import ThemeToggleButton from "./components/Button";
 
 function App() {
@@ -21,6 +22,10 @@ function App() {
             <Route path="forgot-password" element={<ForgotPassword />} />
             <Route path="/dashboard/profile" element={<Profile />} />
             <Route path="/dashboard/*" element={<Dashboard />} />
+            <Route
+              path="/dashboard/categories"
+              element={<ManageCategories />}
+            />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Router>

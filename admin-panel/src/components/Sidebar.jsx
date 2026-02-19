@@ -6,6 +6,7 @@ import {
   LogOut,
   Hexagon,
   X,
+  Grid,
 } from "lucide-react";
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
@@ -20,6 +21,11 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       path: "/dashboard/settings",
       name: "Settings",
       icon: <Settings size={18} />,
+    },
+    {
+      path: "/dashboard/categories",
+      name: "Manage Categories",
+      icon: <Grid size={18} />,
     },
   ];
 
