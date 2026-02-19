@@ -3,9 +3,9 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 const connectDB = require("./config/db");
 
-// Route imports
+// Routes
 const authRoutes = require("./routes/authRoutes");
-const quoteRoutes = require("./routes/quoteRoutes");
+const careerRoutes = require("./routes/careerRoutes");
 
 dotenv.config();
 connectDB();
@@ -15,12 +15,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ✅ Important: Do NOT use ()
+// API Routes
 app.use("/api/auth", authRoutes);
-app.use("/api/quote", quoteRoutes);
 
-// Add other routes similarly
-// app.use("/api/blogs", blogRoutes);
+// API Routes
+app.use("/api/career", careerRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

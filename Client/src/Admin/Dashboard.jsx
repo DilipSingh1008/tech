@@ -15,10 +15,10 @@ import {
 } from "lucide-react";
 
 import HeroForm from "./HeroForm";
-import CareerForm from "./CareerForm";
 import ServicesForm from "./ServicesForm";
 import TrainForm from "./TrainForm";
 import CreateAdmin from "./createadmin";
+import CareerManager from "./CareerManager";
 // import Createadmin from "./CreateAdmin";
 function Dashboard() {
   const [activeTab, setActiveTab] = useState("Hero");
@@ -35,7 +35,7 @@ function Dashboard() {
     {
       name: "Careers",
       icon: <Briefcase size={20} />,
-      component: <CareerForm />,
+      component: <CareerManager />,
     },
     {
       name: "Services",
