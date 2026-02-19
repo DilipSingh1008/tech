@@ -7,6 +7,7 @@ import {
   Hexagon,
   X,
   Grid,
+  LocationEdit,
 } from "lucide-react";
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
@@ -17,6 +18,11 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       icon: <LayoutDashboard size={18} />,
     },
     { path: "/dashboard/users", name: "Users", icon: <Users size={18} /> },
+     {
+      path: "/dashboard/location",
+      name: "Location",
+      icon: <LocationEdit size={18} />,
+    },
     {
       path: "/dashboard/settings",
       name: "Settings",
