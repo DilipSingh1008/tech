@@ -24,12 +24,15 @@ function AppRouter() {
             <Route path="/register" element={<Register />} />
 
             <Route path="forgot-password" element={<ForgotPassword />} />
-            <Route path="/dashboard/profile" element={<Profile />} />
-            <Route path="/dashboard/*" element={<Dashboard />} />
+            <Route path="/dashboard" element={<Dashboard />}>
+            <Route path="profile" element={<Profile />} />
+            {/* <Route path="/dashboard/*" element={<Dashboard />} /> */}
+            <Route path="/dashboard/location" element={<Location />} />
             <Route
               path="/dashboard/categories"
               element={<ManageCategories />}
             />
+            </Route>
             
             <Route path="*" element={<NotFound />} />
           </Routes>

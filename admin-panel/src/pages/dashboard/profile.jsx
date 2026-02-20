@@ -27,10 +27,10 @@ const ProfilePage = () => {
 
   return (
     <div className="flex h-screen bg-[var(--main-bg)] text-[var(--text-main)] font-sans antialiased">
-      <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+      {/* <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} /> */}
 
       <div className="flex-1 flex flex-col min-w-0">
-        <Navbar onMenuClick={toggleSidebar} />
+        {/* <Navbar onMenuClick={toggleSidebar} /> */}
 
         <main className="flex-1 overflow-y-auto bg-[#fafafa] dark:bg-[var(--main-bg)]">
           <div className=" mx-auto p-1 md:p-10 space-y-10">
