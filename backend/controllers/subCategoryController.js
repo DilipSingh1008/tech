@@ -1,15 +1,31 @@
-const express = require("express");
-const router = express.Router();
-const {
-  createSubCategory,
-  getSubCategories,
-  updateSubCategory,
-  deleteSubCategory,
-} = require("../controllers/subCategoryController");
+const SubCategory = require('../models/SubCategory');
 
-router.post("/", createSubCategory);
-router.get("/", getSubCategories);
-router.put("/:id", updateSubCategory);
-router.delete("/:id", deleteSubCategory);
+// Create subcategory
+exports.createSubCategory = async (req, res) => {
+  const { name, image, categoryId } = req.body;
+  const subcategory = await SubCategory.create({ name, image, category: categoryId });
+  res.json(subcategory);
+};
 
-module.exports = router;
+// Get all subcategories
+exports.getSubCategories = async (req, res) => {
+  const subcategories = await SubCategory.find().populate('category', 'name');
+  res.json(subcategories);
+};
+
+// Update subcategory
+exports.updateSubCategory = async (req, res) => {
+  const { name, image, status } = req.body;
+  const subcategory = await SubCategory.findByIdAndUpdate(
+    req.params.id,
+    { name, image, status },
+    { new: true }
+  );
+  res.json(subcategory);
+};
+
+// Delete subcategory
+exports.deleteSubCategory = async (req, res) => {
+  await SubCategory.findByIdAndDelete(req.params.id);
+  res.json({ message: 'Subcategory deleted' });
+};
