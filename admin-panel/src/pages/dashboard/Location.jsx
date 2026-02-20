@@ -1,73 +1,62 @@
-import React, { useState } from 'react';
-import { Formik, Form, Field, ErrorMessage } from 'formik';
-import * as Yup from 'yup';
-import { useGetDataQuery } from '../../redux/api/apiSlice';
+import React, { useState } from "react";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
+import {
+  useGetDataQuery,
+  usePostDataMutation,
+} from "../../redux/api/apiSlice";
 
 const Location = () => {
+  // ⭐ Fetch countries
   const { data, isLoading, error } = useGetDataQuery({
-  url: "/countrylocation",
-});
+    url: "/countrylocation",
+  });
 
-
-  // Dummy Data
-  const [countries, setCountries] = useState([
-    { id: 1, name: 'India' },
-    { id: 2, name: 'Canada' },
-    { id: 3, name: 'Germany' },
-  ]);
+  // ⭐ Create country mutation
+  const [postData, { isLoading: createLoading }] = usePostDataMutation();
 
   const [editingCountry, setEditingCountry] = useState(null);
 
-  // Form Validation Schema (Yup)
+  // ⭐ Validation
   const validationSchema = Yup.object({
     countryName: Yup.string()
-      .min(2, 'Bahut chhota naam hai!')
-      .max(50, 'Bahut bada naam hai!')
-      .required('Country ka naam zaroori hai'),
+      .min(2, "Bahut chhota naam hai!")
+      .max(50, "Bahut bada naam hai!")
+      .required("Country ka naam zaroori hai"),
   });
 
-  // Handlers
-  const handleAddOrUpdate = (values, { resetForm }) => {
-    if (editingCountry) {
-      // Rename logic
-      setCountries(countries.map(c => 
-        c.id === editingCountry.id ? { ...c, name: values.countryName } : c
-      ));
-      setEditingCountry(null);
-    } else {
-      // Create logic
-      const newCountry = {
-        id: Date.now(),
-        name: values.countryName,
-      };
-      setCountries([...countries, newCountry]);
+  // ⭐ Create country function
+  const createCountryFunction = async (values, { resetForm }) => {
+    try {
+      await postData({
+        url: "/countrylocation",
+        body: { country: values.countryName },
+      }).unwrap();
+
+      resetForm();
+    } catch (err) {
+      console.log(err);
     }
-    resetForm();
   };
 
-  const deleteCountry = (id) => {
-    setCountries(countries.filter(c => c.id !== id));
-  };
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error</div>;
 
-  const startEdit = (country) => {
-    setEditingCountry(country);
-  };
-
-  if(isLoading) return <div>Loading...</div>;
-
-console.log(data)
+  const countriesData = data || [];
 
   return (
     <div className="p-8 bg-gray-900 min-h-screen text-white">
       <h1 className="text-3xl font-bold mb-6">Location Management</h1>
 
-      {/* Formik Form */}
+      {/* ⭐ Form */}
       <div className="bg-gray-800 p-6 rounded-lg mb-8 shadow-lg">
         <Formik
-          initialValues={{ countryName: editingCountry ? editingCountry.name : '' }}
+          initialValues={{
+            countryName: editingCountry ? editingCountry.name : "",
+          }}
           enableReinitialize={true}
           validationSchema={validationSchema}
-          onSubmit={handleAddOrUpdate}
+          onSubmit={createCountryFunction}
         >
           {({ errors, touched }) => (
             <Form className="flex flex-col gap-4">
@@ -76,34 +65,31 @@ console.log(data)
                   name="countryName"
                   placeholder="Enter Country Name"
                   className={`p-2 rounded bg-gray-700 border ${
-                    errors.countryName && touched.countryName ? 'border-red-500' : 'border-gray-600'
+                    errors.countryName && touched.countryName
+                      ? "border-red-500"
+                      : "border-gray-600"
                   } outline-none`}
                 />
-                <ErrorMessage name="countryName" component="span" className="text-red-400 text-sm mt-1" />
+                <ErrorMessage
+                  name="countryName"
+                  component="span"
+                  className="text-red-400 text-sm mt-1"
+                />
               </div>
-              
+
               <button
                 type="submit"
+                disabled={createLoading}
                 className="bg-blue-600 cursor-pointer hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition"
               >
-                {editingCountry ? 'Rename Country' : 'Create Country'}
+                {createLoading ? "Creating..." : "Create Country"}
               </button>
-              
-              {editingCountry && (
-                <button 
-                  type="button" 
-                  onClick={() => setEditingCountry(null)}
-                  className="text-gray-400 cursor-pointer hover:text-white text-sm"
-                >
-                  Cancel Edit
-                </button>
-              )}
             </Form>
           )}
         </Formik>
       </div>
 
-      {/* Country Table */}
+      {/* ⭐ Table */}
       <div className="overflow-x-auto">
         <table className="w-full text-left bg-gray-800 rounded-lg overflow-hidden">
           <thead className="bg-gray-700">
@@ -113,22 +99,22 @@ console.log(data)
               <th className="p-4 text-center">Actions</th>
             </tr>
           </thead>
+
           <tbody>
-            {countries.map((country) => (
-              <tr key={country.id} className="border-b border-gray-700 hover:bg-gray-750">
-                <td className="p-4">{country.id}</td>
+            {countriesData.map((country, index) => (
+              <tr
+                key={country._id}
+                className="border-b border-gray-700 hover:bg-gray-750"
+              >
+                <td className="p-4">{index + 1}</td>
                 <td className="p-4 font-medium">{country.name}</td>
+
                 <td className="p-4 flex justify-center gap-3">
-                  <button
-                    onClick={() => startEdit(country)}
-                    className="bg-yellow-500 cursor-pointer hover:bg-yellow-600 text-black px-3 py-1 rounded text-sm"
-                  >
-                    Edit/Rename
+                  <button className="bg-yellow-500 cursor-pointer hover:bg-yellow-600 text-black px-3 py-1 rounded text-sm">
+                    Edit
                   </button>
-                  <button
-                    onClick={() => deleteCountry(country.id)}
-                    className="bg-red-500 cursor-pointer hover:bg-red-600 text-white px-3 py-1 rounded text-sm"
-                  >
+
+                  <button className="bg-red-500 cursor-pointer hover:bg-red-600 text-white px-3 py-1 rounded text-sm">
                     Delete
                   </button>
                 </td>
