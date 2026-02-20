@@ -110,7 +110,7 @@ const ManageCategories = () => {
             <h2 className="text-lg font-bold">Categories</h2>
             <button
               onClick={() => setIsModalOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-xs font-semibold hover:bg-indigo-500 transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-(--primary) text-white rounded-lg text-xs font-semibold hover:bg-(--primary) transition-all"
             >
               <Plus size={14} /> Add Category
             </button>
@@ -163,7 +163,7 @@ const ManageCategories = () => {
                           onClick={() =>
                             handleToggleStatus(cat._id, cat.status)
                           }
-                          className={`w-8 h-4 rounded-full relative transition-colors ${cat.status ? "bg-indigo-600" : "bg-gray-400"}`}
+                          className={`w-8 h-4 rounded-full relative transition-colors ${cat.status ? "bg-(--primary)" : "bg-gray-400"}`}
                         >
                           <div
                             className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${cat.status ? "left-4.5" : "left-0.5"}`}
@@ -172,9 +172,10 @@ const ManageCategories = () => {
                       </td>
                       <td className="px-4 py-2.5 text-right">
                         <div className="flex justify-end gap-1">
-                          <button className="p-1.5 hover:text-indigo-500 transition-colors">
+                          <button className="p-1.5 hover:text-(--primary) transition-colors">
                             <RefreshCcw size={14} />
                           </button>
+
                           <button
                             onClick={() => {
                               setFormData({
@@ -184,7 +185,7 @@ const ManageCategories = () => {
                               });
                               setIsModalOpen(true);
                             }}
-                            className="p-1.5 hover:text-indigo-500 transition-colors"
+                            className="p-1.5 hover:text-(--primary) transition-colors"
                           >
                             <Edit3 size={14} />
                           </button>
@@ -252,14 +253,13 @@ const ManageCategories = () => {
                     <input
                       type="text"
                       required
-                      className="w-full p-2 text-sm rounded-lg bg-gray-500/5 border border-gray-500/20 outline-none focus:border-indigo-500"
+                      className="w-full p-2 text-sm rounded-lg bg-gray-500/5 border border-gray-500/20 outline-none focus:border-(--primary)"
                       value={formData.name}
                       onChange={(e) =>
                         setFormData({ ...formData, name: e.target.value })
                       }
                     />
-                  </div>
-                  ={" "}
+                  </div>{" "}
                   {formData.icon && (
                     <img
                       src={
@@ -279,7 +279,7 @@ const ManageCategories = () => {
                       type="file"
                       accept="image/*"
                       required={!formData.id}
-                      className="w-full text-xs file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-bold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 cursor-pointer"
+                      className="w-full text-xs file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-bold file:bg-(--primary) file:text-white hover:file:bg-(--primary) cursor-pointer"
                       onChange={(e) =>
                         setFormData({ ...formData, icon: e.target.files[0] })
                       }
@@ -287,7 +287,7 @@ const ManageCategories = () => {
                   </div>
                   <button
                     type="submit"
-                    className="w-full py-2 mt-2 bg-indigo-600 text-white rounded-lg text-xs font-bold hover:bg-indigo-500 transition-all"
+                    className="w-full py-2 mt-2 bg-(--primary) text-white rounded-lg text-xs font-bold hover:bg-(--primary) transition-all"
                   >
                     {formData.id ? "Update Category" : "Create Category"}
                   </button>
