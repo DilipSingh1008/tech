@@ -113,11 +113,7 @@ const ManageCategories = () => {
 
   return (
     <div className={`flex h-screen overflow-hidden text-sm ${theme.main}`}>
-      {/* <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} /> */}
-
       <div className="flex-1 flex flex-col min-w-0">
-        {/* <Navbar onMenuClick={toggleSidebar} /> */}
-
         <main className="p-3 md:p-5 overflow-y-auto">
           <div className="max-w-5xl mx-auto">
             <div className="flex items-center justify-between mb-4">
