@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Plus, Trash2, Edit3, Check, X } from "lucide-react";
 import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
@@ -29,11 +29,16 @@ const ManageCategories = () => {
   const [categories, setCategories] = useState(initialCategories);
   const [editingId, setEditingId] = useState(null);
   const [tempName, setTempName] = useState("");
-
+  const idCounter = useRef(3);
   const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
 
   const addCategory = () => {
-    const newCat = { id: Date.now(), name: "New Category", subCategories: [] };
+    const newCat = {
+      id: idCounter.current++,
+      name: "New Category",
+      subCategories: [],
+    };
+    console.log(newCat);
     setCategories([...categories, newCat]);
     setEditingId(newCat.id);
     setTempName("New Category");
@@ -64,19 +69,29 @@ const ManageCategories = () => {
     setCategories(categories.filter((cat) => cat.id !== id));
 
   const addSubCategory = (parentId) => {
-    const newSub = { id: Date.now(), name: "New Sub" };
-    setCategories(
-      categories.map((cat) =>
-        cat.id === parentId
-          ? { ...cat, subCategories: [...cat.subCategories, newSub] }
-          : cat,
-      ),
+    setCategories((prevCategories) =>
+      prevCategories.map((cat) => {
+        if (cat.id === parentId) {
+          const nextId =
+            cat.subCategories.length > 0
+              ? Math.max(...cat.subCategories.map((s) => s.id)) + 1
+              : 1;
+
+          const newSub = {
+            id: nextId,
+            name: "New Sub",
+          };
+
+          return {
+            ...cat,
+            subCategories: [...cat.subCategories, newSub],
+          };
+        }
+        return cat;
+      }),
     );
-    setEditingId(newSub.id);
-    setTempName("New Sub");
   };
 
-  // --- Dynamic Styles ---
   const theme = {
     main: isDarkMode
       ? "bg-[#0b0e14] text-slate-200"
@@ -105,7 +120,6 @@ const ManageCategories = () => {
 
         <main className="p-3 md:p-5 overflow-y-auto">
           <div className="max-w-5xl mx-auto">
-            {/* Minimal Header */}
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h2 className="text-xl font-bold tracking-tight">Categories</h2>

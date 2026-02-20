@@ -33,17 +33,17 @@ const ProfilePage = () => {
         <Navbar onMenuClick={toggleSidebar} />
 
         <main className="flex-1 overflow-y-auto bg-[#fafafa] dark:bg-[var(--main-bg)]">
-          <div className="max-w-4xl mx-auto p-6 md:p-10 space-y-10">
+          <div className=" mx-auto p-1 md:p-10 space-y-10">
             {/* Minimal Header */}
             <div className="flex items-center justify-between">
-              <div>
+              {/* <div>
                 <h1 className="text-xl font-semibold tracking-tight">
                   Account Settings
                 </h1>
                 <p className="text-sm text-gray-500 mt-0.5">
                   Manage your personal information and security.
                 </p>
-              </div>
+              </div> */}
               {/* <button
                 onClick={() => alert("Logged out")}
                 className="text-xs font-medium text-red-500 hover:bg-red-50 px-3 py-1.5 rounded-lg transition-colors"
@@ -52,8 +52,7 @@ const ProfilePage = () => {
               </button> */}
             </div>
 
-            {/* Profile Section */}
-            <div className="bg-white dark:bg-[var(--card-bg)] rounded-xl border   shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07)] overflow-hidden">
+            <div className="bg-white dark:bg-[var(--card-bg)] rounded-xl shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07)] overflow-hidden">
               <div className="p-1 px-6 py-4 border-b border-gray-50  bg-gray-50/50 dark:bg-white/5">
                 <h2 className="text-sm font-medium flex items-center gap-2">
                   <User size={16} className="text-[var(--primary)]" /> Basic
@@ -63,7 +62,6 @@ const ProfilePage = () => {
 
               <div className="p-6 md:p-8">
                 <div className="flex flex-col md:flex-row gap-10">
-                  {/* Slim Avatar Upload */}
                   <div className="flex flex-col items-center gap-3">
                     <div className="relative group">
                       <div className="w-24 h-24 rounded-full border-2 border-gray-100  p-1">
@@ -84,7 +82,6 @@ const ProfilePage = () => {
                     </span>
                   </div>
 
-                  {/* Form - Slim Inputs */}
                   <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
                     {[
                       {
@@ -141,7 +138,7 @@ const ProfilePage = () => {
             </div>
 
             {/* Security Section - More Compact */}
-            <div className="bg-white dark:bg-[var(--card-bg)] rounded-xl border border-gray-100  shadow-sm">
+            <div className="bg-white dark:bg-[var(--card-bg)] rounded-xl  border-gray-100  shadow-sm">
               <div className="p-6 space-y-6">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center text-blue-500">

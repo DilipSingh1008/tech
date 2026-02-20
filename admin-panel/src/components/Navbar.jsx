@@ -3,10 +3,25 @@ import ThemeToggleButton from "./Button";
 import { useContext, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+// import { useLocation } from "react-router-dom";
+const getPageTitle = () => {
+  const path = location.pathname;
+
+  if (path === "/dashboard") return "Dashboard";
+  if (path === "/dashboard/users") return "Users";
+  if (path === "/dashboard/settings") return "Settings";
+  if (path === "/dashboard/categories") return "Manage Categories";
+  if (path === "/dashboard/location") return "Location";
+  if (path === "/dashboard/profile") return "Account Settings";
+
+  return "Dashboard"; // default
+};
 
 const Navbar = ({ onMenuClick }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef();
+  // const location = useLocation();
+
   const { logout } = useContext(AuthContext);
   const navigate = useNavigate();
   useEffect(() => {
@@ -47,14 +62,15 @@ const Navbar = ({ onMenuClick }) => {
             className="text-sm font-bold tracking-tight "
             style={{ color: "var(--text-muted)" }}
           >
-            Dashboard Overview
+            {/* Dashboard */}
+            {getPageTitle()}
           </span>
-          <span
+          {/* <span
             className=" text-[8px] uppercase tracking-[0.2em] "
             style={{ color: "var(--text-main)" }}
           >
             System
-          </span>
+          </span> */}
         </div>
       </div>
 
