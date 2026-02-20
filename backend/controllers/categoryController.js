@@ -1,5 +1,6 @@
 const Category = require("../models/Category");
-
+const fs = require("fs");
+const path = require("path");
 // Create category
 exports.createCategory = async (req, res) => {
   try {
@@ -24,7 +25,7 @@ exports.createCategory = async (req, res) => {
 // Get all categories
 exports.getCategories = async (req, res) => {
   try {
-    const categories = await Category.find();
+    const categories = await Category.find().sort({ createdAt: -1 });
     res.json(categories);
   } catch (error) {
     console.error("Error fetching categories:", error.message);
@@ -71,7 +72,15 @@ exports.deleteCategory = async (req, res) => {
       return res.status(404).json({ error: "Category not found" });
     }
 
-    res.json({ message: "Category deleted" });
+    if (category.icon) {
+      const imagePath = path.join(__dirname, "..", category.icon);
+      fs.unlink(imagePath, (err) => {
+        if (err) console.error("Failed to delete image file:", err);
+        else console.log("Image deleted:", imagePath);
+      });
+    }
+
+    res.json({ message: "Category and image deleted" });
   } catch (error) {
     console.error("Error deleting category:", error.message);
     res
