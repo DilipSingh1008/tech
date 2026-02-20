@@ -6,11 +6,9 @@ const connectDB = require("./config/db");
 // Routes
 const authRoutes = require("./routes/authRoutes");
 const careerRoutes = require("./routes/careerRoutes");
-const categoryRoutes = require("./routes/categoryRoutes");
+const categoryRoutes = require("./routes/cate");
 const subCategoryRoutes = require("./routes/subCategoryRoutes");
 const countryLocationRoute = require("./routes/countryLocationRoute");
-const StateLocationRoute = require("./routes/stateLocation")
-const cityLocationRoute = require("./routes/cityLocationRoute")
 
 dotenv.config();
 connectDB();
@@ -19,7 +17,6 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
-app.use("/uploads", express.static("uploads"));
 
 // API Routes
 app.use("/api/auth", authRoutes);
@@ -29,8 +26,6 @@ app.use("/api/career", careerRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/subcategories', subCategoryRoutes);
 app.use('/api/countrylocation', countryLocationRoute);
-app.use('/api/statelocation', StateLocationRoute);
-app.use('/api/citylocation', cityLocationRoute);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
