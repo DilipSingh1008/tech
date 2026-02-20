@@ -39,7 +39,7 @@ const CareerTable = ({ onEdit, onCreateNew }) => {
         });
         setCareers(careers.filter((job) => job._id !== id));
       } catch (err) {
-        alert("Delete failed");
+        alert("Delete failed", err);
       }
     }
   };

@@ -38,7 +38,7 @@ const CareerForm = ({ onSuccess }) => {
         "http://localhost:5000/api/career",
         formData,
       );
-
+      console.log(res);
       // Success Message dikhao
       setStatus({
         type: "success",

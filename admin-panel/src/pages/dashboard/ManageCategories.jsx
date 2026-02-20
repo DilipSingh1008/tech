@@ -1,96 +1,136 @@
-import { useRef, useState } from "react";
-import { Plus, Trash2, Edit3, Check, X } from "lucide-react";
-import Sidebar from "../../components/Sidebar";
-import Navbar from "../../components/Navbar";
+import React, { useState, useEffect } from "react";
+import {
+  Plus,
+  Trash2,
+  Edit3,
+  ChevronDown,
+  ChevronRight,
+  Image as ImageIcon,
+} from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
-
-const initialCategories = [
-  {
-    id: 1,
-    name: "Electronics",
-    subCategories: [
-      { id: 11, name: "Mobiles" },
-      { id: 12, name: "Laptops" },
-    ],
-  },
-  {
-    id: 2,
-    name: "Fashion",
-    subCategories: [
-      { id: 21, name: "Men" },
-      { id: 22, name: "Women" },
-    ],
-  },
-];
 
 const ManageCategories = () => {
   const { isDarkMode } = useTheme();
-  const [isSidebarOpen, setSidebarOpen] = useState(false);
-  const [categories, setCategories] = useState(initialCategories);
-  const [editingId, setEditingId] = useState(null);
-  const [tempName, setTempName] = useState("");
-  const idCounter = useRef(3);
-  const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [expandedIds, setExpandedIds] = useState(new Set());
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalType, setModalType] = useState("category");
+  const [formData, setFormData] = useState({
+    name: "",
+    icon: null,
+    image: null,
+    categoryId: "",
+  });
 
-  const addCategory = () => {
-    const newCat = {
-      id: idCounter.current++,
-      name: "New Category",
-      subCategories: [],
-    };
-    console.log(newCat);
-    setCategories([...categories, newCat]);
-    setEditingId(newCat.id);
-    setTempName("New Category");
-  };
+  const CATEGORY_API = "http://localhost:5000/api/categories";
+  const SUBCATEGORY_API = "http://localhost:5000/api/subcategories";
 
-  const handleSave = (id, isSub = false, parentId = null) => {
-    if (!tempName.trim()) {
-      setEditingId(null);
-      return;
+  const handleSave = async (e) => {
+    e.preventDefault();
+
+    const url = modalType === "category" ? CATEGORY_API : SUBCATEGORY_API;
+
+    const data = new FormData();
+    data.append("name", formData.name);
+
+    if (modalType === "category") {
+      data.append("icon", formData.icon);
+    } else {
+      data.append("image", formData.image);
+      data.append("categoryId", formData.categoryId);
     }
-    const updated = categories.map((cat) => {
-      if (!isSub && cat.id === id) return { ...cat, name: tempName };
-      if (isSub && cat.id === parentId) {
-        return {
-          ...cat,
-          subCategories: cat.subCategories.map((sub) =>
-            sub.id === id ? { ...sub, name: tempName } : sub,
-          ),
-        };
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        body: data, // ❗ NO headers
+      });
+
+      if (response.ok) {
+        setIsModalOpen(false);
+        setFormData({
+          name: "",
+          icon: null,
+          image: null,
+          categoryId: "",
+        });
+        fetchData();
+        alert(`${modalType} added successfully!`);
       }
-      return cat;
-    });
-    setCategories(updated);
-    setEditingId(null);
+    } catch (err) {
+      console.error("Save error:", err);
+    }
+  };
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const [catRes, subRes] = await Promise.all([
+        fetch(CATEGORY_API),
+        fetch(SUBCATEGORY_API),
+      ]);
+      const cats = await catRes.json();
+      const subs = await subRes.json();
+
+      const merged = cats.map((cat) => {
+        const filteredSubs = subs.filter((sub) => {
+          const subParentId =
+            typeof sub.category === "object" ? sub.category._id : sub.category;
+          return String(subParentId) === String(cat._id);
+        });
+        return { ...cat, subCategories: filteredSubs };
+      });
+      setCategories(merged);
+    } catch (err) {
+      console.error("Fetch error:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const deleteCategory = (id) =>
-    setCategories(categories.filter((cat) => cat.id !== id));
+  const handleToggleStatus = async (id, currentStatus, isSub) => {
+    console.log(
+      `Toggling ${isSub ? "Sub" : "Cat"} ID: ${id} to ${!currentStatus}`,
+    );
 
-  const addSubCategory = (parentId) => {
-    setCategories((prevCategories) =>
-      prevCategories.map((cat) => {
-        if (cat.id === parentId) {
-          const nextId =
-            cat.subCategories.length > 0
-              ? Math.max(...cat.subCategories.map((s) => s.id)) + 1
-              : 1;
-
-          const newSub = {
-            id: nextId,
-            name: "New Sub",
-          };
-
+    setCategories((prev) =>
+      prev.map((cat) => {
+        if (!isSub && cat._id === id) return { ...cat, status: !currentStatus };
+        if (isSub) {
           return {
             ...cat,
-            subCategories: [...cat.subCategories, newSub],
+            subCategories: cat.subCategories.map((sub) =>
+              sub._id === id ? { ...sub, status: !currentStatus } : sub,
+            ),
           };
         }
         return cat;
       }),
     );
   };
+
+  const toggleExpand = (id) => {
+    const newSet = new Set(expandedIds);
+    expandedIds.has(id) ? newSet.delete(id) : newSet.add(id);
+    setExpandedIds(newSet);
+  };
+
+  const StatusToggle = ({ status, onToggle }) => (
+    <div
+      onClick={(e) => {
+        e.stopPropagation();
+        onToggle();
+      }}
+      className={`relative w-10 h-5 flex items-center rounded-full p-1 cursor-pointer transition-colors duration-300 ${status ? "bg-indigo-600" : "bg-gray-400"}`}
+    >
+      <div
+        className={`bg-white w-3 h-3 rounded-full shadow-md transform transition-transform duration-300 ${status ? "translate-x-5" : "translate-x-0"}`}
+      />
+    </div>
+  );
 
   const theme = {
     main: isDarkMode
@@ -102,171 +142,305 @@ const ManageCategories = () => {
     header: isDarkMode
       ? "bg-[#1f2637] text-gray-400"
       : "bg-gray-100 text-gray-600",
-    input: isDarkMode
-      ? "bg-[#1c2333] border-indigo-500 text-white"
-      : "bg-white border-indigo-400",
-    pill: isDarkMode
-      ? "bg-[#1e2536] border-gray-700 text-gray-300"
-      : "bg-gray-100 border-gray-300 text-gray-700",
-    rowHover: isDarkMode ? "hover:bg-[#1c2333]" : "hover:bg-gray-50",
+    subHeader: isDarkMode
+      ? "bg-[#252d3d] text-indigo-300"
+      : "bg-indigo-50 text-indigo-900",
   };
 
+  if (loading)
+    return (
+      <div className="flex h-screen items-center justify-center font-bold italic">
+        Updating View...
+      </div>
+    );
+
   return (
-    <div className={`flex h-screen overflow-hidden text-sm ${theme.main}`}>
-      <div className="flex-1 flex flex-col min-w-0">
-        <main className="p-3 md:p-5 overflow-y-auto">
-          <div className="max-w-5xl mx-auto">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h2 className="text-xl font-bold tracking-tight">Categories</h2>
-                <p className="text-xs opacity-60">
-                  Manage your product hierarchy
-                </p>
-              </div>
-              <button
-                onClick={addCategory}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-md transition-all text-xs font-medium shadow-sm"
-              >
-                <Plus size={14} /> Add New
-              </button>
-            </div>
-
-            {/* Table Container */}
-            <div
-              className={`rounded-lg border shadow-sm overflow-hidden ${theme.card}`}
+    <div className={`h-screen w-full overflow-hidden ${theme.main}`}>
+      <main className="h-full overflow-y-auto">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold tracking-tight"></h2>
+            <button
+              onClick={() => {
+                setModalType("category");
+                setIsModalOpen(true);
+              }}
+              className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-semibold hover:bg-indigo-500 transition-all"
             >
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead
-                    className={`text-[11px] uppercase tracking-wider font-semibold ${theme.header}`}
-                  >
-                    <tr>
-                      <th className="px-4 py-2.5">ID</th>
-                      <th className="px-4 py-2.5">Category</th>
-                      <th className="px-4 py-2.5">Sub Categories</th>
-                      <th className="px-4 py-2.5 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-800/10 dark:divide-gray-100/10">
-                    {categories.map((cat) => (
-                      <tr
-                        key={cat.id}
-                        className={`transition-colors group ${theme.rowHover}`}
-                      >
-                        {/* ID Cell */}
-                        <td
-                          className={`px-4 py-3 whitespace-nowrap ${theme.text}`}
-                        >
-                          {cat.id}
-                        </td>
+              <Plus size={18} /> Add New
+            </button>
+            <button
+              onClick={() => {
+                setModalType("subcategory");
+                setIsModalOpen(true);
+              }}
+              className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg"
+            >
+              <Plus size={18} /> Add SubCategory
+            </button>
+            {isModalOpen && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                <div
+                  className={`${isDarkMode ? "bg-[#151b28] text-white" : "bg-white"} p-6 rounded-xl w-96 shadow-2xl border border-gray-700`}
+                >
+                  <h3 className="text-xl font-bold mb-4">
+                    Add New{" "}
+                    {modalType === "category" ? "Category" : "Sub-Category"}
+                  </h3>
 
-                        {/* Main Category Cell */}
-                        <td
-                          className={`px-4 py-3 whitespace-nowrap ${theme.text}`}
+                  <form onSubmit={handleSave} className="space-y-4">
+                    {/* Common Name Field */}
+                    <div>
+                      <label className="text-xs font-bold opacity-50 uppercase">
+                        Name
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        className="w-full p-2 rounded bg-gray-500/10 border border-gray-500/20 outline-none focus:border-indigo-500"
+                        value={formData.name}
+                        onChange={(e) =>
+                          setFormData({ ...formData, name: e.target.value })
+                        }
+                      />
+                    </div>
+
+                    {/* Conditional Fields based on Type */}
+                    {modalType === "category" ? (
+                      <div>
+                        <label className="text-xs font-bold opacity-50 uppercase">
+                          Icon URL
+                        </label>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          required
+                          className="w-full p-2 rounded bg-gray-500/10 border border-gray-500/20 outline-none"
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              icon: e.target.files[0],
+                            })
+                          }
+                        />
+                      </div>
+                    ) : (
+                      <>
+                        <div>
+                          <label className="text-xs font-bold opacity-50 uppercase">
+                            Parent Category
+                          </label>
+                          <select
+                            required
+                            className="w-full p-2 rounded bg-gray-500/10 border border-gray-500/20 outline-none text-black"
+                            value={formData.categoryId}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                categoryId: e.target.value,
+                              })
+                            }
+                          >
+                            <option value="">Select Category</option>
+                            {categories.map((cat) => (
+                              <option key={cat._id} value={cat._id}>
+                                {cat.name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="text-xs font-bold opacity-50 uppercase">
+                            Image URL
+                          </label>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="w-full p-2 rounded bg-gray-500/10 border border-gray-500/20 outline-none"
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                image: e.target.files[0],
+                              })
+                            }
+                          />
+                        </div>
+                      </>
+                    )}
+
+                    {/* Action Buttons */}
+                    <div className="flex gap-2 pt-4">
+                      <button
+                        type="button"
+                        onClick={() => setIsModalOpen(false)}
+                        className="flex-1 py-2 bg-gray-500/20 rounded hover:bg-gray-500/30"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="flex-1 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-500"
+                      >
+                        Save Data
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div
+            className={`rounded-xl border shadow-2xl overflow-hidden ${theme.card}`}
+          >
+            <table className="w-full text-left border-collapse">
+              <thead
+                className={`text-[11px] uppercase tracking-widest font-black ${theme.header}`}
+              >
+                <tr>
+                  <th className="px-6 py-4 w-12"></th>
+                  <th className="px-6 py-4">ID</th>
+                  <th className="px-6 py-4">Category Name</th>
+                  <th className="px-6 py-4">Icon</th>
+                  <th className="px-6 py-4">Status</th>
+                  <th className="px-6 py-4 text-right">Action</th>
+                </tr>
+              </thead>
+
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
+                {categories.map((cat) => (
+                  <React.Fragment key={cat._id}>
+                    {/* Category Row */}
+                    <tr
+                      className="hover:bg-indigo-500/5 cursor-pointer transition-colors"
+                      onClick={() => toggleExpand(cat._id)}
+                    >
+                      <td className="px-6 py-4 text-center">
+                        {expandedIds.has(cat._id) ? (
+                          <ChevronDown size={18} className="text-indigo-500" />
+                        ) : (
+                          <ChevronRight size={18} />
+                        )}
+                      </td>
+                      <td className="px-6 py-4 text-[10px] font-mono opacity-50 italic">
+                        {cat._id.slice(-8)}
+                      </td>
+                      <td className="px-6 py-4 font-bold text-lg">
+                        {cat.name}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="w-8 h-8 flex items-center justify-center rounded bg-indigo-500/10 uppercase font-bold text-xs text-indigo-600">
+                          {cat.icon && cat.icon.includes("http") ? (
+                            <img
+                              src={`http://localhost:5000/uploads/categories/${cat.icon}`}
+                              className="w-6 h-6 object-contain"
+                              alt=""
+                            />
+                          ) : (
+                            cat.name.charAt(0)
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <StatusToggle
+                          status={cat.status}
+                          onToggle={() =>
+                            handleToggleStatus(cat._id, cat.status, false)
+                          }
+                        />
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div
+                          className="flex justify-end gap-2"
+                          onClick={(e) => e.stopPropagation()}
                         >
-                          {editingId === cat.id ? (
-                            <div className="flex items-center gap-1">
-                              <input
-                                autoFocus
-                                className={`border rounded px-2 py-0.5 text-sm outline-none w-32 ${theme.input}`}
-                                value={tempName}
-                                onChange={(e) => setTempName(e.target.value)}
-                                onKeyDown={(e) =>
-                                  e.key === "Enter" && handleSave(cat.id)
+                          <button className="p-2 hover:bg-amber-500/10 text-amber-500 rounded-md transition-colors">
+                            <Edit3 size={16} />
+                          </button>
+                          <button className="p-2 hover:bg-red-500/10 text-red-500 rounded-md transition-colors">
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+
+                    {/* Sub-Items Structure */}
+                    {expandedIds.has(cat._id) && (
+                      <>
+                        <tr
+                          className={`${theme.subHeader} border-l-4 border-indigo-500`}
+                        >
+                          <th className="px-6 py-2"></th>
+                          <th className="px-6 py-2 text-[10px] font-bold uppercase">
+                            ID
+                          </th>
+                          <th className="px-6 py-2 text-[10px] font-bold uppercase">
+                            Subcategory
+                          </th>
+                          <th className="px-6 py-2 text-[10px] font-bold uppercase">
+                            Image
+                          </th>
+                          <th className="px-6 py-2 text-[10px] font-bold uppercase">
+                            Status
+                          </th>
+                          <th className="px-6 py-2 text-right text-[10px] font-bold uppercase">
+                            Action
+                          </th>
+                        </tr>
+                        {cat.subCategories.map((sub) => (
+                          <tr
+                            key={sub._id}
+                            className={`${isDarkMode ? "bg-black/20" : "bg-gray-50/50"} border-l-4 border-indigo-500`}
+                          >
+                            <td className="px-6 py-3"></td>
+                            <td className="px-6 py-3 text-[10px] font-mono opacity-40 italic">
+                              {sub._id.slice(-8)}
+                            </td>
+                            <td className="px-6 py-3 text-sm font-semibold">
+                              {sub.name}
+                            </td>
+                            <td className="px-6 py-3">
+                              {sub.image ? (
+                                <img
+                                  src={`http://localhost:5000/uploads/subcategories/${sub.image}`}
+                                  className="w-10 h-10 rounded-lg object-cover border-2 border-indigo-500/10"
+                                  alt=""
+                                />
+                              ) : (
+                                <div className="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center">
+                                  <ImageIcon size={14} className="opacity-20" />
+                                </div>
+                              )}
+                            </td>
+                            <td className="px-6 py-3">
+                              <StatusToggle
+                                status={sub.status}
+                                onToggle={() =>
+                                  handleToggleStatus(sub._id, sub.status, true)
                                 }
                               />
-                              <button
-                                onClick={() => handleSave(cat.id)}
-                                className="text-green-500 p-1"
-                              >
-                                <Check size={14} />
-                              </button>
-                            </div>
-                          ) : (
-                            <span className="font-medium">{cat.name}</span>
-                          )}
-                        </td>
-
-                        {/* Sub Categories Cell */}
-                        <td className="px-4 py-3">
-                          <div className="flex flex-wrap gap-1.5 items-center">
-                            {cat.subCategories.map((sub) => (
-                              <div
-                                key={sub.id}
-                                className={`flex items-center gap-1 px-2 py-0.5 rounded-md border text-xs ${theme.pill}`}
-                              >
-                                {editingId === sub.id ? (
-                                  <input
-                                    className="bg-transparent outline-none w-16"
-                                    value={tempName}
-                                    onChange={(e) =>
-                                      setTempName(e.target.value)
-                                    }
-                                    onBlur={() =>
-                                      handleSave(sub.id, true, cat.id)
-                                    }
-                                    autoFocus
-                                  />
-                                ) : (
-                                  <span className={`${theme.text}`}>
-                                    {sub.id}. {sub.name}
-                                  </span>
-                                )}
-                                <button
-                                  onClick={() => {
-                                    setEditingId(sub.id);
-                                    setTempName(sub.name);
-                                  }}
-                                  className="text-gray-400 hover:text-indigo-500 transition-colors"
-                                >
-                                  <Edit3 size={10} />
+                            </td>
+                            <td className="px-6 py-3 text-right">
+                              <div className="flex justify-end gap-1">
+                                <button className="p-1.5 text-slate-400 hover:text-amber-500 transition-colors">
+                                  <Edit3 size={14} />
+                                </button>
+                                <button className="p-1.5 text-slate-400 hover:text-red-500 transition-colors">
+                                  <Trash2 size={14} />
                                 </button>
                               </div>
-                            ))}
-                            <button
-                              onClick={() => addSubCategory(cat.id)}
-                              className="text-[11px] text-indigo-500 hover:underline flex items-center gap-0.5 ml-1"
-                            >
-                              <Plus size={10} /> Add
-                            </button>
-                          </div>
-                        </td>
-
-                        {/* Actions Cell */}
-                        <td className="px-4 py-3 text-right">
-                          <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button
-                              onClick={() => {
-                                setEditingId(cat.id);
-                                setTempName(cat.name);
-                              }}
-                              className="p-1.5 hover:bg-amber-50 dark:hover:bg-amber-900/20 text-amber-600 rounded"
-                            >
-                              <Edit3 size={14} />
-                            </button>
-                            <button
-                              onClick={() => deleteCategory(cat.id)}
-                              className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 rounded"
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {categories.length === 0 && (
-                <div className="py-12 text-center text-gray-500 text-xs">
-                  No categories found. Click "Add New" to begin.
-                </div>
-              )}
-            </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </>
+                    )}
+                  </React.Fragment>
+                ))}
+              </tbody>
+            </table>
           </div>
-        </main>
-      </div>
+        </div>
+      </main>
     </div>
   );
 };
