@@ -7,13 +7,13 @@ import {
   X,
   RefreshCcw,
 } from "lucide-react";
-import { useTheme } from "../../context/ThemeContext";
+import { useTheme } from "../../../context/ThemeContext";
 import {
   getItems,
   createItem,
   updateItem,
   deleteItem,
-} from "../../services/api";
+} from "../../../services/api";
 import { Link } from "react-router-dom";
 const ManageCategories = () => {
   const { isDarkMode } = useTheme();

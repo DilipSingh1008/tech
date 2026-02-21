@@ -3,8 +3,13 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { useNavigate, useParams } from "react-router-dom";
 import { FiEdit2, FiTrash2, FiPlusCircle, FiXCircle } from "react-icons/fi";
-import { useTheme } from "../../context/ThemeContext";
-import { getItems, createItem, updateItem, deleteItem } from "../../services/api";
+import { useTheme } from "../../../context/ThemeContext";
+import {
+  getItems,
+  createItem,
+  updateItem,
+  deleteItem,
+} from "../../../services/api";
 
 const CityLocation = () => {
   const { id } = useParams();
@@ -62,16 +67,18 @@ const CityLocation = () => {
     try {
       if (editingCity) {
         console.log(values.cityName);
-        
+
         // setUpdateLoading(true);
         console.log(values.cityName);
 
-       const res =  await updateItem(`citylocation/${editingCity._id}/edit-city`, {
-          city: values.cityName,
-        });
+        const res = await updateItem(
+          `citylocation/${editingCity._id}/edit-city`,
+          {
+            city: values.cityName,
+          },
+        );
 
         console.log("hiii");
-        
       } else {
         setCreateLoading(true);
         await createItem(`citylocation/${id}/`, {
@@ -124,7 +131,6 @@ const CityLocation = () => {
     <div className={`h-screen w-full flex flex-col ${theme.main}`}>
       <main className="flex-1 overflow-y-auto p-4 md:p-6">
         <div className="max-w-5xl mx-auto">
-
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-bold">Cities</h2>
@@ -137,10 +143,14 @@ const CityLocation = () => {
           </div>
 
           {/* Table */}
-          <div className={`rounded-xl border shadow-sm overflow-hidden ${theme.card}`}>
+          <div
+            className={`rounded-xl border shadow-sm overflow-hidden ${theme.card}`}
+          >
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
-                <thead className={`uppercase tracking-wider font-bold ${theme.header}`}>
+                <thead
+                  className={`uppercase tracking-wider font-bold ${theme.header}`}
+                >
                   <tr>
                     <th className="px-4 py-3 w-28">ID</th>
                     <th className="px-4 py-3">City Name</th>
@@ -150,7 +160,10 @@ const CityLocation = () => {
                 <tbody className={`divide-y ${theme.divider}`}>
                   {isLoading ? (
                     <tr>
-                      <td colSpan={3} className="px-4 py-10 text-center opacity-40 italic">
+                      <td
+                        colSpan={3}
+                        className="px-4 py-10 text-center opacity-40 italic"
+                      >
                         Loading...
                       </td>
                     </tr>
@@ -203,7 +216,9 @@ const CityLocation = () => {
       {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-4">
-          <div className={`${theme.modal} p-5 rounded-xl w-full max-w-xs shadow-xl border border-gray-700/30`}>
+          <div
+            className={`${theme.modal} p-5 rounded-xl w-full max-w-xs shadow-xl border border-gray-700/30`}
+          >
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-sm font-bold">
                 {editingCity ? "Edit City" : "New City"}
@@ -234,7 +249,9 @@ const CityLocation = () => {
                       name="cityName"
                       placeholder="e.g. Jodhpur"
                       className={`w-full p-2 text-sm rounded-lg border outline-none focus:border-blue-500 transition-all ${theme.input} ${
-                        errors.cityName && touched.cityName ? "border-red-500" : ""
+                        errors.cityName && touched.cityName
+                          ? "border-red-500"
+                          : ""
                       }`}
                     />
                     <ErrorMessage
@@ -250,10 +267,18 @@ const CityLocation = () => {
                       disabled={createLoading || updateLoading}
                       className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition-all disabled:opacity-50 cursor-pointer"
                     >
-                      {editingCity ? <FiEdit2 size={12} /> : <FiPlusCircle size={12} />}
+                      {editingCity ? (
+                        <FiEdit2 size={12} />
+                      ) : (
+                        <FiPlusCircle size={12} />
+                      )}
                       {editingCity
-                        ? updateLoading ? "Updating..." : "Update City"
-                        : createLoading ? "Creating..." : "Create City"}
+                        ? updateLoading
+                          ? "Updating..."
+                          : "Update City"
+                        : createLoading
+                          ? "Creating..."
+                          : "Create City"}
                     </button>
                   </div>
                 </Form>
