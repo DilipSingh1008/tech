@@ -1,4 +1,4 @@
-const { Country } = require("../models/location.js");
+const { Country, State, City } = require("../models/location.js");
 
 exports.getCountries = async (req, res) => {
   try {
@@ -71,9 +71,17 @@ exports.deleteCountry = async (req, res) => {
 
     const existingCountry = await Country.findById(id);
 
+    const associatedStates = await State.find({country: id});
+
+    const associatedCities = await City.find({country: id});
+
     if (!existingCountry) {
       return res.status(404).json({ message: "Country not found" });
     }
+
+    await City.deleteMany({state: {$in: associatedStates.map(state => state._id)}})
+
+    await State.deleteMany({country: id})
 
     await Country.findByIdAndDelete(id);
 

@@ -1,4 +1,4 @@
-const { State } = require("../models/location.js");
+const { State, City } = require("../models/location.js");
 
 exports.getStates = async (req, res) => {
   try {
@@ -98,12 +98,15 @@ exports.deleteStates = async (req, res) => {
       return res.status(404).json({ message: "State not found" });
     }
 
+    // ✅ Delete all cities of this state
+    await City.deleteMany({ state: id });
+
+    // ✅ Delete state
     await State.findByIdAndDelete(id);
 
-    res.status(200).json({ message: "State  deleted successfully" });
+    res.status(200).json({ message: "State deleted successfully" });
   } catch (error) {
     console.log(error);
-
     res.status(500).json({ message: "Server Error" });
   }
 };

@@ -10,20 +10,20 @@ exports.getStates = async (req, res) => {
   }
 };
 
-exports.getStatesByCountryId = async (req, res) => {
+exports.getCityByStateId = async (req, res) => {
   try {
-    const { countryId } = req.params;
+    const { stateId } = req.params;
 
-    if (!countryId) {
-      return res.status(400).json({ message: "Country ID is required" });
+    if (!stateId) {
+      return res.status(400).json({ message: "State ID is required" });
     }
 
-    const states = await State.find({ country: countryId });
+    const cities = await City.find({ state: stateId });
 
-    if(!states || states.length === 0) {
-       return res.status(404).json({ message: "No states found for the given country ID" });
+    if(!cities || cities.length === 0) {
+       return res.status(404).json({ message: "No cities found for the given state ID" });
     }
-   return res.status(200).json(states);
+   return res.status(200).json(cities);
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Server Error" });
@@ -90,15 +90,15 @@ exports.editCityName = async (req, res) => {
 
 exports.deletecity = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { cityId } = req.params;
 
-    const existingCity = await City.findById(id);
+    const existingCity = await City.findById(cityId);
 
     if (!existingCity) {
       return res.status(404).json({ message: "City not found" });
     }
 
-    await City.findByIdAndDelete(id);
+    await City.findByIdAndDelete(cityId);
 
     res.status(200).json({ message: "City deleted successfully" });
   } catch (error) {

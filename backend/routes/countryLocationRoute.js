@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.get("/", getCountries)
 router.post("/", createCountryLocation);
-router.post("/:id/edit-country", editCountryName)
+router.put("/:id/edit-country", editCountryName)
 router.delete("/:id/delete-country", deleteCountry)
 
 module.exports = router
