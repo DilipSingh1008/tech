@@ -14,14 +14,13 @@ import {
   updateItem,
   deleteItem,
 } from "../../services/api";
-// import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 const ManageCategories = () => {
   const { isDarkMode } = useTheme();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({ name: "", icon: null, id: null });
-  // const navigate = useNavigate();
 
   useEffect(() => {
     fetchData();
@@ -150,14 +149,18 @@ const ManageCategories = () => {
                   {categories.map((cat, index) => (
                     <tr
                       key={cat._id}
-                      // onClick={() => navigate(`/category/${cat._id}`)}
                       className="hover:bg-indigo-500/5 transition-colors"
                     >
                       <td className="px-4 py-2.5 font-semibold ">
                         {index + 1}
                       </td>
                       <td className="px-4 py-2.5 font-semibold text-sm">
-                        {cat.name}
+                        <Link
+                          to={`/category/${cat.slug}`}
+                          className="text-(--primary) hover:underline"
+                        >
+                          {cat.name}
+                        </Link>
                       </td>
                       <td className="px-4 py-2.5">
                         <div className="w-8 h-8 rounded bg-gray-500/10 border border-gray-500/10 overflow-hidden flex items-center justify-center">
