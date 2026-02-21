@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 
 const categorySchema = new mongoose.Schema({
   name: { type: String, required: true },
+  catid: { type: String },
   icon: { type: String },
   status: { type: Boolean, default: true },
   createdAt: { type: Date, default: Date.now },
