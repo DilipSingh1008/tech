@@ -63,7 +63,7 @@ export const getItemById = async (resource, id) => {
 // Update item by ID
 export const updateItem = async (resource, data) => {
   try {
-    console.log(id)
+    // console.log(id)
     const response = await api.put(`/${resource}/`, data);
     return response.data;
   } catch (error) {
@@ -72,9 +72,9 @@ export const updateItem = async (resource, data) => {
 };
 
 // Delete item by ID
-export const deleteItem = async (resource, id) => {
+export const deleteItem = async (resource) => {
   try {
-    const response = await api.delete(`/${resource}/${id}`);
+    const response = await api.delete(`/${resource}/`);
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;
