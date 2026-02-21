@@ -8,7 +8,12 @@ import {
   RefreshCcw,
 } from "lucide-react";
 import { useTheme } from "../../context/ThemeContext";
-
+import {
+  getItems,
+  createItem,
+  updateItem,
+  deleteItem,
+} from "../../services/api";
 const ManageCategories = () => {
   const { isDarkMode } = useTheme();
   const [categories, setCategories] = useState([]);
@@ -16,69 +21,77 @@ const ManageCategories = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({ name: "", icon: null, id: null });
 
-  const CATEGORY_API = "http://localhost:5000/api/categories";
-
   useEffect(() => {
     fetchData();
   }, []);
 
   const fetchData = async () => {
     try {
-      const res = await fetch(CATEGORY_API);
-      const data = await res.json();
-      setCategories(data);
+      const res = await getItems("categories");
+      setCategories(res);
     } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
     }
   };
-
   const handleToggleStatus = async (id, currentStatus) => {
     try {
-      await fetch(`${CATEGORY_API}/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: !currentStatus }),
-      });
+      await updateItem("categories", id, { status: !currentStatus });
       setCategories((prev) =>
         prev.map((cat) =>
           cat._id === id ? { ...cat, status: !currentStatus } : cat,
         ),
       );
     } catch (err) {
-      console.error(err);
+      console.error("Error toggling status:", err);
+      alert(err.error || "Failed to update status");
     }
   };
-
   const handleSave = async (e) => {
     e.preventDefault();
 
+    if (!formData.name.trim()) {
+      alert("Name is required");
+      return;
+    }
+
+    if (!formData.id && !formData.icon) {
+      alert("Icon is required for new category");
+      return;
+    }
+
     const data = new FormData();
     data.append("name", formData.name);
-
-    // Only append icon if it's a File object (new image)
-    if (formData.icon instanceof File) {
+    if (!formData.id || formData.icon instanceof File) {
       data.append("icon", formData.icon);
     }
 
     try {
-      let url = CATEGORY_API;
-      let method = "POST";
-
       if (formData.id) {
-        url = `${CATEGORY_API}/${formData.id}`;
-        method = "PUT";
+        await updateItem("categories", formData.id, data);
+      } else {
+        await createItem("categories", data);
       }
 
-      const response = await fetch(url, { method, body: data });
-      if (response.ok) {
-        setIsModalOpen(false);
-        setFormData({ name: "", icon: null, id: null });
-        fetchData();
-      }
+      setIsModalOpen(false);
+      setFormData({ name: "", icon: null, id: null });
+
+      fetchData();
     } catch (err) {
-      console.error(err);
+      console.error("Error saving category:", err);
+      alert(err.error || "Failed to save category");
+    }
+  };
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this category?")) {
+      try {
+        await deleteItem("categories", id);
+        setCategories(categories.filter((c) => c._id !== id));
+      } catch (err) {
+        console.error("Error deleting category:", err);
+        alert(err.error || "Failed to delete category");
+      }
     }
   };
 
@@ -105,7 +118,6 @@ const ManageCategories = () => {
     <div className={`h-screen w-full flex flex-col ${theme.main}`}>
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-5xl mx-auto">
-          {/* Header */}
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-bold">Categories</h2>
             <button
@@ -116,7 +128,6 @@ const ManageCategories = () => {
             </button>
           </div>
 
-          {/* Table */}
           <div
             className={`rounded-xl border shadow-sm overflow-hidden ${theme.card}`}
           >
@@ -190,28 +201,7 @@ const ManageCategories = () => {
                             <Edit3 size={14} />
                           </button>
                           <button
-                            onClick={async () => {
-                              if (
-                                window.confirm(
-                                  "Are you sure you want to delete this category?",
-                                )
-                              ) {
-                                try {
-                                  const res = await fetch(
-                                    `${CATEGORY_API}/${cat._id}`,
-                                    { method: "DELETE" },
-                                  );
-                                  if (res.ok)
-                                    setCategories(
-                                      categories.filter(
-                                        (c) => c._id !== cat._id,
-                                      ),
-                                    );
-                                } catch (err) {
-                                  console.error(err);
-                                }
-                              }
-                            }}
+                            onClick={() => handleDelete(cat._id)}
                             className="p-1.5 hover:text-red-500 transition-colors"
                           >
                             <Trash2 size={14} />
@@ -224,8 +214,6 @@ const ManageCategories = () => {
               </table>
             </div>
           </div>
-
-          {/* Modal */}
           {isModalOpen && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-4">
               <div
