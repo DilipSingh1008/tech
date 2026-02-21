@@ -77,21 +77,6 @@ const Navbar = ({ onMenuClick }) => {
       {/* Right Section */}
       <div className="flex items-center gap-3 md:gap-6">
         {/* Modern Search Input */}
-        <div
-          className="hidden md:flex items-center px-3 py-1.5 rounded-lg border transition-all"
-          style={{
-            backgroundColor: "#161b22",
-            borderColor: "var(--border-color)",
-          }}
-        >
-          <Search size={14} style={{ color: "var(--text-muted)" }} />
-          <input
-            type="text"
-            placeholder="Search..."
-            className="bg-transparent border-none focus:outline-none ml-2 text-xs w-40 placeholder:text-slate-600"
-            style={{ color: "var(--text-main)" }}
-          />
-        </div>
 
         <button className=" cursor-pointer relative p-2 rounded-xl transition-all hover:bg-slate-800/50 group">
           <Bell

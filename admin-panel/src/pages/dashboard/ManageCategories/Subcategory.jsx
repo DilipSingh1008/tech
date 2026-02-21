@@ -15,6 +15,7 @@ import {
   deleteItem,
 } from "../../../services/api";
 import { useParams } from "react-router-dom";
+import Searchbar from "../../../components/Searchbar";
 
 const Subcategory = () => {
   const { isDarkMode } = useTheme();
@@ -23,6 +24,7 @@ const Subcategory = () => {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({ name: "", icon: null, id: null });
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     fetchData();
@@ -102,7 +104,9 @@ const Subcategory = () => {
       }
     }
   };
-
+  const filteredCategories = categories.filter((cat) =>
+    cat.name.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
   const theme = {
     main: isDarkMode
       ? "bg-[#0b0e14] text-slate-300"
@@ -127,7 +131,8 @@ const Subcategory = () => {
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-5xl mx-auto p-4">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold">Sub-Categories</h2>
+            {/* <h2 className="text-lg font-bold">Sub-Categories</h2> */}
+            <Searchbar onChange={(e) => setSearchQuery(e.target.value)} />
             <button
               onClick={() => setIsModalOpen(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 bg-(--primary) text-white rounded-lg text-xs font-semibold hover:bg-(--primary) transition-all"
@@ -153,7 +158,7 @@ const Subcategory = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                  {categories.map((cat, index) => (
+                  {filteredCategories.map((cat, index) => (
                     <tr
                       key={cat._id}
                       className="hover:bg-indigo-500/5 transition-colors"

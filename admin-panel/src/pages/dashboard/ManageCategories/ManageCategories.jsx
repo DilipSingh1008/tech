@@ -6,6 +6,7 @@ import {
   Image as ImageIcon,
   X,
   RefreshCcw,
+  Search,
 } from "lucide-react";
 import { useTheme } from "../../../context/ThemeContext";
 import {
@@ -15,13 +16,14 @@ import {
   deleteItem,
 } from "../../../services/api";
 import { Link } from "react-router-dom";
+import Searchbar from "../../../components/Searchbar";
 const ManageCategories = () => {
   const { isDarkMode } = useTheme();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({ name: "", icon: null, id: null });
-
+  const [searchQuery, setSearchQuery] = useState("");
   useEffect(() => {
     fetchData();
   }, []);
@@ -29,7 +31,8 @@ const ManageCategories = () => {
   const fetchData = async () => {
     try {
       const res = await getItems("categories");
-      setCategories(res);
+      const topCategories = res.filter((cat) => cat.catid === null);
+      setCategories(topCategories);
     } catch (err) {
       console.error(err);
     } finally {
@@ -95,7 +98,9 @@ const ManageCategories = () => {
       }
     }
   };
-
+  const filteredCategories = categories.filter((cat) =>
+    cat.name.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
   const theme = {
     main: isDarkMode
       ? "bg-[#0b0e14] text-slate-300"
@@ -120,7 +125,8 @@ const ManageCategories = () => {
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-5xl mx-auto">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold">Categories</h2>
+            {/* <h2 className="text-lg font-bold">Categories</h2> */}
+            <Searchbar onChange={(e) => setSearchQuery(e.target.value)} />
             <button
               onClick={() => setIsModalOpen(true)}
               className=" cursor-pointer flex items-center gap-1.5 px-3 py-1.5 bg-(--primary) text-white rounded-lg text-xs font-semibold hover:bg-(--primary) transition-all"
@@ -146,7 +152,7 @@ const ManageCategories = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                  {categories.map((cat, index) => (
+                  {filteredCategories.map((cat, index) => (
                     <tr
                       key={cat._id}
                       className="hover:bg-indigo-500/5 transition-colors"
