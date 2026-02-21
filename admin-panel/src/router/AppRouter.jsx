@@ -13,6 +13,7 @@ import Profile from "../pages/dashboard/profile";
 import NotFound from "../pages/NotFound";
 import StateLocation from "../pages/dashboard/Location/StateLocation";
 import CityLocation from "../pages/dashboard/Location/CityLocation";
+import Subcategory from "../pages/dashboard/ManageCategories/Subcategory";
 
 // import ThemeToggleButton from "./components/Button";
 
@@ -43,6 +44,7 @@ function AppRouter() {
                 path="/dashboard/categories"
                 element={<ManageCategories />}
               />
+              <Route path="/dashboard/category/:id" element={<Subcategory />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />
