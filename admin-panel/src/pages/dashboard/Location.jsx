@@ -1,28 +1,39 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import {
-  useDeleteDataMutation,
-  useGetDataQuery,
-  usePostDataMutation,
-  useUpdateDataMutation,
-} from "../../redux/api/apiSlice";
 import { useNavigate } from "react-router-dom";
 import { FiEdit2, FiTrash2, FiPlusCircle, FiXCircle } from "react-icons/fi";
 import { useTheme } from "../../context/ThemeContext";
+import { getItems, createItem, updateItem, deleteItem } from "../../services/api";
 
 const Location = () => {
   const navigate = useNavigate();
   const { isDarkMode } = useTheme();
-  const { data, isLoading, error } = useGetDataQuery({
-    url: "/countrylocation",
-  });
-  const [postData, { isLoading: createLoading }] = usePostDataMutation();
-  const [updateData, { isLoading: updateLoading }] = useUpdateDataMutation();
-  const [deleteData, { isLoading: deleteLoading }] = useDeleteDataMutation();
+
+  const [countriesData, setCountriesData] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [createLoading, setCreateLoading] = useState(false);
+  const [updateLoading, setUpdateLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCountry, setEditingCountry] = useState(null);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      setIsLoading(true);
+      const res = await getItems("countrylocation");
+      setCountriesData(res || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const validationSchema = Yup.object({
     countryName: Yup.string()
@@ -49,32 +60,37 @@ const Location = () => {
   const submitCountryFunction = async (values, { resetForm }) => {
     try {
       if (editingCountry) {
-        await updateData({
-          url: `/countrylocation/${editingCountry._id}/edit-country`,
-          body: { country: values.countryName },
-        }).unwrap();
+        setUpdateLoading(true);
+        await updateItem(
+          `countrylocation/${editingCountry._id}/edit-country`,
+          { country: values.countryName }
+        );
       } else {
-        await postData({
-          url: "/countrylocation",
-          body: { country: values.countryName },
-        }).unwrap();
+        setCreateLoading(true);
+        await createItem("countrylocation", { country: values.countryName });
       }
       resetForm();
       closeModal();
+      fetchData();
     } catch (err) {
       console.error(err);
+    } finally {
+      setCreateLoading(false);
+      setUpdateLoading(false);
     }
   };
 
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete?")) return;
     try {
-      await deleteData({
-        url: `/countrylocation/${id}/delete-country`,
-      }).unwrap();
+      setDeleteLoading(true);
+      await deleteItem(`countrylocation/${id}/delete-country`);
       if (editingCountry?._id === id) closeModal();
+      fetchData();
     } catch (err) {
       console.error(err);
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -95,21 +111,6 @@ const Location = () => {
     divider: isDarkMode ? "divide-gray-800" : "divide-gray-100",
   };
 
-  if (isLoading)
-    return (
-      <div className="flex h-screen items-center justify-center text-xs font-medium">
-        Loading...
-      </div>
-    );
-  if (error)
-    return (
-      <div className="flex h-screen items-center justify-center text-xs text-red-500">
-        Error loading data.
-      </div>
-    );
-
-  const countriesData = data || [];
-
   return (
     <div className={`h-screen w-full flex flex-col ${theme.main}`}>
       <main className="flex-1 overflow-y-auto p-4 md:p-6">
@@ -120,7 +121,7 @@ const Location = () => {
             <h2 className="text-lg font-bold">Location</h2>
             <button
               onClick={openAddModal}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-(--primary) text-white rounded-lg text-xs font-semibold hover:bg-(--primary) transition-all"
+              className="cursor-pointer flex items-center gap-1.5 px-3 py-1.5 bg-(--primary) text-white rounded-lg text-xs font-semibold hover:bg-(--primary) transition-all"
             >
               <FiPlusCircle size={14} /> Add Country
             </button>
@@ -138,47 +139,53 @@ const Location = () => {
                   </tr>
                 </thead>
                 <tbody className={`divide-y ${theme.divider}`}>
-                  {countriesData.map((country, index) => (
-                    <tr
-                      key={country._id}
-                      className="hover:bg-indigo-500/5 transition-colors"
-                    >
-                      <td className="px-4 py-2.5 font-mono opacity-50 text-[10px]">
-                        {index + 1}
-                      </td>
-                      <td
-                        className="px-4 py-2.5 font-semibold text-sm cursor-pointer hover:text-blue-400 transition-colors"
-                        onClick={() =>
-                          navigate(`/dashboard/location/${country._id}`)
-                        }
-                      >
-                        {country.name}
-                      </td>
-                      <td className="px-4 py-2.5 text-right">
-                        <div className="flex justify-end gap-1">
-                          <button
-                            onClick={() => openEditModal(country)}
-                            className="p-1.5 hover:text-yellow-400 transition-colors cursor-pointer"
-                            title="Edit"
-                          >
-                            <FiEdit2 size={14} />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(country._id)}
-                            disabled={deleteLoading}
-                            className="p-1.5 hover:text-red-500 transition-colors cursor-pointer disabled:opacity-50"
-                            title="Delete"
-                          >
-                            <FiTrash2 size={14} />
-                          </button>
-                        </div>
+                  {isLoading ? (
+                    <tr>
+                      <td colSpan={3} className="px-4 py-10 text-center opacity-40 italic">
+                        Loading...
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    countriesData.map((country, index) => (
+                      <tr
+                        key={country._id}
+                        className="hover:bg-indigo-500/5 transition-colors"
+                      >
+                        <td className="px-4 py-2.5 font-mono opacity-50 text-[10px]">
+                          {index + 1}
+                        </td>
+                        <td
+                          className="px-4 py-2.5 font-semibold text-sm cursor-pointer hover:text-blue-400 transition-colors"
+                          onClick={() => navigate(`/dashboard/location/${country._id}`)}
+                        >
+                          {country.name}
+                        </td>
+                        <td className="px-4 py-2.5 text-right">
+                          <div className="flex justify-end gap-1">
+                            <button
+                              onClick={() => openEditModal(country)}
+                              className="p-1.5 hover:text-yellow-400 transition-colors cursor-pointer"
+                              title="Edit"
+                            >
+                              <FiEdit2 size={14} />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(country._id)}
+                              disabled={deleteLoading}
+                              className="p-1.5 hover:text-red-500 transition-colors cursor-pointer disabled:opacity-50"
+                              title="Delete"
+                            >
+                              <FiTrash2 size={14} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
-            {countriesData.length === 0 && (
+            {!isLoading && countriesData.length === 0 && (
               <div className="p-10 text-center opacity-40 italic text-xs">
                 No locations found.
               </div>
@@ -190,10 +197,7 @@ const Location = () => {
       {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-4">
-          <div
-            className={`${theme.modal} p-5 rounded-xl w-full max-w-xs shadow-xl border border-gray-700/30`}
-          >
-            {/* Modal Header */}
+          <div className={`${theme.modal} p-5 rounded-xl w-full max-w-xs shadow-xl border border-gray-700/30`}>
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-sm font-bold">
                 {editingCountry ? "Edit Country" : "New Country"}
@@ -206,7 +210,6 @@ const Location = () => {
               </button>
             </div>
 
-            {/* Formik Form */}
             <Formik
               initialValues={{
                 countryName: editingCountry ? editingCountry.name : "",
@@ -225,9 +228,7 @@ const Location = () => {
                       name="countryName"
                       placeholder="e.g. India"
                       className={`w-full p-2 text-sm rounded-lg border outline-none focus:border-blue-500 transition-all ${theme.input} ${
-                        errors.countryName && touched.countryName
-                          ? "border-red-500"
-                          : ""
+                        errors.countryName && touched.countryName ? "border-red-500" : ""
                       }`}
                     />
                     <ErrorMessage
@@ -243,19 +244,10 @@ const Location = () => {
                       disabled={createLoading || updateLoading}
                       className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition-all disabled:opacity-50 cursor-pointer"
                     >
-                      {editingCountry
-                        ? <FiEdit2 size={12} />
-                        : <FiPlusCircle size={12} />}
+                      {editingCountry ? <FiEdit2 size={12} /> : <FiPlusCircle size={12} />}
                       {editingCountry
                         ? updateLoading ? "Updating..." : "Update Country"
                         : createLoading ? "Creating..." : "Create Country"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={closeModal}
-                      className="p-2 opacity-50 hover:opacity-100 transition-opacity cursor-pointer"
-                    >
-                      <FiXCircle size={16} />
                     </button>
                   </div>
                 </Form>

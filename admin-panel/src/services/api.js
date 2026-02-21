@@ -61,9 +61,10 @@ export const getItemById = async (resource, id) => {
 };
 
 // Update item by ID
-export const updateItem = async (resource, id, data) => {
+export const updateItem = async (resource, data) => {
   try {
-    const response = await api.put(`/${resource}/${id}`, data);
+    console.log(id)
+    const response = await api.put(`/${resource}/`, data);
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;
