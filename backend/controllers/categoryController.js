@@ -5,20 +5,25 @@ const path = require("path");
 // Create category
 exports.createCategory = async (req, res) => {
   try {
-    const { name } = req.body;
-
-    if (!name || !req.file) {
-      return res.status(400).json({ error: "Name and icon are required" });
+    const { name, catid } = req.body;
+    console.log(req.body);
+    if (!name) {
+      return res.status(400).json({ error: "Name is required" });
     }
 
-    const category = await Category.create({
+    const categoryData = {
       name,
-      icon: `/uploads/categories/${req.file.filename}`,
-    });
+      catid: catid || null,
+    };
+    if (req.file) {
+      categoryData.icon = `/uploads/categories/${req.file.filename}`;
+    }
+
+    const category = await Category.create(categoryData);
 
     res.status(201).json(category);
   } catch (error) {
-    console.error(error);
+    console.error("Error creating category:", error);
     res.status(500).json({ error: "Failed to create category" });
   }
 };
@@ -26,9 +31,10 @@ exports.createCategory = async (req, res) => {
 // Get all categories
 exports.getCategories = async (req, res) => {
   try {
-    const categories = await Category.find({ catid: 0 }).sort({
+    const categories = await Category.find().sort({
       createdAt: -1,
     });
+
     res.json(categories);
   } catch (error) {
     console.error("Error fetching categories:", error.message);

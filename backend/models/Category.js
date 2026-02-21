@@ -2,7 +2,11 @@ const mongoose = require("mongoose");
 
 const categorySchema = new mongoose.Schema({
   name: { type: String, required: true },
-  catid: { type: Number, default: 0 },
+  catid: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Category",
+    default: null,
+  },
   icon: { type: String },
   status: { type: Boolean, default: true },
   createdAt: { type: Date, default: Date.now },

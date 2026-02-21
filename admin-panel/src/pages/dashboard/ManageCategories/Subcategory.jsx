@@ -14,9 +14,11 @@ import {
   updateItem,
   deleteItem,
 } from "../../../services/api";
-import { Link } from "react-router-dom";
-const ManageCategories = () => {
+import { useParams } from "react-router-dom";
+
+const Subcategory = () => {
   const { isDarkMode } = useTheme();
+  const { id: parentId } = useParams(); // parent category id from URL
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -24,21 +26,28 @@ const ManageCategories = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [parentId]);
 
   const fetchData = async () => {
+    setLoading(true);
     try {
       const res = await getItems("categories");
-      setCategories(res);
+      // filter subcategories of this parent
+      const filtered = res.filter(
+        (cat) => String(cat.catid) === String(parentId),
+      );
+      setCategories(filtered);
     } catch (err) {
-      console.error(err);
+      console.error("Error fetching subcategories:", err);
     } finally {
       setLoading(false);
     }
   };
+
   const handleToggleStatus = async (id, currentStatus) => {
     try {
-      await updateItem("categories", id, { status: !currentStatus });
+      await updateItem(`categories/${id}`, { status: !currentStatus });
       setCategories((prev) =>
         prev.map((cat) =>
           cat._id === id ? { ...cat, status: !currentStatus } : cat,
@@ -49,6 +58,7 @@ const ManageCategories = () => {
       alert(err.error || "Failed to update status");
     }
   };
+
   const handleSave = async (e) => {
     e.preventDefault();
 
@@ -57,13 +67,10 @@ const ManageCategories = () => {
       return;
     }
 
-    if (!formData.id && !formData.icon) {
-      alert("Icon is required for new category");
-      return;
-    }
-
     const data = new FormData();
     data.append("name", formData.name);
+    data.append("catid", parentId); // parent id
+
     if (!formData.id || formData.icon instanceof File) {
       data.append("icon", formData.icon);
     }
@@ -77,18 +84,18 @@ const ManageCategories = () => {
 
       setIsModalOpen(false);
       setFormData({ name: "", icon: null, id: null });
-
       fetchData();
     } catch (err) {
       console.error("Error saving category:", err);
       alert(err.error || "Failed to save category");
     }
   };
+
   const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this category?")) {
+    if (window.confirm("Are you sure you want to delete this subcategory?")) {
       try {
         await deleteItem("categories", id);
-        setCategories(categories.filter((c) => c._id !== id));
+        setCategories((prev) => prev.filter((c) => c._id !== id));
       } catch (err) {
         console.error("Error deleting category:", err);
         alert(err.error || "Failed to delete category");
@@ -118,14 +125,14 @@ const ManageCategories = () => {
   return (
     <div className={`h-screen w-full flex flex-col ${theme.main}`}>
       <main className="flex-1 overflow-y-auto">
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-5xl mx-auto p-4">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold">Categories</h2>
+            <h2 className="text-lg font-bold">Sub-Categories</h2>
             <button
               onClick={() => setIsModalOpen(true)}
-              className=" cursor-pointer flex items-center gap-1.5 px-3 py-1.5 bg-(--primary) text-white rounded-lg text-xs font-semibold hover:bg-(--primary) transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-(--primary) text-white rounded-lg text-xs font-semibold hover:bg-(--primary) transition-all"
             >
-              <Plus size={14} /> Add Category
+              <Plus size={14} /> Add SubCategory
             </button>
           </div>
 
@@ -151,24 +158,17 @@ const ManageCategories = () => {
                       key={cat._id}
                       className="hover:bg-indigo-500/5 transition-colors"
                     >
-                      <td className="px-4 py-2.5 font-semibold ">
-                        {index + 1}
-                      </td>
+                      <td className="px-4 py-2.5 font-semibold">{index + 1}</td>
                       <td className="px-4 py-2.5 font-semibold text-sm">
-                        <Link
-                          to={`/dashboard/category/${cat._id}`}
-                          className="text-(--primary) hover:underline"
-                        >
-                          {cat.name}
-                        </Link>
+                        {cat.name}
                       </td>
                       <td className="px-4 py-2.5">
                         <div className="w-8 h-8 rounded bg-gray-500/10 border border-gray-500/10 overflow-hidden flex items-center justify-center">
                           {cat.icon ? (
                             <img
                               src={`http://localhost:5000${cat.icon}`}
-                              className="w-full h-full object-cover"
                               alt="icon"
+                              className="w-full h-full object-cover"
                             />
                           ) : (
                             <ImageIcon size={14} className="opacity-30" />
@@ -180,19 +180,22 @@ const ManageCategories = () => {
                           onClick={() =>
                             handleToggleStatus(cat._id, cat.status)
                           }
-                          className={`cursor-pointer w-8 h-4 rounded-full relative transition-colors ${cat.status ? "bg-(--primary)" : "bg-gray-400"}`}
+                          className={`cursor-pointer w-8 h-4 rounded-full relative transition-colors ${
+                            cat.status ? "bg-(--primary)" : "bg-gray-400"
+                          }`}
                         >
                           <div
-                            className={` cursor-pointer absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${cat.status ? "left-4.5" : "left-0.5"}`}
+                            className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${
+                              cat.status ? "left-4.5" : "left-0.5"
+                            }`}
                           />
                         </button>
                       </td>
                       <td className="px-4 py-2.5 text-right">
                         <div className="flex justify-end gap-1">
-                          <button className="cursor-pointer p-1.5 hover:text-(--primary) transition-colors">
+                          <button className="p-1.5 hover:text-(--primary) transition-colors">
                             <RefreshCcw size={14} />
                           </button>
-
                           <button
                             onClick={() => {
                               setFormData({
@@ -202,13 +205,13 @@ const ManageCategories = () => {
                               });
                               setIsModalOpen(true);
                             }}
-                            className="cursor-pointer p-1.5 hover:text-(--primary) transition-colors"
+                            className="p-1.5 hover:text-(--primary) transition-colors"
                           >
                             <Edit3 size={14} />
                           </button>
                           <button
                             onClick={() => handleDelete(cat._id)}
-                            className="cursor-pointer p-1.5 hover:text-red-500 transition-colors"
+                            className="p-1.5 hover:text-red-500 transition-colors"
                           >
                             <Trash2 size={14} />
                           </button>
@@ -220,6 +223,7 @@ const ManageCategories = () => {
               </table>
             </div>
           </div>
+
           {isModalOpen && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-4">
               <div
@@ -227,7 +231,7 @@ const ManageCategories = () => {
               >
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-sm font-bold">
-                    {formData.id ? "Edit Category" : "New Category"}
+                    {formData.id ? "Edit SubCategory" : "New SubCategory"}
                   </h3>
                   <button
                     onClick={() => {
@@ -239,6 +243,7 @@ const ManageCategories = () => {
                     <X size={16} />
                   </button>
                 </div>
+
                 <form onSubmit={handleSave} className="space-y-3">
                   <div>
                     <label className="block text-[10px] font-bold opacity-50 uppercase mb-1">
@@ -253,7 +258,8 @@ const ManageCategories = () => {
                         setFormData({ ...formData, name: e.target.value })
                       }
                     />
-                  </div>{" "}
+                  </div>
+
                   {formData.icon && (
                     <img
                       src={
@@ -265,6 +271,7 @@ const ManageCategories = () => {
                       className="w-16 h-16 object-cover rounded mb-2"
                     />
                   )}
+
                   <div>
                     <label className="block text-[10px] font-bold opacity-50 uppercase mb-1">
                       Icon Image
@@ -279,11 +286,12 @@ const ManageCategories = () => {
                       }
                     />
                   </div>
+
                   <button
                     type="submit"
-                    className="cursor-pointer w-full py-2 mt-2 bg-(--primary) text-white rounded-lg text-xs font-bold hover:bg-(--primary) transition-all"
+                    className="w-full py-2 mt-2 bg-(--primary) text-white rounded-lg text-xs font-bold hover:bg-(--primary) transition-all"
                   >
-                    {formData.id ? "Update Category" : "Create Category"}
+                    {formData.id ? "Update SubCategory" : "Create SubCategory"}
                   </button>
                 </form>
               </div>
@@ -295,4 +303,4 @@ const ManageCategories = () => {
   );
 };
 
-export default ManageCategories;
+export default Subcategory;
