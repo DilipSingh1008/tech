@@ -10,7 +10,7 @@ const getPageTitle = () => {
   if (path === "/dashboard") return "Dashboard";
   if (path === "/dashboard/users") return "Users";
   if (path === "/dashboard/settings") return "Settings";
-  if (path === "/dashboard/categories") return "Manage Categories";
+  if (path === "/dashboard/categories") return "Categories";
   if (path === "/dashboard/location") return "Location";
   if (path === "/dashboard/profile") return "Account Settings";
 
@@ -93,8 +93,12 @@ const Navbar = ({ onMenuClick }) => {
           />
         </div>
 
-        <button className="relative p-2 rounded-xl transition-all hover:bg-slate-800/50 group">
-          <Bell size={20} style={{ color: "var(--text-muted)" }} />
+        <button className=" cursor-pointer relative p-2 rounded-xl transition-all hover:bg-slate-800/50 group">
+          <Bell
+            size={20}
+            style={{ color: "var(--text-muted)" }}
+            className="cursor-pointer"
+          />
           <span
             className="absolute top-2 right-2.5 w-2 h-2 rounded-full border-2"
             style={{

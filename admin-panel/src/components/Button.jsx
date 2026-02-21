@@ -11,6 +11,7 @@ const ThemeToggleButton = () => {
       // "w-12 h-6" isko compact aur mini banata hai
       className={`
         relative inline-flex h-6 w-11 items-center rounded-full 
+        cursor-pointer
         transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400
         ${isDarkMode ? "bg-slate-700" : "bg-gray-200"}
       `}

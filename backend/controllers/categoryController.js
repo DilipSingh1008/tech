@@ -1,6 +1,7 @@
 const Category = require("../models/Category");
 const fs = require("fs");
 const path = require("path");
+
 // Create category
 exports.createCategory = async (req, res) => {
   try {
@@ -25,7 +26,9 @@ exports.createCategory = async (req, res) => {
 // Get all categories
 exports.getCategories = async (req, res) => {
   try {
-    const categories = await Category.find().sort({ createdAt: -1 });
+    const categories = await Category.find({ catid: 0 }).sort({
+      createdAt: -1,
+    });
     res.json(categories);
   } catch (error) {
     console.error("Error fetching categories:", error.message);

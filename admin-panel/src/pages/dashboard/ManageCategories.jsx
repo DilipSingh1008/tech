@@ -14,12 +14,14 @@ import {
   updateItem,
   deleteItem,
 } from "../../services/api";
+// import { useNavigate } from "react-router-dom";
 const ManageCategories = () => {
   const { isDarkMode } = useTheme();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({ name: "", icon: null, id: null });
+  // const navigate = useNavigate();
 
   useEffect(() => {
     fetchData();
@@ -69,7 +71,7 @@ const ManageCategories = () => {
 
     try {
       if (formData.id) {
-        await updateItem("categories", formData.id, data);
+        await updateItem(`categories/${formData.id}`, data);
       } else {
         await createItem("categories", data);
       }
@@ -122,7 +124,7 @@ const ManageCategories = () => {
             <h2 className="text-lg font-bold">Categories</h2>
             <button
               onClick={() => setIsModalOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-(--primary) text-white rounded-lg text-xs font-semibold hover:bg-(--primary) transition-all"
+              className=" cursor-pointer flex items-center gap-1.5 px-3 py-1.5 bg-(--primary) text-white rounded-lg text-xs font-semibold hover:bg-(--primary) transition-all"
             >
               <Plus size={14} /> Add Category
             </button>
@@ -145,13 +147,14 @@ const ManageCategories = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                  {categories.map((cat) => (
+                  {categories.map((cat, index) => (
                     <tr
                       key={cat._id}
+                      // onClick={() => navigate(`/category/${cat._id}`)}
                       className="hover:bg-indigo-500/5 transition-colors"
                     >
-                      <td className="px-4 py-2.5 font-mono opacity-50 text-[10px]">
-                        {cat._id.slice(-6)}
+                      <td className="px-4 py-2.5 font-semibold ">
+                        {index + 1}
                       </td>
                       <td className="px-4 py-2.5 font-semibold text-sm">
                         {cat.name}
@@ -174,16 +177,16 @@ const ManageCategories = () => {
                           onClick={() =>
                             handleToggleStatus(cat._id, cat.status)
                           }
-                          className={`w-8 h-4 rounded-full relative transition-colors ${cat.status ? "bg-(--primary)" : "bg-gray-400"}`}
+                          className={`cursor-pointer w-8 h-4 rounded-full relative transition-colors ${cat.status ? "bg-(--primary)" : "bg-gray-400"}`}
                         >
                           <div
-                            className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${cat.status ? "left-4.5" : "left-0.5"}`}
+                            className={` cursor-pointer absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${cat.status ? "left-4.5" : "left-0.5"}`}
                           />
                         </button>
                       </td>
                       <td className="px-4 py-2.5 text-right">
                         <div className="flex justify-end gap-1">
-                          <button className="p-1.5 hover:text-(--primary) transition-colors">
+                          <button className="cursor-pointer p-1.5 hover:text-(--primary) transition-colors">
                             <RefreshCcw size={14} />
                           </button>
 
@@ -196,13 +199,13 @@ const ManageCategories = () => {
                               });
                               setIsModalOpen(true);
                             }}
-                            className="p-1.5 hover:text-(--primary) transition-colors"
+                            className="cursor-pointer p-1.5 hover:text-(--primary) transition-colors"
                           >
                             <Edit3 size={14} />
                           </button>
                           <button
                             onClick={() => handleDelete(cat._id)}
-                            className="p-1.5 hover:text-red-500 transition-colors"
+                            className="cursor-pointer p-1.5 hover:text-red-500 transition-colors"
                           >
                             <Trash2 size={14} />
                           </button>
@@ -275,7 +278,7 @@ const ManageCategories = () => {
                   </div>
                   <button
                     type="submit"
-                    className="w-full py-2 mt-2 bg-(--primary) text-white rounded-lg text-xs font-bold hover:bg-(--primary) transition-all"
+                    className="cursor-pointer w-full py-2 mt-2 bg-(--primary) text-white rounded-lg text-xs font-bold hover:bg-(--primary) transition-all"
                   >
                     {formData.id ? "Update Category" : "Create Category"}
                   </button>
