@@ -2,23 +2,14 @@ import React, { useState, useEffect } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { useNavigate, useParams } from "react-router-dom";
-import {
-  FiEdit2,
-  FiTrash2,
-  FiPlusCircle,
-  FiXCircle,
-  FiChevronLeft,
-  FiChevronRight,
-} from "react-icons/fi";
+import { FiEdit2, FiTrash2, FiPlusCircle, FiXCircle } from "react-icons/fi";
 import { useTheme } from "../../../context/ThemeContext";
 import {
   getItems,
   createItem,
   updateItem,
   deleteItem,
-  patchItem,
 } from "../../../services/api";
-import Searchbar from "../../../components/Searchbar";
 
 const CityLocation = () => {
   const { id } = useParams();
@@ -30,45 +21,26 @@ const CityLocation = () => {
   const [createLoading, setCreateLoading] = useState(false);
   const [updateLoading, setUpdateLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-
-  // Pagination + Sorting states
-  const [page, setPage] = useState(1);
-  const [limit] = useState(5);
-  const [totalPages, setTotalPages] = useState(1);
-  const [sortBy, setSortBy] = useState("createdAt");
-  const [order, setOrder] = useState("desc");
+  const [activeStatus, setActiveStatus] = useState(true);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCity, setEditingCity] = useState(null);
 
   useEffect(() => {
     fetchData();
-  }, [id, page, sortBy, order]);
+  }, [id]);
 
   const fetchData = async () => {
     try {
       setIsLoading(true);
-      const res = await getItems(
-        `statelocation/${id}/all-cities?page=${page}&limit=${limit}&sortBy=${sortBy}&order=${order}`,
-      );
+      const res = await getItems(`statelocation/${id}/all-cities`);
+      console.log("Cities data:", res);
       setCitiesData(res.data || []);
-      setTotalPages(res.pagination?.totalPages || 1);
-      if (res.pagination?.totalPages > 0 && page > res.pagination.totalPages) {
-        setPage(res.pagination.totalPages);
-      }
     } catch (err) {
       console.error(err);
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleSort = (field) => {
-    const isAsc = sortBy === field && order === "asc";
-    setOrder(isAsc ? "desc" : "asc");
-    setSortBy(field);
-    setPage(1);
   };
 
   const validationSchema = Yup.object({
@@ -96,10 +68,19 @@ const CityLocation = () => {
   const submitCityFunction = async (values, { resetForm }) => {
     try {
       if (editingCity) {
-        setUpdateLoading(true);
-        await updateItem(`citylocation/${editingCity._id}/edit-city`, {
-          city: values.cityName,
-        });
+        console.log(values.cityName);
+
+        // setUpdateLoading(true);
+        console.log(values.cityName);
+
+        const res = await updateItem(
+          `citylocation/${editingCity._id}/edit-city`,
+          {
+            city: values.cityName,
+          },
+        );
+
+        console.log("hiii");
       } else {
         setCreateLoading(true);
         await createItem(`citylocation/${id}/`, {
@@ -118,7 +99,7 @@ const CityLocation = () => {
   };
 
   const handleDelete = async (cityId) => {
-    if (!window.confirm("Are you sure you want to delete this city?")) return;
+    if (!window.confirm("Are you sure you want to delete?")) return;
     try {
       setDeleteLoading(true);
       await deleteItem(`citylocation/${cityId}/delete-city`);
@@ -130,26 +111,6 @@ const CityLocation = () => {
       setDeleteLoading(false);
     }
   };
-
-  const handleToggle = async (cityId, currentStatus) => {
-    try {
-      await patchItem(`citylocation/${cityId}/toggle-status`, {
-        isActive: !currentStatus,
-      });
-      fetchData();
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  console.log();
-  
-
-      const filteredCities = citiesData.filter((city) =>{
-        console.log(city);
-        
-        return city.name.toLowerCase().includes(searchQuery.toLowerCase());
-      });
 
   const theme = {
     main: isDarkMode
@@ -168,17 +129,27 @@ const CityLocation = () => {
     divider: isDarkMode ? "divide-gray-800" : "divide-gray-100",
   };
 
+  const handleToggle = async (cityId, currentStatus) => {
+  try {
+    await updateItem(`citylocation/${cityId}/edit-city`, {
+      isActive: !currentStatus,
+    });
+    fetchData();
+  } catch (err) {
+    console.error(err);
+  }
+};
+
   return (
     <div className={`h-screen w-full flex flex-col ${theme.main}`}>
       <main className="flex-1 overflow-y-auto p-4 md:p-6">
         <div className="max-w-5xl mx-auto">
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
-           
-            <Searchbar onChange={(e) => setSearchQuery(e.target.value)} />
+            <h2 className="text-lg font-bold">Cities</h2>
             <button
               onClick={openAddModal}
-              className="flex items-center cursor-pointer gap-1.5 px-3 py-1.5 bg-(--primary) hover:opacity-90 text-white rounded-lg text-xs font-semibold transition-all shadow-sm"
+              className="cursor-pointer flex items-center gap-1.5 px-3 py-1.5 bg-(--primary) text-white rounded-lg text-xs font-semibold hover:bg-(--primary) transition-all"
             >
               <FiPlusCircle size={14} /> Add City
             </button>
@@ -194,83 +165,64 @@ const CityLocation = () => {
                   className={`uppercase tracking-wider font-bold ${theme.header}`}
                 >
                   <tr>
-                    <th className="px-4 py-3 w-16">#</th>
-                    <th
-                      className="px-4 py-3 cursor-pointer hover:text-(--primary) transition-colors"
-                      onClick={() => handleSort("name")}
-                    >
-                      <div className="flex items-center gap-1">
-                        City Name
-                        <span className="opacity-50 text-[10px]">
-                          {sortBy === "name"
-                            ? order === "asc"
-                              ? "▲"
-                              : "▼"
-                            : "↕"}
-                        </span>
-                      </div>
-                    </th>
+                    <th className="px-4 py-3 w-28">ID</th>
+                    <th className="px-4 py-3">City Neeame</th>
                     <th className="px-4 py-3 w-24">Status</th>
                     <th className="px-4 py-3 text-right w-24">Action</th>
                   </tr>
                 </thead>
-
                 <tbody className={`divide-y ${theme.divider}`}>
                   {isLoading ? (
                     <tr>
                       <td
-                        colSpan={4}
+                        colSpan={3}
                         className="px-4 py-10 text-center opacity-40 italic"
                       >
                         Loading...
                       </td>
                     </tr>
-                  ) : citiesData.length === 0 ? (
-                    <tr>
-                      <td
-                        colSpan={4}
-                        className="px-4 py-10 text-center opacity-40"
-                      >
-                        No cities found.
-                      </td>
-                    </tr>
                   ) : (
-                    filteredCities.map((city, index) => (
-                      
+                    citiesData.map((city, index) => (
                       <tr
                         key={city._id}
-                        className="hover:bg-(--primary)/5 transition-colors"
+                        className="hover:bg-indigo-500/5 transition-colors"
                       >
                         <td className="px-4 py-2.5 font-mono opacity-50 text-[10px]">
-                          {(page - 1) * limit + (index + 1)}
+                          {index + 1}
                         </td>
-                        <td className="px-4 py-2.5 font-semibold text-sm hover:text-(--primary) transition-colors cursor-pointer">
+                        <td className="px-4 py-2.5 font-semibold text-sm hover:text-blue-400 transition-colors cursor-pointer">
                           {city.name}
                         </td>
                         <td className="px-4 py-2.5">
                           <button
-                            onClick={() => handleToggle(city._id, city.status)}
+                            onClick={() => setActiveStatus(!activeStatus) }
                             className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                              city.status ? "bg-(--primary)" : "bg-gray-400"
+                              activeStatus? "bg-(--primary)" : "bg-gray-400"
                             }`}
                           >
                             <span
-                              className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${city.status ? "translate-x-5" : "translate-x-1"}`}
+                              className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${
+                               activeStatus
+                                  ? "translate-x-5"
+                                  : "translate-x-1"
+                              }`}
                             />
                           </button>
                         </td>
                         <td className="px-4 py-2.5 text-right">
-                          <div className="flex justify-end gap-2">
+                          <div className="flex justify-end gap-1">
                             <button
                               onClick={() => openEditModal(city)}
-                              className="p-1.5 text-(--primary) hover:bg-(--primary)/10 rounded-md transition-all"
+                              className="p-1.5 hover:text-yellow-400 transition-colors cursor-pointer"
+                              title="Edit"
                             >
                               <FiEdit2 size={14} />
                             </button>
                             <button
                               onClick={() => handleDelete(city._id)}
                               disabled={deleteLoading}
-                              className="p-1.5 text-red-500 hover:bg-red-500/10 rounded-md transition-all disabled:opacity-30"
+                              className="p-1.5 hover:text-red-500 transition-colors cursor-pointer disabled:opacity-50"
+                              title="Delete"
                             >
                               <FiTrash2 size={14} />
                             </button>
@@ -282,44 +234,11 @@ const CityLocation = () => {
                 </tbody>
               </table>
             </div>
-
-            {/* Pagination */}
-            <div
-              className={`flex items-center justify-between p-3 border-t ${theme.divider}`}
-            >
-              <span className="text-[11px] opacity-60">
-                Showing {citiesData.length} entries
-              </span>
-              <div className="flex items-center gap-1">
-                <button
-                  disabled={page === 1 || isLoading}
-                  onClick={() => setPage(page - 1)}
-                  className="p-1.5 border rounded-md disabled:opacity-30 hover:border-(--primary) hover:text-(--primary) transition-colors"
-                >
-                  <FiChevronLeft size={16} />
-                </button>
-                {[...Array(totalPages)].map((_, i) => (
-                  <button
-                    key={i + 1}
-                    onClick={() => setPage(i + 1)}
-                    className={`w-7 h-7 text-[11px] rounded-md border transition-all ${
-                      page === i + 1
-                        ? "bg-(--primary) text-white border-(--primary) shadow-sm"
-                        : "hover:border-(--primary) hover:text-(--primary) border-transparent"
-                    }`}
-                  >
-                    {i + 1}
-                  </button>
-                ))}
-                <button
-                  disabled={page === totalPages || isLoading}
-                  onClick={() => setPage(page + 1)}
-                  className="p-1.5 border rounded-md disabled:opacity-30 hover:border-(--primary) hover:text-(--primary) transition-colors"
-                >
-                  <FiChevronRight size={16} />
-                </button>
+            {!isLoading && citiesData.length === 0 && (
+              <div className="p-10 text-center opacity-40 italic text-xs">
+                No cities found.
               </div>
-            </div>
+            )}
           </div>
         </div>
       </main>
@@ -336,14 +255,16 @@ const CityLocation = () => {
               </h3>
               <button
                 onClick={closeModal}
-                className="opacity-50 hover:text-(--primary) transition-colors"
+                className="opacity-50 hover:opacity-100 transition-opacity cursor-pointer"
               >
                 <FiXCircle size={16} />
               </button>
             </div>
 
             <Formik
-              initialValues={{ cityName: editingCity ? editingCity.name : "" }}
+              initialValues={{
+                cityName: editingCity ? editingCity.name : "",
+              }}
               enableReinitialize
               validationSchema={validationSchema}
               onSubmit={submitCityFunction}
@@ -357,7 +278,11 @@ const CityLocation = () => {
                     <Field
                       name="cityName"
                       placeholder="e.g. Jodhpur"
-                      className={`w-full p-2 text-sm rounded-lg border outline-none focus:border-(--primary) transition-all ${theme.input} ${errors.cityName && touched.cityName ? "border-red-500" : ""}`}
+                      className={`w-full p-2 text-sm rounded-lg border outline-none focus:border-blue-500 transition-all ${theme.input} ${
+                        errors.cityName && touched.cityName
+                          ? "border-red-500"
+                          : ""
+                      }`}
                     />
                     <ErrorMessage
                       name="cityName"
@@ -365,19 +290,27 @@ const CityLocation = () => {
                       className="text-red-400 text-[10px] mt-1 ml-1 block"
                     />
                   </div>
-                  <button
-                    type="submit"
-                    disabled={createLoading || updateLoading}
-                    className="w-full flex items-center justify-center gap-1.5 py-2 bg-(--primary) hover:opacity-90 text-white rounded-lg text-xs font-bold transition-all shadow-md disabled:opacity-50"
-                  >
-                    {editingCity
-                      ? updateLoading
-                        ? "Updating..."
-                        : "Update"
-                      : createLoading
-                        ? "Creating..."
-                        : "Create"}
-                  </button>
+
+                  <div className="flex gap-2 pt-1">
+                    <button
+                      type="submit"
+                      disabled={createLoading || updateLoading}
+                      className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition-all disabled:opacity-50 cursor-pointer"
+                    >
+                      {editingCity ? (
+                        <FiEdit2 size={12} />
+                      ) : (
+                        <FiPlusCircle size={12} />
+                      )}
+                      {editingCity
+                        ? updateLoading
+                          ? "Updating..."
+                          : "Update City"
+                        : createLoading
+                          ? "Creating..."
+                          : "Create City"}
+                    </button>
+                  </div>
                 </Form>
               )}
             </Formik>

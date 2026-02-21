@@ -1,7 +1,7 @@
 const {} =  require("../controllers/countryLocation")
 
 const express = require("express");
-const { getStates, createStateLocation, editStateName, deleteStates, getStatesByCountryId, toggleStateStatus } = require("../controllers/stateLocation");
+const { getStates, createStateLocation, editStateName, deleteStates, getStatesByCountryId } = require("../controllers/stateLocation");
 const { getCityByStateId } = require("../controllers/cityLocation");
 
 const router = express.Router();

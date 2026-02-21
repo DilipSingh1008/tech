@@ -18,47 +18,12 @@ exports.getCityByStateId = async (req, res) => {
       return res.status(400).json({ message: "State ID is required" });
     }
 
-    // ⭐ query params
-    let { page = 1, limit = 10, sortBy = "createdAt", order = "desc" } =
-      req.query;
+    const cities = await City.find({ state: stateId });
 
-    page = parseInt(page);
-    limit = parseInt(limit);
-
-    const sortOption = {};
-    sortOption[sortBy] = order === "asc" ? 1 : -1;
-
-    // ⭐ total count
-    const total = await City.countDocuments({ state: stateId });
-
-    // ⭐ data fetch
-    const cities = await City.find({ state: stateId })
-      .sort(sortOption)
-      .skip((page - 1) * limit)
-      .limit(limit);
-
-    // ⭐ production friendly empty response
-    if (!cities.length) {
-      return res.status(200).json({
-        data: [],
-        pagination: {
-          total,
-          page,
-          limit,
-          totalPages: 0,
-        },
-      });
+    if(!cities || cities.length === 0) {
+       return res.status(404).json({ message: "No cities found for the given state ID" });
     }
-
-    return res.status(200).json({
-      data: cities,
-      pagination: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
-      },
-    });
+   return res.status(200).json(cities);
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Server Error" });

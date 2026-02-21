@@ -195,7 +195,7 @@ const StateLocation = () => {
                   ) : statesData.length === 0 ? (
                     <tr><td colSpan={4} className="px-4 py-10 text-center opacity-40">No states found.</td></tr>
                   ) : (
-                    filteredStates.map((state, index) => (
+                    statesData.map((state, index) => (
                       <tr key={state._id} className="hover:bg-(--primary)/5 transition-colors">
                         <td className="px-4 py-2.5 font-mono opacity-50 text-[10px]">
                           {(page - 1) * limit + (index + 1)}

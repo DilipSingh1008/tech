@@ -18,7 +18,6 @@ import {
   deleteItem,
   patchItem,
 } from "../../../services/api";
-import Searchbar from "../../../components/Searchbar";
 
 const StateLocation = () => {
   const { id } = useParams();
@@ -30,8 +29,6 @@ const StateLocation = () => {
   const [createLoading, setCreateLoading] = useState(false);
   const [updateLoading, setUpdateLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
-    const [searchQuery, setSearchQuery] = useState("");
-  
 
   const [page, setPage] = useState(1);
   const [limit] = useState(5);
@@ -135,11 +132,6 @@ const StateLocation = () => {
       console.error(err);
     }
   };
-   const filteredStates = statesData.filter((state) =>{
-        console.log(state);
-        
-        return state.name.toLowerCase().includes(searchQuery.toLowerCase());
-      });
 
   const theme = {
     main: isDarkMode ? "bg-[#0b0e14] text-slate-300" : "bg-gray-50 text-gray-700",
@@ -156,8 +148,7 @@ const StateLocation = () => {
         <div className="max-w-5xl mx-auto">
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
-                        <Searchbar onChange={(e) => setSearchQuery(e.target.value)} />
-            
+            <h2 className="text-lg font-bold">States</h2>
             <button
               onClick={openAddModal}
               className="flex items-center cursor-pointer gap-1.5 px-3 py-1.5 bg-(--primary) hover:opacity-90 text-white rounded-lg text-xs font-semibold transition-all shadow-sm"
@@ -195,7 +186,7 @@ const StateLocation = () => {
                   ) : statesData.length === 0 ? (
                     <tr><td colSpan={4} className="px-4 py-10 text-center opacity-40">No states found.</td></tr>
                   ) : (
-                    filteredStates.map((state, index) => (
+                    statesData.map((state, index) => (
                       <tr key={state._id} className="hover:bg-(--primary)/5 transition-colors">
                         <td className="px-4 py-2.5 font-mono opacity-50 text-[10px]">
                           {(page - 1) * limit + (index + 1)}
