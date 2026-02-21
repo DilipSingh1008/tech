@@ -21,7 +21,6 @@ const CityLocation = () => {
   const [createLoading, setCreateLoading] = useState(false);
   const [updateLoading, setUpdateLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [activeStatus, setActiveStatus] = useState(true);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCity, setEditingCity] = useState(null);
@@ -128,17 +127,6 @@ const CityLocation = () => {
     divider: isDarkMode ? "divide-gray-800" : "divide-gray-100",
   };
 
-  const handleToggle = async (cityId, currentStatus) => {
-  try {
-    await updateItem(`citylocation/${cityId}/edit-city`, {
-      isActive: !currentStatus,
-    });
-    fetchData();
-  } catch (err) {
-    console.error(err);
-  }
-};
-
   return (
     <div className={`h-screen w-full flex flex-col ${theme.main}`}>
       <main className="flex-1 overflow-y-auto p-4 md:p-6">
@@ -191,22 +179,6 @@ const CityLocation = () => {
                         </td>
                         <td className="px-4 py-2.5 font-semibold text-sm hover:text-blue-400 transition-colors cursor-pointer">
                           {city.name}
-                        </td>
-                        <td className="px-4 py-2.5">
-                          <button
-                            onClick={() => setActiveStatus(!activeStatus) }
-                            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                              activeStatus? "bg-(--primary)" : "bg-gray-400"
-                            }`}
-                          >
-                            <span
-                              className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${
-                               activeStatus
-                                  ? "translate-x-5"
-                                  : "translate-x-1"
-                              }`}
-                            />
-                          </button>
                         </td>
                         <td className="px-4 py-2.5 text-right">
                           <div className="flex justify-end gap-1">

@@ -18,40 +18,12 @@ exports.getStatesByCountryId = async (req, res) => {
       return res.status(400).json({ message: "Country ID is required" });
     }
 
-    // ⭐ query params
-    let { page = 1, limit = 10, sortBy = "createdAt", order = "desc" } =
-      req.query;
+    const states = await State.find({ country: countryId });
 
-    page = parseInt(page);
-    limit = parseInt(limit);
-
-    const sortOption = {};
-    sortOption[sortBy] = order === "asc" ? 1 : -1;
-
-    // ⭐ total count
-    const total = await State.countDocuments({ country: countryId });
-
-    // ⭐ data fetch
-    const states = await State.find({ country: countryId })
-      .sort(sortOption)
-      .skip((page - 1) * limit)
-      .limit(limit);
-
-    if (!states || states.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No states found for the given country ID" });
+    if(!states || states.length === 0) {
+       return res.status(404).json({ message: "No states found for the given country ID" });
     }
-
-    return res.status(200).json({
-      data: states,
-      pagination: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
-      },
-    });
+   return res.status(200).json(states);
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Server Error" });

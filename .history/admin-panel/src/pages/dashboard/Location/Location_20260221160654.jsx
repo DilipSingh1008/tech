@@ -1,15 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import { useNavigate, useParams } from "react-router-dom";
-import {
-  FiEdit2,
-  FiTrash2,
-  FiPlusCircle,
-  FiXCircle,
-  FiChevronLeft,
-  FiChevronRight,
-} from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
+import { FiEdit2, FiTrash2, FiPlusCircle, FiXCircle, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { useTheme } from "../../../context/ThemeContext";
 import {
   getItems,
@@ -19,17 +12,17 @@ import {
   patchItem,
 } from "../../../services/api";
 
-const StateLocation = () => {
-  const { id } = useParams();
+const Location = () => {
   const navigate = useNavigate();
   const { isDarkMode } = useTheme();
 
-  const [statesData, setStatesData] = useState([]);
+  const [countriesData, setCountriesData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
   const [updateLoading, setUpdateLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
+  // Pagination + Sorting states
   const [page, setPage] = useState(1);
   const [limit] = useState(5);
   const [totalPages, setTotalPages] = useState(1);
@@ -37,20 +30,26 @@ const StateLocation = () => {
   const [order, setOrder] = useState("desc");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingState, setEditingState] = useState(null);
+  const [editingCountry, setEditingCountry] = useState(null);
 
   useEffect(() => {
     fetchData();
-  }, [id, page, sortBy, order]);
+  }, [page, sortBy, order]);
 
   const fetchData = async () => {
     try {
       setIsLoading(true);
       const res = await getItems(
-        `statelocation/${id}?page=${page}&limit=${limit}&sortBy=${sortBy}&order=${order}`
+        `countrylocation?page=${page}&limit=${limit}&sortBy=${sortBy}&order=${order}`
       );
-      setStatesData(res.data || []);
+
+      setCountriesData(res.data || []);
       setTotalPages(res.pagination?.totalPages || 1);
+      
+      // If current page is greater than total pages (after deletion), go back
+      if (res.pagination?.totalPages > 0 && page > res.pagination.totalPages) {
+        setPage(res.pagination.totalPages);
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -58,35 +57,48 @@ const StateLocation = () => {
     }
   };
 
+  const handleSort = (field) => {
+    const isAsc = sortBy === field && order === "asc";
+    setOrder(isAsc ? "desc" : "asc");
+    setSortBy(field);
+    setPage(1); // Reset to first page when sorting changes
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this country?")) return;
+    try {
+      setDeleteLoading(true);
+      await deleteItem(`countrylocation/${id}/delete-country`);
+      
+      // If deleting the last item on the page, the useEffect/fetchData logic 
+      // above will handle the page shift.
+      fetchData();
+    } catch (err) {
+      console.error("Delete failed:", err);
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  // ... (validationSchema, open/close modals, handleToggle, and theme object remain the same)
   const validationSchema = Yup.object({
-    stateName: Yup.string().min(2).max(50).required("Required"),
+    countryName: Yup.string().min(2).max(50).required("Required"),
   });
 
-  const openAddModal = () => {
-    setEditingState(null);
-    setIsModalOpen(true);
-  };
+  const openAddModal = () => { setEditingCountry(null); setIsModalOpen(true); };
+  const openEditModal = (country) => { setEditingCountry(country); setIsModalOpen(true); };
+  const closeModal = () => { setIsModalOpen(false); setEditingCountry(null); };
 
-  const openEditModal = (state) => {
-    setEditingState(state);
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setEditingState(null);
-  };
-
-  const submitStateFunction = async (values, { resetForm }) => {
+  const submitCountryFunction = async (values, { resetForm }) => {
     try {
-      if (editingState) {
+      if (editingCountry) {
         setUpdateLoading(true);
-        await updateItem(`statelocation/${editingState._id}/edit-state`, {
-          state: values.stateName,
+        await updateItem(`countrylocation/${editingCountry._id}/edit-country`, {
+          country: values.countryName,
         });
       } else {
         setCreateLoading(true);
-        await createItem(`statelocation/${id}`, { state: values.stateName });
+        await createItem("countrylocation", { country: values.countryName });
       }
       resetForm();
       closeModal();
@@ -99,22 +111,9 @@ const StateLocation = () => {
     }
   };
 
-  const handleDelete = async (stateId) => {
-    if (!window.confirm("Are you sure you want to delete this state?")) return;
+  const handleToggle = async (countryId, currentStatus) => {
     try {
-      setDeleteLoading(true);
-      await deleteItem(`statelocation/${stateId}/delete-state`);
-      fetchData();
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setDeleteLoading(false);
-    }
-  };
-
-  const handleToggle = async (stateId, currentStatus) => {
-    try {
-      await patchItem(`statelocation/${stateId}/toggle-status`, {
+      await patchItem(`countrylocation/${countryId}/toggle-status`, {
         isActive: !currentStatus,
       });
       fetchData();
@@ -138,12 +137,12 @@ const StateLocation = () => {
         <div className="max-w-5xl mx-auto">
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold">States</h2>
+            <h2 className="text-lg font-bold">Location</h2>
             <button
               onClick={openAddModal}
-              className="flex items-center cursor-pointer gap-1.5 px-3 py-1.5 bg-(--primary) hover:opacity-90 text-white rounded-lg text-xs font-semibold transition-all shadow-sm"
+              className="flex items-center cursor-pointer gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold transition-colors"
             >
-              <FiPlusCircle size={14} /> Add State
+              <FiPlusCircle size={14} /> Add Country
             </button>
           </div>
 
@@ -155,15 +154,10 @@ const StateLocation = () => {
                   <tr>
                     <th className="px-4 py-3 w-16">#</th>
                     <th
-                      className="px-4 py-3 cursor-pointer hover:text-(--primary) transition-colors"
-                      onClick={() => {
-                        setSortBy("name");
-                        setOrder(order === "asc" ? "desc" : "asc");
-                      }}
+                      className="px-4 py-3 cursor-pointer hover:text-blue-500 transition-colors"
+                      onClick={() => handleSort("name")}
                     >
-                      <div className="flex items-center gap-1">
-                        State Name {sortBy === "name" && (order === "asc" ? "↑" : "↓")}
-                      </div>
+                      Country Name {sortBy === "name" && (order === "asc" ? "↑" : "↓")}
                     </th>
                     <th className="px-4 py-3 w-24">Status</th>
                     <th className="px-4 py-3 text-right w-24">Action</th>
@@ -173,41 +167,38 @@ const StateLocation = () => {
                 <tbody className={`divide-y ${theme.divider}`}>
                   {isLoading ? (
                     <tr><td colSpan={4} className="px-4 py-10 text-center opacity-40 italic">Loading...</td></tr>
-                  ) : statesData.length === 0 ? (
-                    <tr><td colSpan={4} className="px-4 py-10 text-center opacity-40">No states found.</td></tr>
+                  ) : countriesData.length === 0 ? (
+                    <tr><td colSpan={4} className="px-4 py-10 text-center opacity-40">No countries found.</td></tr>
                   ) : (
-                    statesData.map((state, index) => (
-                      <tr key={state._id} className="hover:bg-(--primary)/5 transition-colors">
+                    countriesData.map((country, index) => (
+                      <tr key={country._id} className="hover:bg-blue-500/5 transition-colors">
                         <td className="px-4 py-2.5 font-mono opacity-50 text-[10px]">
                           {(page - 1) * limit + (index + 1)}
                         </td>
                         <td
-                          className="px-4 py-2.5 font-semibold text-sm cursor-pointer hover:text-(--primary)"
-                          onClick={() => navigate(`/dashboard/citylocation/${state._id}`)}
+                          className="px-4 py-2.5 font-semibold text-sm cursor-pointer"
+                          onClick={() => navigate(`/dashboard/location/${country._id}`)}
                         >
-                          {state.name}
+                          {country.name}
                         </td>
                         <td className="px-4 py-2.5">
                           <button
-                            onClick={() => handleToggle(state._id, state.status)}
+                            onClick={() => handleToggle(country._id, country.status)}
                             className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                              state.status ? "bg-(--primary)" : "bg-gray-400"
+                              country.status ? "bg-blue-600" : "bg-gray-400"
                             }`}
                           >
-                            <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${state.status ? "translate-x-5" : "translate-x-1"}`} />
+                            <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${country.status ? "translate-x-5" : "translate-x-1"}`} />
                           </button>
                         </td>
                         <td className="px-4 py-2.5 text-right">
                           <div className="flex justify-end gap-2">
-                            <button
-                              onClick={() => openEditModal(state)}
-                              className="p-1.5 text-(--primary) hover:bg-(--primary)/10 rounded-md transition-all"
-                            >
+                            <button onClick={() => openEditModal(country)} className="hover:text-blue-500 transition-colors">
                               <FiEdit2 size={14} />
                             </button>
-                            <button
-                              onClick={() => handleDelete(state._id)}
-                              className="p-1.5 text-red-500 hover:bg-red-500/10 rounded-md transition-all"
+                            <button 
+                              onClick={() => handleDelete(country._id)} 
+                              className="hover:text-red-500 transition-colors disabled:opacity-30"
                               disabled={deleteLoading}
                             >
                               <FiTrash2 size={14} />
@@ -224,33 +215,37 @@ const StateLocation = () => {
             {/* Pagination Controls */}
             <div className={`flex items-center justify-between p-3 border-t ${theme.divider}`}>
               <span className="text-[11px] opacity-60">
-                Showing {statesData.length} entries
+                Showing {countriesData.length} of {totalPages * limit} entries
               </span>
+              
               <div className="flex items-center gap-1">
                 <button
                   disabled={page === 1 || isLoading}
                   onClick={() => setPage(page - 1)}
-                  className="p-1.5 border rounded-md disabled:opacity-30 hover:border-(--primary) hover:text-(--primary) transition-colors"
+                  className="p-1.5 border rounded-md disabled:opacity-30 hover:bg-gray-500/10 transition-colors"
                 >
                   <FiChevronLeft size={16} />
                 </button>
+
+                {/* Optional: Generate page numbers */}
                 {[...Array(totalPages)].map((_, i) => (
-                  <button
-                    key={i + 1}
-                    onClick={() => setPage(i + 1)}
-                    className={`w-7 h-7 text-[11px] rounded-md border transition-all ${
-                      page === i + 1
-                        ? "bg-(--primary) text-white border-(--primary) shadow-sm"
-                        : "hover:border-(--primary) hover:text-(--primary) border-transparent"
-                    }`}
-                  >
-                    {i + 1}
-                  </button>
+                    <button
+                        key={i + 1}
+                        onClick={() => setPage(i + 1)}
+                        className={`w-7 h-7 text-[11px] rounded-md border transition-all ${
+                            page === i + 1 
+                            ? "bg-blue-600 text-white border-blue-600" 
+                            : "hover:bg-gray-500/10 border-transparent"
+                        }`}
+                    >
+                        {i + 1}
+                    </button>
                 ))}
+
                 <button
                   disabled={page === totalPages || isLoading}
                   onClick={() => setPage(page + 1)}
-                  className="p-1.5 border rounded-md disabled:opacity-30 hover:border-(--primary) hover:text-(--primary) transition-colors"
+                  className="p-1.5 border rounded-md disabled:opacity-30 hover:bg-gray-500/10 transition-colors"
                 >
                   <FiChevronRight size={16} />
                 </button>
@@ -260,39 +255,38 @@ const StateLocation = () => {
         </div>
       </main>
 
-      {/* Modal */}
+      {/* Modal remains largely the same but ensure Formik values use the correct field "name" */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-4">
           <div className={`${theme.modal} p-5 rounded-xl w-full max-w-xs shadow-xl border border-gray-700/30`}>
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-sm font-bold">{editingState ? "Edit State" : "New State"}</h3>
-              <button onClick={closeModal} className="opacity-50 hover:text-(--primary) transition-colors">
-                <FiXCircle size={16} />
-              </button>
+              <h3 className="text-sm font-bold">{editingCountry ? "Edit Country" : "New Country"}</h3>
+              <button onClick={closeModal} className="opacity-50 hover:opacity-100 transition-opacity"><FiXCircle size={16} /></button>
             </div>
+
             <Formik
-              initialValues={{ stateName: editingState ? editingState.name : "" }}
+              initialValues={{ countryName: editingCountry ? editingCountry.name : "" }}
               enableReinitialize
               validationSchema={validationSchema}
-              onSubmit={submitStateFunction}
+              onSubmit={submitCountryFunction}
             >
               {({ errors, touched }) => (
                 <Form className="space-y-3">
                   <div>
-                    <label className="block text-[10px] font-bold opacity-50 uppercase mb-1">State Name</label>
+                    <label className="block text-[10px] font-bold opacity-50 uppercase mb-1">Country Name</label>
                     <Field
-                      name="stateName"
-                      placeholder="e.g. California"
-                      className={`w-full p-2 text-sm rounded-lg border outline-none focus:border-(--primary) transition-all ${theme.input} ${errors.stateName && touched.stateName ? "border-red-500" : ""}`}
+                      name="countryName"
+                      placeholder="e.g. India"
+                      className={`w-full p-2 text-sm rounded-lg border outline-none focus:border-blue-500 transition-all ${theme.input} ${errors.countryName && touched.countryName ? "border-red-500" : ""}`}
                     />
-                    <ErrorMessage name="stateName" component="span" className="text-red-400 text-[10px] mt-1 ml-1 block" />
+                    <ErrorMessage name="countryName" component="span" className="text-red-400 text-[10px] mt-1 ml-1 block" />
                   </div>
                   <button
                     type="submit"
                     disabled={createLoading || updateLoading}
-                    className="w-full flex items-center justify-center gap-1.5 py-2 bg-(--primary) hover:opacity-90 text-white rounded-lg text-xs font-bold transition-all shadow-md disabled:opacity-50"
+                    className="w-full flex items-center justify-center gap-1.5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition-all disabled:opacity-50"
                   >
-                    {editingState ? (updateLoading ? "Updating..." : "Update") : (createLoading ? "Creating..." : "Create")}
+                    {editingCountry ? (updateLoading ? "Updating..." : "Update Country") : (createLoading ? "Creating..." : "Create Country")}
                   </button>
                 </Form>
               )}
@@ -304,4 +298,4 @@ const StateLocation = () => {
   );
 };
 
-export default StateLocation;
+export default Location;

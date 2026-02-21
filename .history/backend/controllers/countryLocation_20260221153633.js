@@ -2,39 +2,14 @@ const { Country, State, City } = require("../models/location.js");
 
 exports.getCountries = async (req, res) => {
   try {
-    // query params
-    let { page = 1, limit = 10, sortBy = "createdAt", order = "desc" } = req.query;
-
-    page = parseInt(page);
-    limit = parseInt(limit);
-
-    // sorting object
-    const sortOption = {};
-    sortOption[sortBy] = order === "asc" ? 1 : -1;
-
-    // total count
-    const total = await Country.countDocuments();
-
-    // data
-    const countries = await Country.find()
-      .sort(sortOption)
-      .skip((page - 1) * limit)
-      .limit(limit);
-
-    res.status(200).json({
-      data: countries,
-      pagination: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
-      },
-    });
+    const countries = await Country.find();
+    res.status(200).json(countries);
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Server Error" });
   }
 };
+
 exports.createCountryLocation = async (req, res) => {
   try {
     const { country } = req.body;
@@ -123,7 +98,8 @@ exports.toggleCountryStatus = async (req, res) => {
   try {
     const { id } = req.params;
 
-    console.log("hii")
+    console.log"hii
+
     const existingCountry = await Country.findById(id);
 
     if (!existingCountry) {

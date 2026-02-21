@@ -87,7 +87,7 @@ const ManageCategories = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this category?")) {
       try {
-        await deleteItem(`categories/${id}`);
+        await deleteItem("categories", id);
         setCategories(categories.filter((c) => c._id !== id));
       } catch (err) {
         console.error("Error deleting category:", err);
@@ -156,7 +156,7 @@ const ManageCategories = () => {
                       </td>
                       <td className="px-4 py-2.5 font-semibold text-sm">
                         <Link
-                          to={`/dashboard/category/${cat._id}`}
+                          to={`/category/${cat.slug}`}
                           className="text-(--primary) hover:underline"
                         >
                           {cat.name}

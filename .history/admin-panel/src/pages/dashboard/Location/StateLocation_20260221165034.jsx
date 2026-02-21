@@ -150,75 +150,32 @@ const StateLocation = () => {
           {/* Table */}
           <div className={`rounded-xl border shadow-sm overflow-hidden ${theme.card}`}>
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse">
-                <thead className={`uppercase tracking-wider font-bold ${theme.header}`}>
-                  <tr>
-                    <th className="px-4 py-3 w-16">#</th>
-                    <th
-                      className="px-4 py-3 cursor-pointer hover:text-(--primary) transition-colors"
-                      onClick={() => {
-                        setSortBy("name");
-                        setOrder(order === "asc" ? "desc" : "asc");
-                      }}
-                    >
-                      <div className="flex items-center gap-1">
-                        State Name {sortBy === "name" && (order === "asc" ? "↑" : "↓")}
-                      </div>
-                    </th>
-                    <th className="px-4 py-3 w-24">Status</th>
-                    <th className="px-4 py-3 text-right w-24">Action</th>
-                  </tr>
-                </thead>
-
-                <tbody className={`divide-y ${theme.divider}`}>
-                  {isLoading ? (
-                    <tr><td colSpan={4} className="px-4 py-10 text-center opacity-40 italic">Loading...</td></tr>
-                  ) : statesData.length === 0 ? (
-                    <tr><td colSpan={4} className="px-4 py-10 text-center opacity-40">No states found.</td></tr>
-                  ) : (
-                    statesData.map((state, index) => (
-                      <tr key={state._id} className="hover:bg-(--primary)/5 transition-colors">
-                        <td className="px-4 py-2.5 font-mono opacity-50 text-[10px]">
-                          {(page - 1) * limit + (index + 1)}
-                        </td>
-                        <td
-                          className="px-4 py-2.5 font-semibold text-sm cursor-pointer hover:text-(--primary)"
-                          onClick={() => navigate(`/dashboard/citylocation/${state._id}`)}
-                        >
-                          {state.name}
-                        </td>
-                        <td className="px-4 py-2.5">
-                          <button
-                            onClick={() => handleToggle(state._id, state.status)}
-                            className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                              state.status ? "bg-(--primary)" : "bg-gray-400"
-                            }`}
-                          >
-                            <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${state.status ? "translate-x-5" : "translate-x-1"}`} />
-                          </button>
-                        </td>
-                        <td className="px-4 py-2.5 text-right">
-                          <div className="flex justify-end gap-2">
-                            <button
-                              onClick={() => openEditModal(state)}
-                              className="p-1.5 text-(--primary) hover:bg-(--primary)/10 rounded-md transition-all"
-                            >
-                              <FiEdit2 size={14} />
-                            </button>
-                            <button
-                              onClick={() => handleDelete(state._id)}
-                              className="p-1.5 text-red-500 hover:bg-red-500/10 rounded-md transition-all"
-                              disabled={deleteLoading}
-                            >
-                              <FiTrash2 size={14} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+           <thead className={`uppercase tracking-wider font-bold ${theme.header}`}>
+  <tr>
+    <th className="px-4 py-3 w-16">#</th>
+    <th
+      className="px-4 py-3 cursor-pointer group hover:text-(--primary) transition-colors"
+      onClick={() => {
+        const newOrder = order === "asc" ? "desc" : "asc";
+        setSortBy("name");
+        setOrder(newOrder);
+      }}
+    >
+      <div className="flex items-center gap-2">
+        State Name
+        <span className={`transition-opacity ${sortBy === "name" ? "opacity-100 text-(--primary)" : "opacity-30 group-hover:opacity-100"}`}>
+          {sortBy === "name" && order === "asc" ? (
+            <FiArrowUp size={14} />
+          ) : (
+            <FiArrowDown size={14} />
+          )}
+        </span>
+      </div>
+    </th>
+    <th className="px-4 py-3 w-24">Status</th>
+    <th className="px-4 py-3 text-right w-24">Action</th>
+  </tr>
+</thead>
             </div>
 
             {/* Pagination Controls */}

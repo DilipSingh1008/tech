@@ -74,7 +74,7 @@ export const updateItem = async (resource, data) => {
 export const patchItem = async (resource, data) => {
   try {
     // console.log(id)
-    const response = await api.patch(`/${resource}`, data);
+    const response = await api.patch(`/${resource}/`, data);
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;
