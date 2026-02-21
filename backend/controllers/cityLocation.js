@@ -56,6 +56,9 @@ exports.createCityLocation = async (req, res) => {
 };
 
 exports.editCityName = async (req, res) => {
+
+  console.log("req.body", req.body);
+  
   try {
     const { city } = req.body;
 

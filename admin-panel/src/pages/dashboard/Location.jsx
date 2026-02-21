@@ -135,6 +135,7 @@ const Location = () => {
                   <tr>
                     <th className="px-4 py-3 w-28">ID</th>
                     <th className="px-4 py-3">Country Name</th>
+                    <th className="px-4 py-3 w-24">Status</th>
                     <th className="px-4 py-3 text-right w-24">Action</th>
                   </tr>
                 </thead>
@@ -160,6 +161,18 @@ const Location = () => {
                         >
                           {country.name}
                         </td>
+                        <td className="px-4 py-2.5">
+                        <button
+                          onClick={() =>
+                           console.log("hi")
+                          }
+                          className={`cursor-pointer w-8 h-4 rounded-full relative transition-colors ${cat.status ? "bg-(--primary)" : "bg-gray-400"}`}
+                        >
+                          <div
+                            className={` cursor-pointer absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${cat.status ? "left-4.5" : "left-0.5"}`}
+                          />
+                        </button>
+                      </td>
                         <td className="px-4 py-2.5 text-right">
                           <div className="flex justify-end gap-1">
                             <button

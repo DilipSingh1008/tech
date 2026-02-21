@@ -141,6 +141,7 @@ const StateLocation = () => {
                   <tr>
                     <th className="px-4 py-3 w-28">ID</th>
                     <th className="px-4 py-3">State Name</th>
+                    <th className="px-4 py-3 w-24">Status</th>
                     <th className="px-4 py-3 text-right w-24">Action</th>
                   </tr>
                 </thead>
