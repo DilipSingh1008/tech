@@ -3,8 +3,13 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { useNavigate } from "react-router-dom";
 import { FiEdit2, FiTrash2, FiPlusCircle, FiXCircle } from "react-icons/fi";
-import { useTheme } from "../../context/ThemeContext";
-import { getItems, createItem, updateItem, deleteItem } from "../../services/api";
+import { useTheme } from "../../../context/ThemeContext";
+import {
+  getItems,
+  createItem,
+  updateItem,
+  deleteItem,
+} from "../../../services/api";
 
 const Location = () => {
   const navigate = useNavigate();
@@ -61,10 +66,9 @@ const Location = () => {
     try {
       if (editingCountry) {
         setUpdateLoading(true);
-        await updateItem(
-          `countrylocation/${editingCountry._id}/edit-country`,
-          { country: values.countryName }
-        );
+        await updateItem(`countrylocation/${editingCountry._id}/edit-country`, {
+          country: values.countryName,
+        });
       } else {
         setCreateLoading(true);
         await createItem("countrylocation", { country: values.countryName });
@@ -115,7 +119,6 @@ const Location = () => {
     <div className={`h-screen w-full flex flex-col ${theme.main}`}>
       <main className="flex-1 overflow-y-auto p-4 md:p-6">
         <div className="max-w-5xl mx-auto">
-
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-bold">Location</h2>
@@ -128,10 +131,14 @@ const Location = () => {
           </div>
 
           {/* Table */}
-          <div className={`rounded-xl border shadow-sm overflow-hidden ${theme.card}`}>
+          <div
+            className={`rounded-xl border shadow-sm overflow-hidden ${theme.card}`}
+          >
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
-                <thead className={`uppercase tracking-wider font-bold ${theme.header}`}>
+                <thead
+                  className={`uppercase tracking-wider font-bold ${theme.header}`}
+                >
                   <tr>
                     <th className="px-4 py-3 w-28">ID</th>
                     <th className="px-4 py-3">Country Name</th>
@@ -142,7 +149,10 @@ const Location = () => {
                 <tbody className={`divide-y ${theme.divider}`}>
                   {isLoading ? (
                     <tr>
-                      <td colSpan={3} className="px-4 py-10 text-center opacity-40 italic">
+                      <td
+                        colSpan={3}
+                        className="px-4 py-10 text-center opacity-40 italic"
+                      >
                         Loading...
                       </td>
                     </tr>
@@ -157,7 +167,9 @@ const Location = () => {
                         </td>
                         <td
                           className="px-4 py-2.5 font-semibold text-sm cursor-pointer hover:text-blue-400 transition-colors"
-                          onClick={() => navigate(`/dashboard/location/${country._id}`)}
+                          onClick={() =>
+                            navigate(`/dashboard/location/${country._id}`)
+                          }
                         >
                           {country.name}
                         </td>
@@ -210,7 +222,9 @@ const Location = () => {
       {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-4">
-          <div className={`${theme.modal} p-5 rounded-xl w-full max-w-xs shadow-xl border border-gray-700/30`}>
+          <div
+            className={`${theme.modal} p-5 rounded-xl w-full max-w-xs shadow-xl border border-gray-700/30`}
+          >
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-sm font-bold">
                 {editingCountry ? "Edit Country" : "New Country"}
@@ -241,7 +255,9 @@ const Location = () => {
                       name="countryName"
                       placeholder="e.g. India"
                       className={`w-full p-2 text-sm rounded-lg border outline-none focus:border-blue-500 transition-all ${theme.input} ${
-                        errors.countryName && touched.countryName ? "border-red-500" : ""
+                        errors.countryName && touched.countryName
+                          ? "border-red-500"
+                          : ""
                       }`}
                     />
                     <ErrorMessage
@@ -257,10 +273,18 @@ const Location = () => {
                       disabled={createLoading || updateLoading}
                       className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition-all disabled:opacity-50 cursor-pointer"
                     >
-                      {editingCountry ? <FiEdit2 size={12} /> : <FiPlusCircle size={12} />}
+                      {editingCountry ? (
+                        <FiEdit2 size={12} />
+                      ) : (
+                        <FiPlusCircle size={12} />
+                      )}
                       {editingCountry
-                        ? updateLoading ? "Updating..." : "Update Country"
-                        : createLoading ? "Creating..." : "Create Country"}
+                        ? updateLoading
+                          ? "Updating..."
+                          : "Update Country"
+                        : createLoading
+                          ? "Creating..."
+                          : "Create Country"}
                     </button>
                   </div>
                 </Form>
