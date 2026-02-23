@@ -5,7 +5,10 @@ const fs = require("fs");
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     // frontend / route se folder name aayega
-    const folder = req.body.folder || "others";
+
+    console.log(req.body.folder);
+    
+    const folder = req.body.folder;
 
     const uploadPath = path.join("uploads", folder);
 

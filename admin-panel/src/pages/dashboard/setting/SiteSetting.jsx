@@ -1,41 +1,68 @@
 import React, { useState } from "react";
+import { useTheme } from "../../../context/ThemeContext";
 import SiteSettingsForm from "./SiteTab";
+import SocialForms from "./SocailForms";
+import MailForm from "./MailForm";
+import Payment from "./Payment";
+import SmsForm from "./SmsFrom";
 
 const SiteSetting = () => {
+  const { isDarkMode } = useTheme();
   const [activeTab, setActiveTab] = useState("site");
 
   const tabs = ["site", "social", "mail", "payment", "sms"];
 
-  return (
-    <div className="p-6 pt-0 min-h-screen bg-white dark:bg-[#0f172a] transition-colors duration-300">
-      {/* Tab Navigation */}
-      <div className="flex flex-wrap gap-2 border-b border-gray-200 dark:border-gray-700 mb-6">
-        {tabs.map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`capitalize cursor-pointer px-6 py-2.5 text-sm font-medium transition-all duration-200 border-b-2 ${
-              activeTab === tab
-                ? "border-blue-500 text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20"
-                : "border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
-      </div>
+  // theme object following your Location.jsx pattern
+  const theme = {
+    main: isDarkMode
+      ? "bg-[#0b0e14] text-slate-300"
+      : "bg-gray-50 text-gray-700",
+    card: isDarkMode
+      ? "bg-[#151b28] border-gray-800"
+      : "bg-white border-gray-200",
+    tabActive: isDarkMode
+      ? "border-(--primary) text-(--primary) bg-(--primary)/10"
+      : "border-(--primary) text-(--primary) bg-gray-100",
+    tabInactive: isDarkMode
+      ? "border-transparent text-gray-500 hover:text-gray-300 hover:bg-gray-800/50"
+      : "border-transparent text-gray-400 hover:text-gray-600 hover:bg-gray-200/50",
+    divider: isDarkMode ? "border-gray-800" : "border-gray-200",
+  };
 
-      {/* Tab Content Area */}
-      <div className="p-6 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-[#1e293b] text-gray-900 dark:text-gray-100 shadow-sm">
-        <h2 className="text-xl font-semibold mb-4 capitalize">{activeTab} Settings</h2>
+  return (
+    <div className={`flex-1 overflow-y-auto p-4 md:p-6 transition-colors duration-300 ${theme.main}`}>
+      <div className="max-w-5xl mx-auto">
         
-        {/* Conditional Rendering */}
-        <div className="mt-2">
-          {activeTab === "site" && <SiteSettingsForm / >}
-          {activeTab === "social" && <p>Manage your Facebook, X, and Instagram links.</p>}
-          {activeTab === "mail" && <p>Setup SMTP and email template configurations.</p>}
-          {activeTab === "payment" && <p>Integrate Stripe, PayPal, or other gateways.</p>}
-          {activeTab === "sms" && <p>Manage Twilio or other SMS provider API keys.</p>}
+        {/* Tab Navigation */}
+        <div className={`flex flex-wrap gap-1 border-b mb-6 ${theme.divider}`}>
+          {tabs.map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`capitalize cursor-pointer px-6 py-2.5 text-xs font-bold transition-all duration-200 border-b-2 tracking-wider ${
+                activeTab === tab ? theme.tabActive : theme.tabInactive
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+
+        {/* Tab Content Area */}
+        <div className={`rounded-xl border shadow-sm overflow-hidden transition-all duration-300 ${theme.card}`}>
+          <div className="p-6">
+            <h2 className="text-sm font-bold uppercase tracking-widest mb-6 opacity-80">
+              {activeTab} Settings
+            </h2>
+            
+            <div className="mt-2">
+              {activeTab === "site" && <SiteSettingsForm />}
+              {activeTab === "social" && <SocialForms />}
+              {activeTab === "mail" && <MailForm />}
+              {activeTab === "payment" && <Payment />}
+              {activeTab === "sms" && <SmsForm />}
+            </div>
+          </div>
         </div>
       </div>
     </div>
