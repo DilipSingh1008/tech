@@ -30,8 +30,7 @@ const StateLocation = () => {
   const [createLoading, setCreateLoading] = useState(false);
   const [updateLoading, setUpdateLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
-    const [searchQuery, setSearchQuery] = useState("");
-  
+  const [searchQuery, setSearchQuery] = useState("");
 
   const [page, setPage] = useState(1);
   const [limit] = useState(5);
@@ -44,16 +43,19 @@ const StateLocation = () => {
 
   useEffect(() => {
     fetchData();
-  }, [id, page, sortBy, order]);
+  }, [id, page, sortBy, order, searchQuery]);
 
   const fetchData = async () => {
     try {
       setIsLoading(true);
+
       const res = await getItems(
-        `statelocation/${id}?page=${page}&limit=${limit}&sortBy=${sortBy}&order=${order}`
+        `statelocation/${id}?page=${page}&limit=${limit}&sortBy=${sortBy}&order=${order}&search=${searchQuery}`,
       );
+
       setStatesData(res.data || []);
       setTotalPages(res.pagination?.totalPages || 1);
+
       if (res.pagination?.totalPages > 0 && page > res.pagination.totalPages) {
         setPage(res.pagination.totalPages);
       }
@@ -72,7 +74,11 @@ const StateLocation = () => {
   };
 
   const validationSchema = Yup.object({
-    stateName: Yup.string().min(2).max(50).required("Required"),
+    stateName: Yup.string()
+      .trim()
+      .min(2, "Too short")
+      .max(50, "Too long")
+      .required("State name is required"),
   });
 
   const openAddModal = () => {
@@ -135,17 +141,25 @@ const StateLocation = () => {
       console.error(err);
     }
   };
-   const filteredStates = statesData.filter((state) =>{
-        console.log(state);
-        
-        return state.name.toLowerCase().includes(searchQuery.toLowerCase());
-      });
+  //  const filteredStates = statesData.filter((state) =>{
+  //       console.log(state);
+
+  //       return state.name.toLowerCase().includes(searchQuery.toLowerCase());
+  //     });
 
   const theme = {
-    main: isDarkMode ? "bg-[#0b0e14] text-slate-300" : "bg-gray-50 text-gray-700",
-    card: isDarkMode ? "bg-[#151b28] border-gray-800" : "bg-white border-gray-200",
-    header: isDarkMode ? "bg-[#1f2637] text-gray-400" : "bg-gray-100 text-gray-500",
-    input: isDarkMode ? "bg-gray-500/5 border-gray-500/20 text-white" : "bg-gray-50 border-gray-300 text-gray-900",
+    main: isDarkMode
+      ? "bg-[#0b0e14] text-slate-300"
+      : "bg-gray-50 text-gray-700",
+    card: isDarkMode
+      ? "bg-[#151b28] border-gray-800"
+      : "bg-white border-gray-200",
+    header: isDarkMode
+      ? "bg-[#1f2637] text-gray-400"
+      : "bg-gray-100 text-gray-500",
+    input: isDarkMode
+      ? "bg-gray-500/5 border-gray-500/20 text-white"
+      : "bg-gray-50 border-gray-300 text-gray-900",
     modal: isDarkMode ? "bg-[#151b28] text-white" : "bg-white text-gray-800",
     divider: isDarkMode ? "divide-gray-800" : "divide-gray-100",
   };
@@ -156,8 +170,8 @@ const StateLocation = () => {
         <div className="max-w-5xl mx-auto">
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
-                        <Searchbar onChange={(e) => setSearchQuery(e.target.value)} />
-            
+            <Searchbar onChange={(e) => setSearchQuery(e.target.value)} />
+
             <button
               onClick={openAddModal}
               className="flex items-center cursor-pointer gap-1.5 px-3 py-1.5 bg-(--primary) hover:opacity-90 text-white rounded-lg text-xs font-semibold transition-all shadow-sm"
@@ -167,10 +181,14 @@ const StateLocation = () => {
           </div>
 
           {/* Table */}
-          <div className={`rounded-xl border shadow-sm overflow-hidden ${theme.card}`}>
+          <div
+            className={`rounded-xl border shadow-sm overflow-hidden ${theme.card}`}
+          >
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
-                <thead className={`uppercase tracking-wider font-bold ${theme.header}`}>
+                <thead
+                  className={`uppercase tracking-wider font-bold ${theme.header}`}
+                >
                   <tr>
                     <th className="px-4 py-3 w-16">#</th>
                     <th
@@ -180,7 +198,11 @@ const StateLocation = () => {
                       <div className="flex items-center gap-1">
                         State Name
                         <span className="opacity-50 text-[10px]">
-                          {sortBy === "name" ? (order === "asc" ? "▲" : "▼") : "↕"}
+                          {sortBy === "name"
+                            ? order === "asc"
+                              ? "▲"
+                              : "▼"
+                            : "↕"}
                         </span>
                       </div>
                     </th>
@@ -191,29 +213,52 @@ const StateLocation = () => {
 
                 <tbody className={`divide-y ${theme.divider}`}>
                   {isLoading ? (
-                    <tr><td colSpan={4} className="px-4 py-10 text-center opacity-40 italic">Loading...</td></tr>
+                    <tr>
+                      <td
+                        colSpan={4}
+                        className="px-4 py-10 text-center opacity-40 italic"
+                      >
+                        Loading...
+                      </td>
+                    </tr>
                   ) : statesData.length === 0 ? (
-                    <tr><td colSpan={4} className="px-4 py-10 text-center opacity-40">No states found.</td></tr>
+                    <tr>
+                      <td
+                        colSpan={4}
+                        className="px-4 py-10 text-center opacity-40"
+                      >
+                        No states found.
+                      </td>
+                    </tr>
                   ) : (
-                    filteredStates.map((state, index) => (
-                      <tr key={state._id} className="hover:bg-(--primary)/5 transition-colors">
+                    statesData.map((state, index) => (
+                      <tr
+                        key={state._id}
+                        className="hover:bg-(--primary)/5 transition-colors"
+                      >
                         <td className="px-4 py-2.5 font-mono opacity-50 text-[10px]">
                           {(page - 1) * limit + (index + 1)}
                         </td>
                         <td
                           className="px-4 py-2.5 font-semibold text-sm cursor-pointer hover:text-(--primary)"
-                          onClick={() => navigate(`/dashboard/citylocation/${state._id}`)}
+                          onClick={() =>
+                            navigate(`/dashboard/citylocation/${state._id}`)
+                          }
                         >
                           {state.name}
                         </td>
                         <td className="px-4 py-2.5">
                           <button
-                            onClick={() => handleToggle(state._id, state.status)}
+                            onClick={() =>
+                              handleToggle(state._id, state.status)
+                            }
                             className={`relative cursor-pointer inline-flex h-5 w-9 items-center rounded-full transition-colors ${
                               state.status ? "bg-(--primary)" : "bg-gray-400"
                             }`}
                           >
-                            <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${state.status ? "translate-x-5" : "translate-x-1"}`} />
+                            <span
+                              className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${state.status ? "translate-x-5" : "translate-x-1"}`}
+                            />
                           </button>
                         </td>
                         <td className="px-4 py-2.5 text-right">
@@ -241,7 +286,9 @@ const StateLocation = () => {
             </div>
 
             {/* Pagination */}
-            <div className={`flex items-center justify-between p-3 border-t ${theme.divider}`}>
+            <div
+              className={`flex items-center justify-between p-3 border-t ${theme.divider}`}
+            >
               <span className="text-[11px] opacity-60">
                 Showing {statesData.length} entries
               </span>
@@ -282,15 +329,24 @@ const StateLocation = () => {
       {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-4">
-          <div className={`${theme.modal} p-5 rounded-xl w-full max-w-xs shadow-xl border border-gray-700/30`}>
+          <div
+            className={`${theme.modal} p-5 rounded-xl w-full max-w-xs shadow-xl border border-gray-700/30`}
+          >
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-sm font-bold">{editingState ? "Edit State" : "New State"}</h3>
-              <button onClick={closeModal} className="opacity-50 cursor-pointer hover:text-(--primary) transition-colors">
+              <h3 className="text-sm font-bold">
+                {editingState ? "Edit State" : "New State"}
+              </h3>
+              <button
+                onClick={closeModal}
+                className="opacity-50 cursor-pointer hover:text-(--primary) transition-colors"
+              >
                 <FiXCircle size={16} />
               </button>
             </div>
             <Formik
-              initialValues={{ stateName: editingState ? editingState.name : "" }}
+              initialValues={{
+                stateName: editingState ? editingState.name : "",
+              }}
               enableReinitialize
               validationSchema={validationSchema}
               onSubmit={submitStateFunction}
@@ -298,20 +354,32 @@ const StateLocation = () => {
               {({ errors, touched }) => (
                 <Form className="space-y-3">
                   <div>
-                    <label className="block text-[10px] font-bold opacity-50 uppercase mb-1">State Name</label>
+                    <label className="block text-[10px] font-bold opacity-50 uppercase mb-1">
+                      State Name
+                    </label>
                     <Field
                       name="stateName"
                       placeholder="e.g. California"
                       className={`w-full p-2 text-sm rounded-lg border outline-none focus:border-(--primary) transition-all ${theme.input} ${errors.stateName && touched.stateName ? "border-red-500" : ""}`}
                     />
-                    <ErrorMessage name="stateName" component="span" className="text-red-400 text-[10px] mt-1 ml-1 block" />
+                    <ErrorMessage
+                      name="stateName"
+                      component="span"
+                      className="text-red-400 text-[10px] mt-1 ml-1 block"
+                    />
                   </div>
                   <button
                     type="submit"
                     disabled={createLoading || updateLoading}
                     className="w-full cursor-pointer flex items-center justify-center gap-1.5 py-2 bg-(--primary) hover:opacity-90 text-white rounded-lg text-xs font-bold transition-all shadow-md disabled:opacity-50"
                   >
-                    {editingState ? (updateLoading ? "Updating..." : "Update") : (createLoading ? "Creating..." : "Create")}
+                    {editingState
+                      ? updateLoading
+                        ? "Updating..."
+                        : "Update"
+                      : createLoading
+                        ? "Creating..."
+                        : "Create"}
                   </button>
                 </Form>
               )}

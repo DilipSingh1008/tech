@@ -44,13 +44,13 @@ const CityLocation = () => {
 
   useEffect(() => {
     fetchData();
-  }, [id, page, sortBy, order]);
+  }, [id, page, sortBy, order, searchQuery]);
 
   const fetchData = async () => {
     try {
       setIsLoading(true);
       const res = await getItems(
-        `statelocation/${id}/all-cities?page=${page}&limit=${limit}&sortBy=${sortBy}&order=${order}`,
+        `statelocation/${id}/all-cities?page=${page}&limit=${limit}&sortBy=${sortBy}&order=${order}&search=${searchQuery}`,
       );
       setCitiesData(res.data || []);
       setTotalPages(res.pagination?.totalPages || 1);
@@ -75,7 +75,7 @@ const CityLocation = () => {
     cityName: Yup.string()
       .min(2, "Name too short!")
       .max(50, "Name too long!")
-      .required("Required"),
+      .required("City name is required"),
   });
 
   const openAddModal = () => {
@@ -145,11 +145,11 @@ const CityLocation = () => {
   console.log();
   
 
-      const filteredCities = citiesData.filter((city) =>{
-        console.log(city);
+      // const filteredCities = citiesData.filter((city) =>{
+      //   console.log(city);
         
-        return city.name.toLowerCase().includes(searchQuery.toLowerCase());
-      });
+      //   return city.name.toLowerCase().includes(searchQuery.toLowerCase());
+      // });
 
   const theme = {
     main: isDarkMode
@@ -235,7 +235,7 @@ const CityLocation = () => {
                       </td>
                     </tr>
                   ) : (
-                    filteredCities.map((city, index) => (
+                    citiesData.map((city, index) => (
                       
                       <tr
                         key={city._id}
@@ -336,7 +336,7 @@ const CityLocation = () => {
               </h3>
               <button
                 onClick={closeModal}
-                className="opacity-50 hover:text-(--primary) transition-colors"
+                className="opacity-50 cursor-pointer hover:text-(--primary) transition-colors"
               >
                 <FiXCircle size={16} />
               </button>

@@ -133,7 +133,7 @@ exports.toggleCountryStatus = async (req, res) => {
   try {
     const { id } = req.params;
 
-    console.log("hii")
+    // console.log("hii")
     const existingCountry = await Country.findById(id);
 
     if (!existingCountry) {

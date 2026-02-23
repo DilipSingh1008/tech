@@ -19,7 +19,7 @@ exports.getCityByStateId = async (req, res) => {
     }
 
     // ⭐ query params
-    let { page = 1, limit = 10, sortBy = "createdAt", order = "desc" } =
+    let { page = 1, limit = 10, sortBy = "createdAt", order = "desc", search="" } =
       req.query;
 
     page = parseInt(page);
@@ -28,11 +28,19 @@ exports.getCityByStateId = async (req, res) => {
     const sortOption = {};
     sortOption[sortBy] = order === "asc" ? 1 : -1;
 
+    //  combined filter (country + search)
+    const filter = {
+      state: stateId,
+      ...(search && {
+        name: { $regex: search, $options: "i" },
+      }),
+    };
+
     // ⭐ total count
-    const total = await City.countDocuments({ state: stateId });
+    const total = await City.countDocuments(filter);
 
     // ⭐ data fetch
-    const cities = await City.find({ state: stateId })
+    const cities = await City.find(filter)
       .sort(sortOption)
       .skip((page - 1) * limit)
       .limit(limit);
