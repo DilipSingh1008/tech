@@ -23,16 +23,15 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       name: "Location",
       icon: <LocationEdit size={18} />,
     },
-    
-    {
-      path: "/dashboard/categories",
-      name: "Manage Categories",
-      icon: <Grid size={18} />,
-    },
     {
       path: "/dashboard/settings",
       name: "Settings",
       icon: <Settings size={18} />,
+    },
+    {
+      path: "/dashboard/categories",
+      name: "Manage Categories",
+      icon: <Grid size={18} />,
     },
   ];
 

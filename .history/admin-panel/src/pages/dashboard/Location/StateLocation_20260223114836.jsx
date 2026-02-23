@@ -285,7 +285,7 @@ const StateLocation = () => {
           <div className={`${theme.modal} p-5 rounded-xl w-full max-w-xs shadow-xl border border-gray-700/30`}>
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-sm font-bold">{editingState ? "Edit State" : "New State"}</h3>
-              <button onClick={closeModal} className="opacity-50 cursor-pointer hover:text-(--primary) transition-colors">
+              <button onClick={closeModal} className="opacity-50 hover:text-(--primary) transition-colors">
                 <FiXCircle size={16} />
               </button>
             </div>

@@ -285,7 +285,7 @@ const StateLocation = () => {
           <div className={`${theme.modal} p-5 rounded-xl w-full max-w-xs shadow-xl border border-gray-700/30`}>
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-sm font-bold">{editingState ? "Edit State" : "New State"}</h3>
-              <button onClick={closeModal} className="opacity-50 cursor-pointer hover:text-(--primary) transition-colors">
+              <button onClick={closeModal} className="opacity-50 hover:text-(--primary) transition-colors">
                 <FiXCircle size={16} />
               </button>
             </div>
@@ -309,7 +309,7 @@ const StateLocation = () => {
                   <button
                     type="submit"
                     disabled={createLoading || updateLoading}
-                    className="w-full cursor-pointer flex items-center justify-center gap-1.5 py-2 bg-(--primary) hover:opacity-90 text-white rounded-lg text-xs font-bold transition-all shadow-md disabled:opacity-50"
+                    className="w-full flex items-center justify-center gap-1.5 py-2 bg-(--primary) hover:opacity-90 text-white rounded-lg text-xs font-bold transition-all shadow-md disabled:opacity-50"
                   >
                     {editingState ? (updateLoading ? "Updating..." : "Update") : (createLoading ? "Creating..." : "Create")}
                   </button>
