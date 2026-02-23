@@ -263,7 +263,7 @@ const CityLocation = () => {
                           <div className="flex justify-end gap-2">
                             <button
                               onClick={() => openEditModal(city)}
-                              className="p-1.5 cursor-pointer hover:text-(--primary) hover:bg-(--primary)/10 rounded-md transition-all"
+                              className="p-1.5 text-(--primary) hover:bg-(--primary)/10 rounded-md transition-all"
                             >
                               <FiEdit2 size={14} />
                             </button>
