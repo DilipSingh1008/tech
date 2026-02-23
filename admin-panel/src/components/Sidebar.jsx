@@ -8,6 +8,7 @@ import {
   X,
   Grid,
   LocationEdit,
+  ImageIcon,
 } from "lucide-react";
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
@@ -23,11 +24,16 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       name: "Location",
       icon: <LocationEdit size={18} />,
     },
-    
+
     {
       path: "/dashboard/categories",
       name: "Manage Categories",
       icon: <Grid size={18} />,
+    },
+    {
+      path: "/dashboard/banner",
+      name: "Banner",
+      icon: <ImageIcon size={18} />,
     },
     {
       path: "/dashboard/settings",
@@ -38,7 +44,6 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
 
   return (
     <>
-      {/* Mobile Backdrop */}
       <div
         className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] transition-opacity duration-300 md:hidden ${
           isOpen ? "opacity-100 visible" : "opacity-0 invisible"
@@ -46,7 +51,6 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         onClick={toggleSidebar}
       />
 
-      {/* Sidebar - Width reduced to w-56 */}
       <aside
         className={`fixed inset-y-0 left-0 z-[70] w-56 transform transition-transform duration-300 ease-in-out border-r flex flex-col
         md:sticky md:translate-x-0 
@@ -57,7 +61,6 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           height: "100vh",
         }}
       >
-        {/* Header - Height reduced to h-14 for compact look */}
         <div
           className="h-14 flex items-center justify-between px-5 border-b"
           style={{ borderColor: "var(--border-color)" }}
@@ -87,7 +90,6 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           </button>
         </div>
 
-        {/* Navigation - Reduced vertical padding (py-4) and spacing (space-y-1) */}
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
           {menuItems.map((item) => (
             <NavLink
