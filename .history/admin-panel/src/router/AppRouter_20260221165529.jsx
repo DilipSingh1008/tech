@@ -14,7 +14,6 @@ import NotFound from "../pages/NotFound";
 import StateLocation from "../pages/dashboard/Location/StateLocation";
 import CityLocation from "../pages/dashboard/Location/CityLocation";
 import Subcategory from "../pages/dashboard/ManageCategories/Subcategory";
-import SiteSetting from "../pages/dashboard/setting/SiteSetting";
 
 // import ThemeToggleButton from "./components/Button";
 
@@ -46,7 +45,6 @@ function AppRouter() {
                 element={<ManageCategories />}
               />
               <Route path="/dashboard/category/:id" element={<Subcategory />} />
-              <Route path="/dashboard/settings" element={<SiteSetting />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />

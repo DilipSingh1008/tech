@@ -46,7 +46,7 @@ function AppRouter() {
                 element={<ManageCategories />}
               />
               <Route path="/dashboard/category/:id" element={<Subcategory />} />
-              <Route path="/dashboard/settings" element={<SiteSetting />} />
+              <Route path="/settings" element={<SiteSetting />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />
