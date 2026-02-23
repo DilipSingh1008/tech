@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const upload = require("../middlewares/bannerUpload"); // your multer setup
+const upload = require("../middlewares/bannerUpload");
 const {
   createBanner,
   getBanners,

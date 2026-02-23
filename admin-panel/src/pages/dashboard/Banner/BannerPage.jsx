@@ -12,18 +12,15 @@ import {
 import { FiChevronRight, FiChevronLeft } from "react-icons/fi";
 import Searchbar from "../../../components/Searchbar";
 
-// Function to validate image dimensions
+// Validate 200x200 image
 const validateImageDimensions = (file) => {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.src = URL.createObjectURL(file);
-    img.onload = () => {
-      if (img.width === 200 && img.height === 200) {
-        resolve(true);
-      } else {
-        reject("Image must be exactly 200x200 px");
-      }
-    };
+    img.onload = () =>
+      img.width === 200 && img.height === 200
+        ? resolve(true)
+        : reject("Image must be 200x200 px");
     img.onerror = () => reject("Invalid image file");
   });
 };
@@ -57,6 +54,7 @@ const BannerPage = () => {
   }, [page]);
 
   const fetchBanners = async () => {
+    setLoading(true);
     try {
       const res = await getItems(`banners?page=${page}&limit=${limit}`);
       setBanners(res.data || []);
@@ -83,9 +81,9 @@ const BannerPage = () => {
     title: Yup.string().required("Title is required"),
     url: Yup.string().url("Enter a valid URL"),
     image: Yup.mixed().when("isEdit", {
-      is: false, // new banner
-      then: Yup.mixed().required("Banner image is required"),
-      otherwise: Yup.mixed(), // edit me optional
+      is: false, // if isEdit is false → new banner
+      then: (schema) => schema.required("Banner image is required"),
+      otherwise: (schema) => schema,
     }),
   });
 
@@ -175,6 +173,7 @@ const BannerPage = () => {
                 </tbody>
               </table>
             </div>
+
             {/* Pagination */}
             <div
               className={`flex items-center justify-between p-3 border-t ${theme.divider}`}
@@ -194,11 +193,7 @@ const BannerPage = () => {
                   <button
                     key={i + 1}
                     onClick={() => setPage(i + 1)}
-                    className={`w-7 h-7 text-[11px] rounded-md border transition-all ${
-                      page === i + 1
-                        ? "bg-(--primary) text-white border-(--primary) shadow-sm"
-                        : "hover:border-(--primary) hover:text-(--primary) border-transparent"
-                    }`}
+                    className={`w-7 h-7 text-[11px] rounded-md border transition-all ${page === i + 1 ? "bg-(--primary) text-white border-(--primary) shadow-sm" : "hover:border-(--primary) hover:text-(--primary) border-transparent"}`}
                   >
                     {i + 1}
                   </button>
@@ -236,22 +231,23 @@ const BannerPage = () => {
                   initialValues={{
                     title: editingBanner?.title || "",
                     url: editingBanner?.url || "",
-                    // status: editingBanner?.status || true,
                     image: null,
                   }}
                   validationSchema={BannerSchema}
                   onSubmit={async (values, { setSubmitting }) => {
                     try {
-                      const data = new FormData();
-                      data.append("title", values.title);
-                      data.append("url", values.url);
-                      // data.append("status", values.status);
-                      if (values.image) data.append("image", values.image);
+                      const formData = new FormData();
+                      formData.append("title", values.title);
+                      formData.append("url", values.url);
+                      if (values.image) formData.append("image", values.image);
 
                       if (editingBanner) {
-                        await updateItem(`banners/${editingBanner._id}`, data);
+                        await updateItem(
+                          `banners/${editingBanner._id}`,
+                          formData,
+                        );
                       } else {
-                        await createItem("banners", data);
+                        await createItem("banners", formData);
                       }
                       setIsModalOpen(false);
                       fetchBanners();
@@ -293,8 +289,8 @@ const BannerPage = () => {
 
                       <div>
                         <label className="block text-[10px] font-bold opacity-50 uppercase mb-1">
-                          Banner Image (200x200 px)
-                          <span className="text-red-500 text-sm">*</span>{" "}
+                          Banner Image (200x200 px){" "}
+                          <span className="text-red-500 text-sm">*</span>
                         </label>
                         <input
                           type="file"
@@ -330,15 +326,6 @@ const BannerPage = () => {
                           className="text-red-500 text-[10px]"
                         />
                       </div>
-
-                      {/* <div className="flex items-center gap-2">
-                        <Field
-                          type="checkbox"
-                          name="status"
-                          className="cursor-pointer"
-                        />
-                        <label className="text-[10px]">Active</label>
-                      </div> */}
 
                       <button
                         type="submit"
