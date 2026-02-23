@@ -100,7 +100,6 @@ const ManageCategories = () => {
 
     const data = new FormData();
     data.append("name", formData.name);
-    data.append("folder", "categories");
     if (!formData.id || formData.icon instanceof File) {
       data.append("icon", formData.icon);
     }
