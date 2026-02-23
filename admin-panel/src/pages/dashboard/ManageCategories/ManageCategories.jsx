@@ -277,7 +277,7 @@ const ManageCategories = () => {
                 <button
                   disabled={page === 1}
                   onClick={() => setPage(page - 1)}
-                  className="p-1.5 border rounded-md disabled:opacity-30 hover:border-(--primary) hover:text-(--primary) transition-colors"
+                  className="p-1.5 cursor-pointer border rounded-md disabled:opacity-30 hover:border-(--primary) hover:text-(--primary) transition-colors"
                 >
                   <FiChevronLeft size={16} />
                 </button>
@@ -288,8 +288,8 @@ const ManageCategories = () => {
                     onClick={() => setPage(i + 1)}
                     className={`w-7 h-7 text-[11px] rounded-md border transition-all ${
                       page === i + 1
-                        ? "bg-(--primary) text-white border-(--primary) shadow-sm"
-                        : "hover:border-(--primary) hover:text-(--primary) border-transparent"
+                        ? "bg-(--primary) text-white cursor-pointer border-(--primary) shadow-sm"
+                        : "hover:border-(--primary) cursor-pointer hover:text-(--primary) border-transparent"
                     }`}
                   >
                     {i + 1}
@@ -299,7 +299,7 @@ const ManageCategories = () => {
                 <button
                   disabled={page === totalPages}
                   onClick={() => setPage(page + 1)}
-                  className="p-1.5 border rounded-md disabled:opacity-30 hover:border-(--primary) hover:text-(--primary) transition-colors"
+                  className="p-1.5 cursor-pointer border rounded-md disabled:opacity-30 hover:border-(--primary) hover:text-(--primary) transition-colors"
                 >
                   <FiChevronRight size={16} />
                 </button>

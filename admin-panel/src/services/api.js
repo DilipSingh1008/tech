@@ -36,6 +36,7 @@ export const createItem = async (resource, data) => {
         : { "Content-Type": "application/json" };
 
     const response = await api.post(`/${resource}`, data, { headers });
+    console.log(response);
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;

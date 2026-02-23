@@ -12,7 +12,7 @@ exports.createBanner = async (req, res) => {
     const banner = await Banner.create({
       title,
       url: url || "",
-      image: `/uploads/banners/${req.file.filename}`,
+      image: `/uploads/Banner/${req.file.filename}`,
     });
 
     res.status(201).json(banner);
@@ -69,7 +69,17 @@ exports.updateBanner = async (req, res) => {
     if (status !== undefined) updateData.status = status;
 
     if (req.file) {
-      updateData.image = `/uploads/banners/${req.file.filename}`;
+      const oldBanner = await Banner.findById(req.params.id);
+      if (!oldBanner)
+        return res.status(404).json({ error: "Banner not found" });
+      if (oldBanner.image) {
+        const oldImagePath = path.join(__dirname, "..", oldBanner.image);
+        if (fs.existsSync(oldImagePath)) {
+          fs.unlinkSync(oldImagePath);
+          console.log("Old image deleted:", oldImagePath);
+        }
+      }
+      updateData.image = `/uploads/Banner/${req.file.filename}`;
     }
 
     const banner = await Banner.findByIdAndUpdate(req.params.id, updateData, {

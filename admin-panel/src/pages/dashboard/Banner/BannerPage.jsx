@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useTheme } from "../../../context/ThemeContext";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
-import { Plus, Trash2, Edit3, X } from "lucide-react";
+import { Plus, Trash2, Edit3, X, CloudCog, ImageIcon } from "lucide-react";
 import {
   getItems,
   createItem,
@@ -13,18 +13,35 @@ import { FiChevronRight, FiChevronLeft } from "react-icons/fi";
 import Searchbar from "../../../components/Searchbar";
 
 // Validate 200x200 image
+// const validateImageDimensions = (file) => {
+//   return new Promise((resolve, reject) => {
+//     const img = new Image();
+//     img.src = URL.createObjectURL(file);
+//     img.onload = () =>
+//       img.width === 200 && img.height === 200
+//         ? resolve(true)
+//         : reject("Image must be 200x200 px");
+//     img.onerror = () => reject("Invalid image file");
+//   });
+// };
 const validateImageDimensions = (file) => {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.src = URL.createObjectURL(file);
-    img.onload = () =>
-      img.width === 200 && img.height === 200
-        ? resolve(true)
-        : reject("Image must be 200x200 px");
+
+    img.onload = () => {
+      const { width, height } = img;
+
+      if (width >= 200 && width <= 500 && height >= 200 && height <= 500) {
+        resolve(true);
+      } else {
+        reject("Image must be between 200x200 px and 500x500 px");
+      }
+    };
+
     img.onerror = () => reject("Invalid image file");
   });
 };
-
 const BannerPage = () => {
   const { isDarkMode } = useTheme();
   const [banners, setBanners] = useState([]);
@@ -56,7 +73,7 @@ const BannerPage = () => {
   const fetchBanners = async () => {
     setLoading(true);
     try {
-      const res = await getItems(`banners?page=${page}&limit=${limit}`);
+      const res = await getItems(`banner?page=${page}&limit=${limit}`);
       setBanners(res.data || []);
       setTotalPages(res.pagination?.totalPages || 1);
     } catch (err) {
@@ -69,7 +86,7 @@ const BannerPage = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this banner?")) {
       try {
-        await deleteItem(`banners/${id}`);
+        await deleteItem(`banner/${id}`);
         setBanners(banners.filter((b) => b._id !== id));
       } catch (err) {
         console.error(err);
@@ -79,14 +96,37 @@ const BannerPage = () => {
 
   const BannerSchema = Yup.object().shape({
     title: Yup.string().required("Title is required"),
-    url: Yup.string().url("Enter a valid URL"),
+    url: Yup.string()
+      .nullable()
+      .notRequired()
+      .test(
+        "is-valid-url",
+        "Enter a valid URL",
+        (value) => !value || /^https?:\/\/.+\..+/.test(value),
+      ),
     image: Yup.mixed().when("isEdit", {
-      is: false, // if isEdit is false → new banner
-      then: (schema) => schema.required("Banner image is required"),
+      is: false,
+      then: (schema) => schema.required("Image is required"),
       otherwise: (schema) => schema,
     }),
   });
 
+  const handleToggleStatus = async (id, currentStatus) => {
+    try {
+      await updateItem(`banner/${id}`, {
+        status: !currentStatus,
+      });
+
+      setBanners((prev) =>
+        prev.map((banner) =>
+          banner._id === id ? { ...banner, status: !currentStatus } : banner,
+        ),
+      );
+    } catch (err) {
+      console.error("Error toggling status:", err);
+      alert("Failed to update status");
+    }
+  };
   if (loading)
     return (
       <div className="flex h-screen items-center justify-center text-xs font-medium">
@@ -98,14 +138,14 @@ const BannerPage = () => {
     <div className={`h-screen w-full flex flex-col ${theme.main}`}>
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-5xl mx-auto">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex cursor-pointer items-center justify-between mb-4">
             <Searchbar onChange={(e) => setSearchQuery(e.target.value)} />
             <button
               onClick={() => {
                 setEditingBanner(null);
                 setIsModalOpen(true);
               }}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-(--primary) text-white rounded-lg text-xs font-semibold hover:bg-(--primary) transition-all"
+              className="flex items-center cursor-pointer gap-1.5 px-3 py-1.5 bg-(--primary) text-white rounded-lg text-xs font-semibold hover:bg-(--primary) transition-all"
             >
               <Plus size={14} /> Add Banner
             </button>
@@ -128,6 +168,7 @@ const BannerPage = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                  {console.log(banners)}
                   {banners
                     .filter((b) =>
                       b.title.toLowerCase().includes(searchQuery.toLowerCase()),
@@ -137,19 +178,45 @@ const BannerPage = () => {
                         key={b._id}
                         className="hover:bg-indigo-500/5 transition-colors"
                       >
-                        <td className="px-4 py-2.5">
+                        <td className="px-4 py-2.5  font-semibold">
                           {(page - 1) * limit + index + 1}
                         </td>
-                        <td className="px-4 py-2.5">{b.title}</td>
-                        <td className="px-4 py-2.5">
+                        <td className="px-4 py-2.5 font-semibold text-sm">
+                          {b.title}
+                        </td>
+                        {/* <td className="px-4 py-2.5">
+                        
                           <img
                             src={`http://localhost:5000${b.image}`}
                             alt="banner"
                             className="w-16 h-16 object-cover rounded"
                           />
-                        </td>
+                        </td> */}
                         <td className="px-4 py-2.5">
+                          <div className="w-8 h-8 rounded bg-gray-500/10 border border-gray-500/10 overflow-hidden flex items-center justify-center">
+                            {b.image ? (
+                              <img
+                                src={`http://localhost:5000${b.image}`}
+                                className="w-full h-full object-cover"
+                                alt="banner"
+                              />
+                            ) : (
+                              <ImageIcon size={14} className="opacity-30" />
+                            )}
+                          </div>
+                        </td>
+                        {/* <td className="px-4 py-2.5">
                           {b.status ? "Active" : "Inactive"}
+                        </td> */}
+                        <td className="px-4 py-2.5">
+                          <button
+                            onClick={() => handleToggleStatus(b._id, b.status)}
+                            className={`cursor-pointer w-8 h-4 rounded-full relative transition-colors ${b.status ? "bg-(--primary)" : "bg-gray-400"}`}
+                          >
+                            <div
+                              className={` cursor-pointer absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${b.status ? "left-4.5" : "left-0.5"}`}
+                            />
+                          </button>
                         </td>
                         <td className="px-4 py-2.5 text-right flex justify-end gap-1">
                           <button
@@ -157,13 +224,13 @@ const BannerPage = () => {
                               setEditingBanner(b);
                               setIsModalOpen(true);
                             }}
-                            className="p-1.5 hover:text-(--primary)"
+                            className="p-1.5 cursor-pointer hover:text-(--primary)"
                           >
                             <Edit3 size={14} />
                           </button>
                           <button
                             onClick={() => handleDelete(b._id)}
-                            className="p-1.5 hover:text-red-500"
+                            className="p-1.5 cursor-pointer hover:text-red-500"
                           >
                             <Trash2 size={14} />
                           </button>
@@ -185,7 +252,7 @@ const BannerPage = () => {
                 <button
                   disabled={page === 1}
                   onClick={() => setPage(page - 1)}
-                  className="p-1.5 border rounded-md disabled:opacity-30 hover:border-(--primary) hover:text-(--primary)"
+                  className="p-1.5 cursor-pointer border rounded-md disabled:opacity-30 hover:border-(--primary) hover:text-(--primary)"
                 >
                   <FiChevronLeft size={16} />
                 </button>
@@ -193,7 +260,7 @@ const BannerPage = () => {
                   <button
                     key={i + 1}
                     onClick={() => setPage(i + 1)}
-                    className={`w-7 h-7 text-[11px] rounded-md border transition-all ${page === i + 1 ? "bg-(--primary) text-white border-(--primary) shadow-sm" : "hover:border-(--primary) hover:text-(--primary) border-transparent"}`}
+                    className={`w-7 h-7 cursor-pointer text-[11px] rounded-md border transition-all ${page === i + 1 ? "bg-(--primary) text-white border-(--primary) shadow-sm" : "hover:border-(--primary) hover:text-(--primary) border-transparent"}`}
                   >
                     {i + 1}
                   </button>
@@ -201,7 +268,7 @@ const BannerPage = () => {
                 <button
                   disabled={page === totalPages}
                   onClick={() => setPage(page + 1)}
-                  className="p-1.5 border rounded-md disabled:opacity-30 hover:border-(--primary) hover:text-(--primary)"
+                  className="p-1.5 border cursor-pointer rounded-md disabled:opacity-30 hover:border-(--primary) hover:text-(--primary)"
                 >
                   <FiChevronRight size={16} />
                 </button>
@@ -232,6 +299,7 @@ const BannerPage = () => {
                     title: editingBanner?.title || "",
                     url: editingBanner?.url || "",
                     image: null,
+                    isEdit: !!editingBanner,
                   }}
                   validationSchema={BannerSchema}
                   onSubmit={async (values, { setSubmitting }) => {
@@ -239,15 +307,16 @@ const BannerPage = () => {
                       const formData = new FormData();
                       formData.append("title", values.title);
                       formData.append("url", values.url);
+                      formData.append("folder", "Banner");
                       if (values.image) formData.append("image", values.image);
 
                       if (editingBanner) {
                         await updateItem(
-                          `banners/${editingBanner._id}`,
+                          `banner/${editingBanner._id}`,
                           formData,
                         );
                       } else {
-                        await createItem("banners", formData);
+                        await createItem("banner", formData);
                       }
                       setIsModalOpen(false);
                       fetchBanners();
@@ -258,7 +327,7 @@ const BannerPage = () => {
                     }
                   }}
                 >
-                  {({ setFieldValue, values }) => (
+                  {({ setFieldValue, setFieldError, values }) => (
                     <Form className="space-y-3">
                       <div>
                         <label className="block text-[10px] font-bold opacity-50 uppercase mb-1">
@@ -285,6 +354,12 @@ const BannerPage = () => {
                           name="url"
                           className="w-full p-2 text-sm rounded-lg bg-gray-500/5 border border-gray-500/20 outline-none focus:border-(--primary)"
                         />
+
+                        <ErrorMessage
+                          name="url"
+                          component="div"
+                          className="text-red-500 text-[10px] mt-1"
+                        />
                       </div>
 
                       <div>
@@ -302,8 +377,9 @@ const BannerPage = () => {
                                 await validateImageDimensions(file);
                                 setFieldValue("image", file);
                               } catch (err) {
-                                alert(err);
-                                setFieldValue("image", null);
+                                // alert(err);
+                                setFieldError("image");
+                                setFieldError("image", err);
                               }
                             }
                           }}

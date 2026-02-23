@@ -4,7 +4,7 @@ const bannerSchema = new mongoose.Schema(
   {
     title: { type: String, required: true },
     url: { type: String },
-    image: { type: String, required: true },
+    image: { type: String },
     status: { type: Boolean, default: true },
   },
   { timestamps: true },

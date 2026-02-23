@@ -144,7 +144,7 @@ const Subcategory = () => {
             <Searchbar onChange={(e) => setSearchQuery(e.target.value)} />
             <button
               onClick={() => setIsModalOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-(--primary) text-white rounded-lg text-xs font-semibold hover:bg-(--primary) transition-all"
+              className="flex  items-center cursor-pointer gap-1.5 px-3 py-1.5 bg-(--primary) text-white rounded-lg text-xs font-semibold hover:bg-(--primary) transition-all"
             >
               <Plus size={14} /> Add SubCategory
             </button>
@@ -197,12 +197,12 @@ const Subcategory = () => {
                           onClick={() =>
                             handleToggleStatus(cat._id, cat.status)
                           }
-                          className={`cursor-pointer w-8 h-4 rounded-full relative transition-colors ${
+                          className={`cursor-pointer cursor-pointer  w-8 h-4 rounded-full relative transition-colors ${
                             cat.status ? "bg-(--primary)" : "bg-gray-400"
                           }`}
                         >
                           <div
-                            className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${
+                            className={`absolute top-0.5 cursor-pointer w-3 h-3 bg-white rounded-full transition-all ${
                               cat.status ? "left-4.5" : "left-0.5"
                             }`}
                           />
@@ -210,7 +210,7 @@ const Subcategory = () => {
                       </td>
                       <td className="px-4 py-2.5 text-right">
                         <div className="flex justify-end gap-1">
-                          <button className="p-1.5 hover:text-(--primary) transition-colors">
+                          <button className="p-1.5 cursor-pointer hover:text-(--primary) transition-colors">
                             <RefreshCcw size={14} />
                           </button>
                           <button
@@ -222,13 +222,13 @@ const Subcategory = () => {
                               });
                               setIsModalOpen(true);
                             }}
-                            className="p-1.5 hover:text-(--primary) transition-colors"
+                            className="p-1.5 cursor-pointer hover:text-(--primary) transition-colors"
                           >
                             <Edit3 size={14} />
                           </button>
                           <button
                             onClick={() => handleDelete(cat._id)}
-                            className="p-1.5 hover:text-red-500 transition-colors"
+                            className="p-1.5 cursor-pointer hover:text-red-500 transition-colors"
                           >
                             <Trash2 size={14} />
                           </button>
@@ -251,7 +251,7 @@ const Subcategory = () => {
                 <button
                   disabled={page === 1}
                   onClick={() => setPage(page - 1)}
-                  className="p-1.5 border rounded-md disabled:opacity-30 hover:border-(--primary) hover:text-(--primary) transition-colors"
+                  className="p-1.5 cursor-pointer border rounded-md disabled:opacity-30 hover:border-(--primary) hover:text-(--primary) transition-colors"
                 >
                   <FiChevronLeft size={16} />
                 </button>
@@ -260,7 +260,7 @@ const Subcategory = () => {
                   <button
                     key={i + 1}
                     onClick={() => setPage(i + 1)}
-                    className={`w-7 h-7 text-[11px] rounded-md border transition-all ${
+                    className={`w-7 h-7 cursor-pointer text-[11px] rounded-md border transition-all ${
                       page === i + 1
                         ? "bg-(--primary) text-white border-(--primary) shadow-sm"
                         : "hover:border-(--primary) hover:text-(--primary) border-transparent"
@@ -273,7 +273,7 @@ const Subcategory = () => {
                 <button
                   disabled={page === totalPages}
                   onClick={() => setPage(page + 1)}
-                  className="p-1.5 border rounded-md disabled:opacity-30 hover:border-(--primary) hover:text-(--primary) transition-colors"
+                  className="p-1.5 cursor-pointer border rounded-md disabled:opacity-30 hover:border-(--primary) hover:text-(--primary) transition-colors"
                 >
                   <FiChevronRight size={16} />
                 </button>
