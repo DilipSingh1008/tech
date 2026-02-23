@@ -29,27 +29,76 @@ exports.createCategory = async (req, res) => {
 };
 
 // Get all categories
+// exports.getCategories = async (req, res) => {
+//   try {
+//     const categories = await Category.find().sort({
+//       createdAt: -1,
+//     });
+
+//     res.json(categories);
+//   } catch (error) {
+//     console.error("Error fetching categories:", error.message);
+//     res
+//       .status(500)
+//       .json({ error: "Failed to fetch categories", details: error.message });
+//   }
+// };
 exports.getCategories = async (req, res) => {
   try {
-    const categories = await Category.find().sort({
-      createdAt: -1,
-    });
+    let {
+      page = 1,
+      limit = 5,
+      sortBy = "createdAt",
+      order = "desc",
+      catid,
+    } = req.query;
 
-    res.json(categories);
+    page = parseInt(page);
+    limit = parseInt(limit);
+
+    const filter = {};
+    if (catid === "null") {
+      filter.catid = null;
+    } else if (catid) {
+      filter.catid = catid;
+    }
+
+    const total = await Category.countDocuments(filter);
+
+    const categories = await Category.find(filter)
+      .sort({ [sortBy]: order === "asc" ? 1 : -1 })
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    res.json({
+      data: categories,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    });
   } catch (error) {
     console.error("Error fetching categories:", error.message);
-    res
-      .status(500)
-      .json({ error: "Failed to fetch categories", details: error.message });
+    res.status(500).json({
+      message: "Failed to fetch categories",
+      error: error.message,
+    });
   }
 };
-
 // Update category
 exports.updateCategory = async (req, res) => {
   try {
-    const { name, status } = req.body;
+    const updateData = {};
 
-    const updateData = { name, status };
+    if (req.body.name !== undefined) {
+      updateData.name = req.body.name;
+    }
+
+    if (req.body.status !== undefined) {
+      updateData.status = req.body.status;
+    }
 
     if (req.file) {
       updateData.icon = `/uploads/categories/${req.file.filename}`;

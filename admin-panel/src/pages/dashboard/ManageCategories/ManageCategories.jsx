@@ -17,6 +17,7 @@ import {
 } from "../../../services/api";
 import { Link } from "react-router-dom";
 import Searchbar from "../../../components/Searchbar";
+import { FiChevronRight, FiChevronLeft } from "react-icons/fi";
 const ManageCategories = () => {
   const { isDarkMode } = useTheme();
   const [categories, setCategories] = useState([]);
@@ -24,24 +25,56 @@ const ManageCategories = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({ name: "", icon: null, id: null });
   const [searchQuery, setSearchQuery] = useState("");
-  useEffect(() => {
-    fetchData();
-  }, []);
 
-  const fetchData = async () => {
+  //pagination
+  const [page, setPage] = useState(1);
+  const [limit] = useState(5);
+  const [totalPages, setTotalPages] = useState(1);
+  const [sortBy, setSortBy] = useState("createdAt");
+  const [order, setOrder] = useState("desc");
+  useEffect(() => {
+    fetchData("top");
+  }, [page, sortBy, order]);
+
+  const fetchData = async (parentCatId = null) => {
     try {
-      const res = await getItems("categories");
-      const topCategories = res.filter((cat) => cat.catid === null);
-      setCategories(topCategories);
+      let url = `categories?page=${page}&limit=${limit}&sortBy=${sortBy}&order=${order}`;
+
+      if (parentCatId === "top") {
+        url += `&catid=null`;
+      }
+
+      const res = await getItems(url);
+
+      const filteredCategories = (res.data || []).filter((cat) =>
+        cat.name.toLowerCase().includes(searchQuery.toLowerCase()),
+      );
+
+      setCategories(filteredCategories);
+      setTotalPages(res.pagination?.totalPages || 1);
+
+      if (res.pagination?.totalPages > 0 && page > res.pagination.totalPages) {
+        setPage(res.pagination.totalPages);
+      }
     } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
     }
   };
+
+  const handleSort = (field) => {
+    const isAsc = sortBy === field && order === "asc";
+    setOrder(isAsc ? "desc" : "asc");
+    setSortBy(field);
+    setPage(1);
+  };
   const handleToggleStatus = async (id, currentStatus) => {
     try {
-      await updateItem("categories", id, { status: !currentStatus });
+      await updateItem(`categories/${id}`, {
+        status: !currentStatus,
+      });
+      // console.log(res);
       setCategories((prev) =>
         prev.map((cat) =>
           cat._id === id ? { ...cat, status: !currentStatus } : cat,
@@ -111,6 +144,7 @@ const ManageCategories = () => {
     header: isDarkMode
       ? "bg-[#1f2637] text-gray-400"
       : "bg-gray-100 text-gray-500",
+    divider: isDarkMode ? "divide-gray-800" : "divide-gray-100",
   };
 
   if (loading)
@@ -145,7 +179,12 @@ const ManageCategories = () => {
                 >
                   <tr>
                     <th className="px-4 py-3 w-20">ID</th>
-                    <th className="px-4 py-3">Name</th>
+                    <th
+                      onClick={() => handleSort("name")}
+                      className="px-4 py-3"
+                    >
+                      Name
+                    </th>
                     <th className="px-4 py-3 w-16">Icon</th>
                     <th className="px-4 py-3 w-24">Status</th>
                     <th className="px-4 py-3 text-right w-24">Action</th>
@@ -158,12 +197,12 @@ const ManageCategories = () => {
                       className="hover:bg-indigo-500/5 transition-colors"
                     >
                       <td className="px-4 py-2.5 font-semibold ">
-                        {index + 1}
+                        {(page - 1) * limit + (index + 1)}
                       </td>
                       <td className="px-4 py-2.5 font-semibold text-sm">
                         <Link
                           to={`/dashboard/category/${cat._id}`}
-                          className="text-(--primary) hover:underline"
+                          className="px-4 py-2.5 font-semibold text-sm hover:text-(--primary)"
                         >
                           {cat.name}
                         </Link>
@@ -224,6 +263,46 @@ const ManageCategories = () => {
                   ))}
                 </tbody>
               </table>
+            </div>
+            {/* Pagination */}
+            <div
+              className={`flex items-center justify-between p-3 border-t ${theme.divider}`}
+            >
+              <span className="text-[11px] opacity-60">
+                Showing {filteredCategories.length} entries
+              </span>
+
+              <div className="flex items-center gap-1">
+                <button
+                  disabled={page === 1}
+                  onClick={() => setPage(page - 1)}
+                  className="p-1.5 border rounded-md disabled:opacity-30 hover:border-(--primary) hover:text-(--primary) transition-colors"
+                >
+                  <FiChevronLeft size={16} />
+                </button>
+
+                {[...Array(totalPages)].map((_, i) => (
+                  <button
+                    key={i + 1}
+                    onClick={() => setPage(i + 1)}
+                    className={`w-7 h-7 text-[11px] rounded-md border transition-all ${
+                      page === i + 1
+                        ? "bg-(--primary) text-white border-(--primary) shadow-sm"
+                        : "hover:border-(--primary) hover:text-(--primary) border-transparent"
+                    }`}
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+
+                <button
+                  disabled={page === totalPages}
+                  onClick={() => setPage(page + 1)}
+                  className="p-1.5 border rounded-md disabled:opacity-30 hover:border-(--primary) hover:text-(--primary) transition-colors"
+                >
+                  <FiChevronRight size={16} />
+                </button>
+              </div>
             </div>
           </div>
           {isModalOpen && (

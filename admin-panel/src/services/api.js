@@ -63,8 +63,12 @@ export const getItemById = async (resource, id) => {
 // Update item by ID
 export const updateItem = async (resource, data) => {
   try {
-    // console.log(id)
-    const response = await api.put(`/${resource}/`, data);
+    const headers =
+      data instanceof FormData
+        ? { "Content-Type": "multipart/form-data" }
+        : { "Content-Type": "application/json" };
+
+    const response = await api.put(`/${resource}`, data, { headers });
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;

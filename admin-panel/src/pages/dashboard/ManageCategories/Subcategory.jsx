@@ -16,6 +16,7 @@ import {
 } from "../../../services/api";
 import { useParams } from "react-router-dom";
 import Searchbar from "../../../components/Searchbar";
+import { FiChevronRight, FiChevronLeft } from "react-icons/fi";
 
 const Subcategory = () => {
   const { isDarkMode } = useTheme();
@@ -26,20 +27,28 @@ const Subcategory = () => {
   const [formData, setFormData] = useState({ name: "", icon: null, id: null });
   const [searchQuery, setSearchQuery] = useState("");
 
+  // pagination
+  const [page, setPage] = useState(1);
+  const [limit] = useState(5);
+  const [totalPages, setTotalPages] = useState(1);
+
   useEffect(() => {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [parentId]);
+  }, [parentId, page]);
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await getItems("categories");
-      // filter subcategories of this parent
-      const filtered = res.filter(
-        (cat) => String(cat.catid) === String(parentId),
+      const res = await getItems(
+        `categories?catid=${parentId}&page=${page}&limit=${limit}`,
       );
-      setCategories(filtered);
+      // console.log(res);
+      // const filtered = res.filter(
+      //   (cat) => String(cat.catid) === String(parentId),
+      // );
+      setCategories(res.data || []);
+      setTotalPages(res.pagination?.totalPages || 1);
     } catch (err) {
       console.error("Error fetching subcategories:", err);
     } finally {
@@ -163,8 +172,11 @@ const Subcategory = () => {
                       key={cat._id}
                       className="hover:bg-indigo-500/5 transition-colors"
                     >
-                      <td className="px-4 py-2.5 font-semibold">{index + 1}</td>
-                      <td className="px-4 py-2.5 font-semibold text-sm">
+                      <td className="px-4 py-2.5 font-semibold">
+                        {" "}
+                        {(page - 1) * limit + (index + 1)}
+                      </td>
+                      <td className="px-4 py-2.5 font-semibold text-sm hover:text-(--primary)">
                         {cat.name}
                       </td>
                       <td className="px-4 py-2.5">
@@ -226,6 +238,46 @@ const Subcategory = () => {
                   ))}
                 </tbody>
               </table>
+            </div>
+            {/* Pagination */}
+            <div
+              className={`flex items-center justify-between p-3 border-t ${theme.divider}`}
+            >
+              <span className="text-[11px] opacity-60">
+                Showing {filteredCategories.length} entries
+              </span>
+
+              <div className="flex items-center gap-1">
+                <button
+                  disabled={page === 1}
+                  onClick={() => setPage(page - 1)}
+                  className="p-1.5 border rounded-md disabled:opacity-30 hover:border-(--primary) hover:text-(--primary) transition-colors"
+                >
+                  <FiChevronLeft size={16} />
+                </button>
+
+                {[...Array(totalPages)].map((_, i) => (
+                  <button
+                    key={i + 1}
+                    onClick={() => setPage(i + 1)}
+                    className={`w-7 h-7 text-[11px] rounded-md border transition-all ${
+                      page === i + 1
+                        ? "bg-(--primary) text-white border-(--primary) shadow-sm"
+                        : "hover:border-(--primary) hover:text-(--primary) border-transparent"
+                    }`}
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+
+                <button
+                  disabled={page === totalPages}
+                  onClick={() => setPage(page + 1)}
+                  className="p-1.5 border rounded-md disabled:opacity-30 hover:border-(--primary) hover:text-(--primary) transition-colors"
+                >
+                  <FiChevronRight size={16} />
+                </button>
+              </div>
             </div>
           </div>
 
