@@ -259,12 +259,11 @@ const ProductCategory = () => {
   const handleStatusToggle = async (id) => {
     try {
       await patchItem(`product-category/status/${id}`);
-      console.log("before", products);
-      setProducts((prev) =>
-        prev.map((p) => (p._id === id ? { ...p, status: !p.status } : p)),
-      );
-      console.log("after",products);
-      
+      setProducts((prev) =>{
+        console.log(prev);
+        
+        return prev.map((p) => (p._id === id ? { ...p, status: !p.status } : p));
+      });
     } catch (err) {
       console.error(err);
     }
