@@ -1,7 +1,7 @@
-const  Service = require( "../models/Service.js");
+import Service from "../models/Service.js";
 
 // Create new service
-exports.createService = async (req, res) => {
+export const createService = async (req, res) => {
   try {
     const { name, slug, shortDescription, description, status } = req.body;
 
