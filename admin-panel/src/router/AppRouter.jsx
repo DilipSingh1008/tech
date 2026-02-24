@@ -17,6 +17,8 @@ import Subcategory from "../pages/dashboard/ManageCategories/Subcategory";
 import SiteSetting from "../pages/dashboard/setting/SiteSetting";
 import BannerPage from "../pages/dashboard/Banner/BannerPage";
 import ProductCategory from "../pages/dashboard/product/ProductCategory";
+import ServicePage from "../pages/dashboard/Manage Services/ServicePage";
+import AddServicePage from "../pages/dashboard/Manage Services/AddServicePage";
 
 // import ThemeToggleButton from "./components/Button";
 
@@ -42,7 +44,6 @@ function AppRouter() {
                 path="/dashboard/citylocation/:id"
                 element={<CityLocation />}
               />
-
               <Route
                 path="/dashboard/categories"
                 element={<ManageCategories />}
@@ -51,8 +52,11 @@ function AppRouter() {
               <Route path="/dashboard/settings" element={<SiteSetting />} />
               <Route path="/dashboard/banner" element={<BannerPage />} />
               <Route path="/dashboard/products" element={<ProductCategory />} />
-
-
+              <Route path="/dashboard/service" element={<ServicePage />} />
+              <Route
+                path="/dashboard/service/add"
+                element={<AddServicePage />}
+              />
             </Route>
 
             <Route path="*" element={<NotFound />} />

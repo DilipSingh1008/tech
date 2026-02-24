@@ -9,6 +9,7 @@ import {
   Grid,
   LocationEdit,
   ImageIcon,
+  Wrench,
 } from "lucide-react";
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
@@ -39,6 +40,11 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       path: "/dashboard/products",
       name: "Products",
       icon: <Hexagon size={18} />,
+    },
+    {
+      path: "/dashboard/service",
+      name: "Manage Services",
+      icon: <Wrench size={18} />,
     },
     {
       path: "/dashboard/settings",
