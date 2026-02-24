@@ -19,7 +19,6 @@ import BannerPage from "../pages/dashboard/Banner/BannerPage";
 import ProductCategory from "../pages/dashboard/product/ProductCategory";
 import ProductCategoryItems from "../pages/dashboard/product/ProductCategoryItems";
 import ServicePage from "../pages/dashboard/Manage Services/ServicePage.jsx";
-import AddServicePage from "../pages/dashboard/Manage Services/AddServicePage.jsx";
 
 // import ThemeToggleButton from "./components/Button";
 

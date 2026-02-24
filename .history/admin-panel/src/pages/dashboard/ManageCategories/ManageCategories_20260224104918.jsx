@@ -14,6 +14,7 @@ import {
   createItem,
   updateItem,
   deleteItem,
+  patchItem,
 } from "../../../services/api";
 import { Link } from "react-router-dom";
 import Searchbar from "../../../components/Searchbar";
@@ -23,7 +24,7 @@ const ManageCategories = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [formData, setFormData] = useState({ name: "", icon: null, id: null });
+  const [formData, setFormData] = useState({ name: "", image: null, id: null });
   const [searchQuery, setSearchQuery] = useState("");
 
   //pagination
@@ -36,26 +37,14 @@ const ManageCategories = () => {
     fetchData("top");
   }, [page, sortBy, order]);
 
-  const fetchData = async (parentCatId = null) => {
+  const fetchData = async () => {
     try {
-      let url = `categories?page=${page}&limit=${limit}&sortBy=${sortBy}&order=${order}`;
-
-      if (parentCatId === "top") {
-        url += `&catid=null`;
-      }
+      let url = `/product-category?page=${page}&limit=${limit}&sortBy=${sortBy}&order=${order}&search=${searchQuery}`;
 
       const res = await getItems(url);
 
-      const filteredCategories = (res.data || []).filter((cat) =>
-        cat.name.toLowerCase().includes(searchQuery.toLowerCase()),
-      );
-
-      setCategories(filteredCategories);
-      setTotalPages(res.pagination?.totalPages || 1);
-
-      if (res.pagination?.totalPages > 0 && page > res.pagination.totalPages) {
-        setPage(res.pagination.totalPages);
-      }
+      setCategories(res.data || []);
+      setTotalPages(res.pages || 1);
     } catch (err) {
       console.error(err);
     } finally {
@@ -71,9 +60,7 @@ const ManageCategories = () => {
   };
   const handleToggleStatus = async (id, currentStatus) => {
     try {
-      await updateItem(`categories/${id}`, {
-        status: !currentStatus,
-      });
+      await patchItem(`product-category/status/${id}`);
       // console.log(res);
       setCategories((prev) =>
         prev.map((cat) =>
@@ -93,7 +80,7 @@ const ManageCategories = () => {
       return;
     }
 
-    if (!formData.id && !formData.icon) {
+    if (!formData.id && !formData.image) {
       alert("Icon is required for new category");
       return;
     }
@@ -101,15 +88,14 @@ const ManageCategories = () => {
     const data = new FormData();
     data.append("name", formData.name);
     data.append("folder", "categories");
-    if (!formData.id || formData.icon instanceof File) {
-      data.append("icon", formData.icon);
+    if (!formData.id || formData.image instanceof File) {
+      data.append("image", formData.image);
     }
-
     try {
       if (formData.id) {
-        await updateItem(`categories/${formData.id}`, data);
+        await updateItem(`product-category/${formData.id}`, data);
       } else {
-        await createItem("categories", data);
+        await createItem("product-category", data);
       }
 
       setIsModalOpen(false);
@@ -124,7 +110,7 @@ const ManageCategories = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this category?")) {
       try {
-        await deleteItem(`categories/${id}`);
+        await deleteItem(`product-category/${id}`);
         setCategories(categories.filter((c) => c._id !== id));
       } catch (err) {
         console.error("Error deleting category:", err);
@@ -210,11 +196,9 @@ const ManageCategories = () => {
                       </td>
                       <td className="px-4 py-2.5">
                         <div className="w-8 h-8 rounded bg-gray-500/10 border border-gray-500/10 overflow-hidden flex items-center justify-center">
-                          {cat.icon ? (
+                          {cat.image ? (
                             <img
-                              src={`http://localhost:5000${cat.icon}`}
-                              className="w-full h-full object-cover"
-                              alt="icon"
+                              src={`http://localhost:5000/uploads/${cat.image}`}
                             />
                           ) : (
                             <ImageIcon size={14} className="opacity-30" />
@@ -243,7 +227,7 @@ const ManageCategories = () => {
                             onClick={() => {
                               setFormData({
                                 name: cat.name,
-                                icon: `http://localhost:5000${cat.icon}`,
+                                image: `http://localhost:5000/uploads/${cat.image}`,
                                 id: cat._id,
                               });
                               setIsModalOpen(true);
@@ -340,12 +324,12 @@ const ManageCategories = () => {
                       }
                     />
                   </div>{" "}
-                  {formData.icon && (
+                  {formData.image && (
                     <img
                       src={
-                        formData.icon instanceof File
-                          ? URL.createObjectURL(formData.icon)
-                          : formData.icon
+                        formData.image instanceof File
+                          ? URL.createObjectURL(formData.image)
+                          : formData.image
                       }
                       alt="Category Icon"
                       className="w-16 h-16 object-cover rounded mb-2"
@@ -361,7 +345,7 @@ const ManageCategories = () => {
                       required={!formData.id}
                       className="w-full text-xs file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-bold file:bg-(--primary) file:text-white hover:file:bg-(--primary) cursor-pointer"
                       onChange={(e) =>
-                        setFormData({ ...formData, icon: e.target.files[0] })
+                        setFormData({ ...formData, image: e.target.files[0] })
                       }
                     />
                   </div>

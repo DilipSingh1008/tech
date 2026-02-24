@@ -15,7 +15,7 @@ const siteRoute = require("./routes/settingRoute");
 const bannerRoute = require("./routes/bannerRoutes");
 const productCategoryRoutes = require("./routes/productCategoryRoutes");
 const productItemRoutes = require("./routes/productItemRoutes");
-const serviceRoutes = require("./routes/serviceRoutes");
+
 dotenv.config();
 connectDB();
 
@@ -43,8 +43,6 @@ app.use("/api/setting", siteRoute)
 app.use("/api/banner", bannerRoute);
 app.use("/api/product-category", productCategoryRoutes);
 app.use("/api/product-item", productItemRoutes);
-app.use("/api/services", serviceRoutes);
-
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
