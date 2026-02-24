@@ -85,10 +85,7 @@ const AddServicePage = () => {
               formData.append("description", quill?.root.innerHTML || "");
               if (values.featuredImage)
                 formData.append("featuredImage", values.featuredImage);
-              if (values.bannerImage)
-                formData.append("bannerImage", values.bannerImage);
               formData.append("status", values.status);
-              cansole
               await createItem("service", formData);
               alert("Service created successfully!");
               navigate("/dashboard/services");
@@ -100,7 +97,7 @@ const AddServicePage = () => {
             }
           }}
         >
-          {({ setFieldValue, isSubmitting }) => (
+          {({ setFieldValue, values, isSubmitting }) => (
             <Form className="max-w-4xl mx-auto space-y-6">
               {/* Basic Info */}
               <div className={`${theme.section} ${theme.card}`}>
@@ -166,10 +163,10 @@ const AddServicePage = () => {
                 </div>
               </div>
 
-              {/* Media */}
               <div className={`${theme.section} ${theme.card}`}>
                 <h2 className="text-xs font-bold mb-4">Media Upload</h2>
 
+                {/* Featured Image (Single) */}
                 <div className="mb-4">
                   <label className={theme.label}>
                     Featured Image <span className="text-red-500">*</span>
@@ -188,8 +185,51 @@ const AddServicePage = () => {
                     className={theme.error}
                   />
                 </div>
-              </div>
 
+                {/* Gallery Images (Multiple) */}
+                <div className="mb-4">
+                  <label className={theme.label}>Gallery Images</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className={theme.fileInput}
+                    onChange={(e) =>
+                      setFieldValue("galleryImages", Array.from(e.target.files))
+                    }
+                  />
+                  {values.galleryImages && values.galleryImages.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-2 text-xs">
+                      {values.galleryImages.map((file, index) => (
+                        <span
+                          key={index}
+                          className="bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded"
+                        >
+                          {file.name}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* PDF Upload */}
+                <div className="mb-4">
+                  <label className={theme.label}>Upload PDF</label>
+                  <input
+                    type="file"
+                    accept="application/pdf"
+                    className={theme.fileInput}
+                    onChange={(e) =>
+                      setFieldValue("pdfFile", e.target.files[0])
+                    }
+                  />
+                  {values.pdfFile && (
+                    <div className="mt-2 text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">
+                      {values.pdfFile.name}
+                    </div>
+                  )}
+                </div>
+              </div>
               <button
                 type="submit"
                 disabled={isSubmitting}
