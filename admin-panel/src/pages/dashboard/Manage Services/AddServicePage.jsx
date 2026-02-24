@@ -88,10 +88,10 @@ const AddServicePage = () => {
               if (values.bannerImage)
                 formData.append("bannerImage", values.bannerImage);
               formData.append("status", values.status);
-
+              cansole
               await createItem("service", formData);
               alert("Service created successfully!");
-              navigate("/admin/services");
+              navigate("/dashboard/services");
             } catch (err) {
               console.error(err);
               alert("Error creating service, check console");
@@ -100,7 +100,7 @@ const AddServicePage = () => {
             }
           }}
         >
-          {({ setFieldValue, values, isSubmitting }) => (
+          {({ setFieldValue, isSubmitting }) => (
             <Form className="max-w-4xl mx-auto space-y-6">
               {/* Basic Info */}
               <div className={`${theme.section} ${theme.card}`}>
@@ -131,7 +131,7 @@ const AddServicePage = () => {
                     <Field
                       name="slug"
                       type="text"
-                      className={`${theme.input} bg-gray-100 cursor-not-allowed`}
+                      className={`${theme.input}  cursor-not-allowed`}
                       readOnly
                     />
                   </div>
