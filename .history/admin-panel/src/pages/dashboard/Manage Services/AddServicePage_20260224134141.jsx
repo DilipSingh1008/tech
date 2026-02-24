@@ -78,6 +78,7 @@ const AddServicePage = () => {
     }
   };
 
+  // Validation handleCategoryChange
   const ServiceSchema = Yup.object().shape({
     category: Yup.string().required("Category is required"),
     subCategory: Yup.string().required("Sub-Category is required"),
@@ -126,7 +127,7 @@ const AddServicePage = () => {
                 formData.append("featuredImage", values.featuredImage);
               if (values.galleryImages?.length > 0) {
                 values.galleryImages.forEach((file) =>
-                  formData.append("galleryImages", file)
+                  formData.append("galleryImages", file),
                 );
               }
               if (values.pdfFile) formData.append("pdfFile", values.pdfFile);
@@ -150,6 +151,7 @@ const AddServicePage = () => {
                 <h2 className="text-xs font-bold mb-4">Basic Information</h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  {/* Category */}
                   <div>
                     <label className={theme.label}>
                       Category <span className="text-red-500">*</span>
@@ -176,6 +178,7 @@ const AddServicePage = () => {
                     />
                   </div>
 
+                  {/* Sub-Category */}
                   <div>
                     <label className={theme.label}>
                       Sub-Category <span className="text-red-500">*</span>
@@ -200,6 +203,7 @@ const AddServicePage = () => {
                     />
                   </div>
 
+                  {/* Service Name */}
                   <div>
                     <label className={theme.label}>
                       Service Name <span className="text-red-500">*</span>
@@ -220,6 +224,7 @@ const AddServicePage = () => {
                     />
                   </div>
 
+                  {/* Slug */}
                   <div>
                     <label className={theme.label}>Slug</label>
                     <Field
@@ -231,6 +236,7 @@ const AddServicePage = () => {
                   </div>
                 </div>
 
+                {/* Short Description */}
                 <div className="mb-4">
                   <label className={theme.label}>
                     Short Description <span className="text-red-500">*</span>
@@ -248,6 +254,7 @@ const AddServicePage = () => {
                   />
                 </div>
 
+                {/* Full Description */}
                 <div>
                   <label className={theme.label}>Description</label>
                   <div
@@ -275,16 +282,6 @@ const AddServicePage = () => {
                       setFieldValue("featuredImage", e.target.files[0])
                     }
                   />
-                  {/* --- Featured Image Preview --- */}
-                  {values.featuredImage && (
-                    <div className="mt-3">
-                      <img
-                        src={URL.createObjectURL(values.featuredImage)}
-                        alt="Preview"
-                        className="h-24 w-40 object-cover rounded-lg border border-gray-500"
-                      />
-                    </div>
-                  )}
                   <ErrorMessage
                     name="featuredImage"
                     component="div"
@@ -304,20 +301,15 @@ const AddServicePage = () => {
                       setFieldValue("galleryImages", Array.from(e.target.files))
                     }
                   />
-                  {/* --- Gallery Previews --- */}
                   {values.galleryImages?.length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-2">
+                    <div className="mt-2 flex flex-wrap gap-2 text-xs">
                       {values.galleryImages.map((file, idx) => (
-                        <div key={idx} className="relative group">
-                          <img
-                            src={URL.createObjectURL(file)}
-                            alt={`gallery-${idx}`}
-                            className="h-16 w-16 object-cover rounded border border-gray-500"
-                          />
-                          <span className="absolute bottom-0 left-0 right-0 bg-black/50 text-[8px] text-white text-center truncate px-1">
-                            {file.name}
-                          </span>
-                        </div>
+                        <span
+                          key={idx}
+                          className="bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded"
+                        >
+                          {file.name}
+                        </span>
                       ))}
                     </div>
                   )}

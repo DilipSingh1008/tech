@@ -4,80 +4,66 @@ const fs = require("fs");
 const path = require("path");
 
 // ✅ CREATE CATEGORY
-exports.createProduct = async (req, res) => {
+exports.createCategory = async (req, res) => {
   try {
-    console.log("BODY =>", req.body);
-    console.log("FILES =>", req.files);
+    const { name, slug, description, status } = req.body;
 
-    const {
-      category,
+    const category = new ProductCategory({
       name,
-      price,
       slug,
-      mrp,
-      subCategory,
-      shortDescription,
-      mainDescription,
-    } = req.body;
-
-    // ⭐ validation
-    if (!category) return res.status(400).json({ message: "Category required" });
-    if (!name) return res.status(400).json({ message: "Name required" });
-    if (!price) return res.status(400).json({ message: "Price required" });
-
-    const images = req.files ? req.files.map((f) => f.path) : [];
-
-    const product = await Product.create({
-      category,
-      name,
-      price,
-      slug,
-      mrp,
-      subCategory,
-      shortDescription,
-      mainDescription,
-      images,
+      description,
+      status,
+      image: req.file ? `${req.body.folder}/${req.file.filename}` : "",
     });
 
-    res.status(201).json(product);
+    await category.save();
+
+    res.status(201).json({
+      success: true,
+      message: "Category created successfully",
+      data: category,
+    });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Server Error" });
   }
 };
 
 // ✅ GET ALL CATEGORY (pagination + search + sort)
-exports.getProducts = async (req, res) => {
+exports.getCategories = async (req, res) => {
   try {
     let {
       page = 1,
-      limit = 5,
+      limit = 10,
+      search = "",
       sortBy = "createdAt",
       order = "desc",
-      search = "",
     } = req.query;
 
-    page = Number(page);
-    limit = Number(limit);
+    page = parseInt(page);
+    limit = parseInt(limit);
 
-    const query = search
-      ? { name: { $regex: search, $options: "i" } }
-      : {};
+    const query = {
+      name: { $regex: search, $options: "i" },
+    };
 
-    const products = await Product.find(query)
-      .populate("category", "name")
+    const categories = await ProductCategory.find(query)
       .sort({ [sortBy]: order === "desc" ? -1 : 1 })
       .skip((page - 1) * limit)
       .limit(limit);
 
-    const total = await Product.countDocuments(query);
+    const total = await ProductCategory.countDocuments(query);
 
-    res.json({
-      data: products,
+    res.status(200).json({
+      success: true,
+      total,
+      page,
       pages: Math.ceil(total / limit),
+      data: categories,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.log(error);
+    res.status(500).json({ message: "Server Error" });
   }
 };
 
@@ -97,35 +83,40 @@ exports.getCategoryById = async (req, res) => {
 };
 
 // ✅ UPDATE CATEGORY
-exports.updateProduct = async (req, res) => {
+exports.updateCategory = async (req, res) => {
   try {
-    console.log("UPDATE BODY =>", req.body);
-    console.log("UPDATE FILES =>", req.files);
+    const { name, slug, description, status } = req.body;
 
-    const { id } = req.params;
+    const category = await ProductCategory.findById(req.params.id);
 
-    if (!id) return res.status(400).json({ message: "ID required" });
+    if (!category)
+      return res.status(404).json({ message: "Category not found" });
 
-    const images = req.files ? req.files.map((f) => f.path) : [];
+    category.name = name ?? category.name;
+    category.slug = slug ?? category.slug;
+    category.description = description ?? category.description;
+    category.status = status ?? category.status;
 
-    const updateData = { ...req.body };
+    if (req.file) {
+      const oldPath = path.join("uploads", category.image);
 
-    if (images.length) {
-      updateData.images = images;
+      if (category.image && fs.existsSync(oldPath)) {
+        fs.unlinkSync(oldPath);
+      }
+      
+      category.image = `${req.body.folder}/${req.file.filename}`;
     }
 
-    const product = await Product.findByIdAndUpdate(id, updateData, {
-      new: true,
-      runValidators: true,
+    await category.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Category updated successfully",
+      data: category,
     });
-
-    if (!product)
-      return res.status(404).json({ message: "Product not found" });
-
-    res.json(product);
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: "Server Error" });
   }
 };
 

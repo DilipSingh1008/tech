@@ -6,7 +6,7 @@ const {
   getProducts,
   updateProduct,
  
-} = require("../controllers/productCategoryController.js");
+} = require("../controllers/product.controller.js");
 
 const upload = require("../middlewares/upload.js");
 
