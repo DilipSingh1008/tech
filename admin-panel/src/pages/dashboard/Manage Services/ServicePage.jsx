@@ -1,24 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useTheme } from "../../../context/ThemeContext";
-import { Formik, Form, Field, ErrorMessage } from "formik";
-import * as Yup from "yup";
-// import { useQuill } from "react-quilljs";
-import "quill/dist/quill.snow.css";
-import { Plus, Trash2, Edit3, ImageIcon } from "lucide-react";
+import { Plus, Trash2, Edit3, FileText } from "lucide-react";
 import {
   getItems,
-  // createItem,
-  updateItem,
+  // updateItem,
   deleteItem,
+  patchItem,
 } from "../../../services/api";
 import Searchbar from "../../../components/Searchbar";
 import { useNavigate } from "react-router-dom";
-
-// const generateSlug = (text) =>
-//   text
-//     ?.toLowerCase()
-//     .replace(/ /g, "-")
-//     .replace(/[^\w-]+/g, "");
 
 const ManageServicesPage = () => {
   const { isDarkMode } = useTheme();
@@ -46,7 +36,7 @@ const ManageServicesPage = () => {
   const fetchServices = async () => {
     setLoading(true);
     try {
-      const res = await getItems("service");
+      const res = await getItems("services");
       setServices(res.data || []);
     } catch (err) {
       console.error(err);
@@ -57,14 +47,19 @@ const ManageServicesPage = () => {
 
   const handleDelete = async (id) => {
     if (window.confirm("Delete this service?")) {
-      await deleteItem(`service/${id}`);
+      await deleteItem(`services/${id}`);
       fetchServices();
     }
   };
 
-  const handleToggleStatus = async (id, currentStatus) => {
-    await updateItem(`service/${id}`, { status: !currentStatus });
-    fetchServices();
+  const handleToggleStatus = async (id) => {
+    try {
+      const res = await patchItem(`services/togal/${id}`, {});
+      console.log("New status:", res);
+      fetchServices(); // reload list
+    } catch (err) {
+      console.error("Error toggling status:", err);
+    }
   };
 
   if (loading)
@@ -77,13 +72,14 @@ const ManageServicesPage = () => {
   return (
     <div className={`h-screen w-full flex flex-col ${theme.main}`}>
       <main className="flex-1 overflow-y-auto">
-        <div className="max-w-6xl mx-auto p-4">
+        <div className="max-w-5xl mx-auto">
           {/* Top */}
-          <div className="flex justify-between mb-4">
+          <div className="flex flex-col sm:flex-row justify-between mb-4 gap-2">
             <Searchbar onChange={(e) => setSearchQuery(e.target.value)} />
+
             <button
               onClick={() => navigate("/dashboard/service/add")}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-(--primary) text-white rounded-lg text-xs font-semibold"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-(--primary) text-white rounded-lg text-xs font-semibold w-full sm:w-auto"
             >
               <Plus size={14} /> Add Service
             </button>
@@ -91,61 +87,114 @@ const ManageServicesPage = () => {
 
           {/* Table */}
           <div
-            className={`rounded-xl border shadow-sm overflow-hidden ${theme.card}`}
+            className={`rounded-xl border shadow-sm overflow-x-auto ${theme.card}`}
           >
-            <table className="w-full text-xs">
+            <table className="min-w-[900px] w-full text-xs">
               <thead className={`uppercase font-bold ${theme.header}`}>
                 <tr>
-                  <th className="px-4 py-3">ID</th>
-                  <th className="px-4 py-3">Image</th>
-                  <th className="px-4 py-3">Service Name</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3 text-right">Action</th>
+                  <th className="px-2 py-3 text-left whitespace-nowrap">ID</th>
+                  <th className="px-2 py-3 text-left whitespace-nowrap">
+                    Name
+                  </th>
+                  <th className="px-2 py-3 text-left whitespace-nowrap">
+                    Slug
+                  </th>
+                  <th className="px-2 py-3 text-left whitespace-nowrap">
+                    Category
+                  </th>
+                  <th className="px-2 py-3 text-left whitespace-nowrap">
+                    SubCategory
+                  </th>
+                  <th className="px-2 py-3 text-left whitespace-nowrap">
+                    Short Desc
+                  </th>
+                  <th className="px-2 py-3 text-left whitespace-nowrap">
+                    Status
+                  </th>
+                  <th className="px-2 py-3 text-right whitespace-nowrap">
+                    Action
+                  </th>
                 </tr>
               </thead>
+
               <tbody>
                 {services
                   .filter((s) =>
                     s.name?.toLowerCase().includes(searchQuery.toLowerCase()),
                   )
                   .map((s, index) => (
-                    <tr key={s._id} className="border-t">
-                      <td className="px-4 py-2">{index + 1}</td>
-                      <td className="px-4 py-2">
-                        <div className="w-8 h-8 rounded bg-gray-200 overflow-hidden">
-                          {s.featuredImage ? (
-                            <img
-                              src={`http://localhost:5000${s.featuredImage}`}
-                              className="w-full h-full object-cover"
-                              alt=""
-                            />
-                          ) : (
-                            <ImageIcon size={14} />
-                          )}
-                        </div>
+                    <tr
+                      key={s._id}
+                      className="border-t hover:bg-gray-100 dark:hover:bg-[#1a2030]"
+                    >
+                      <td className="px-2 py-2 whitespace-nowrap">
+                        {index + 1}
                       </td>
-                      <td className="px-4 py-2 font-semibold">{s.name}</td>
-                      <td className="px-4 py-2">
+
+                      <td
+                        className="px-2 py-2 whitespace-nowrap truncate max-w-[150px]"
+                        title={s.name}
+                      >
+                        {s.name}
+                      </td>
+
+                      <td
+                        className="px-2 py-2 whitespace-nowrap truncate max-w-[120px]"
+                        title={s.slug}
+                      >
+                        {s.slug}
+                      </td>
+
+                      <td className="px-2 py-2 whitespace-nowrap">
+                        {s.category?.name || "-"}
+                      </td>
+
+                      <td className="px-2 py-2 whitespace-nowrap">
+                        {s.subCategory?.name || "-"}
+                      </td>
+
+                      <td
+                        className="px-2 py-2 whitespace-nowrap truncate max-w-[180px]"
+                        title={s.shortDescription}
+                      >
+                        {s.shortDescription}
+                      </td>
+
+                      {/* Status */}
+                      <td className="px-2 py-2 whitespace-nowrap">
                         <button
                           onClick={() => handleToggleStatus(s._id, s.status)}
-                          className={`w-8 h-4 rounded-full relative ${s.status ? "bg-(--primary)" : "bg-gray-400"}`}
+                          className={`w-8 h-4 rounded-full relative ${
+                            s.status ? "bg-(--primary)" : "bg-gray-400"
+                          }`}
                         >
                           <div
-                            className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${s.status ? "left-4.5" : "left-0.5"}`}
+                            className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${
+                              s.status ? "left-4.5" : "left-0.5"
+                            }`}
                           />
                         </button>
                       </td>
-                      <td className="px-4 py-2 text-right flex justify-end gap-2">
-                        <button
-                          onClick={() =>
-                            navigate(`/admin/services/edit/${s._id}`)
-                          }
-                        >
-                          <Edit3 size={14} />
-                        </button>
-                        <button onClick={() => handleDelete(s._id)}>
-                          <Trash2 size={14} />
-                        </button>
+
+                      {/* Actions */}
+                      <td className="px-4 py-2.5 text-right">
+                        <div className="flex justify-end gap-4">
+                          <button
+                            onClick={() =>
+                              navigate(`/dashboard/service/edit/${s._id}`)
+                            }
+                            className="cursor-pointer p-1.5 hover:text-(--primary) transition-colors"
+                          >
+                            <Edit3 size={14} />
+                          </button>
+
+                          <button
+                            onClick={() => handleDelete(s._id)}
+                            className="cursor-pointer p-1.5 hover:text-red-500 transition-colors"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}

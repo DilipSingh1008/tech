@@ -56,8 +56,14 @@ function AppRouter() {
               <Route path="/dashboard/banner" element={<BannerPage />} />
               <Route path="/dashboard/products" element={<ProductCategory />} />
               <Route path="/dashboard/service" element={<ServicePage />} />
-              <Route path="/dashboard/product-items" element={<ProductCategoryItems />} />
-
+              <Route
+                path="/dashboard/product-items"
+                element={<ProductCategoryItems />}
+              />
+              <Route
+                path="/dashboard/service/edit/:id"
+                element={<AddServicePage />}
+              />
               <Route
                 path="/dashboard/service/add"
                 element={<AddServicePage />}

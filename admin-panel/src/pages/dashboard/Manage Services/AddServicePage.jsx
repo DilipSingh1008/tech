@@ -4,8 +4,8 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { useQuill } from "react-quilljs";
 import "quill/dist/quill.snow.css";
-import { createItem, getItems } from "../../../services/api";
-import { useNavigate } from "react-router-dom";
+import { createItem, getItems, updateItem } from "../../../services/api";
+import { useNavigate, useParams } from "react-router-dom";
 
 // Utility to generate slug
 const generateSlug = (text) =>
@@ -14,11 +14,12 @@ const generateSlug = (text) =>
     .replace(/ /g, "-")
     .replace(/[^\w-]+/g, "");
 
-const AddServicePage = () => {
+const AddEditServicePage = () => {
   const { isDarkMode } = useTheme();
   const navigate = useNavigate();
+  const { id } = useParams();
+  const isEdit = !!id;
 
-  // Quill editor
   const { quill, quillRef } = useQuill({
     theme: "snow",
     modules: {
@@ -33,6 +34,20 @@ const AddServicePage = () => {
 
   const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const [initialValues, setInitialValues] = useState({
+    category: "",
+    subCategory: "",
+    name: "",
+    slug: "",
+    shortDescription: "",
+    galleryImages: [],
+    existingGallery: [], // for edit: existing images
+    pdfFile: null,
+    existingPdf: null, // for edit: existing pdf
+    status: true,
+  });
 
   const theme = {
     main: isDarkMode
@@ -50,30 +65,67 @@ const AddServicePage = () => {
     section: "p-4 md:p-6 rounded-xl border shadow-sm",
   };
 
-  // Fetch categories from backend
+  // Load categories & service (edit mode)
   useEffect(() => {
     const loadCategories = async () => {
       try {
         const res = await getItems("categories");
-        const topCategories = res.data.filter((cat) => cat.catid === null);
-        setCategories(topCategories);
+        console.log("Service data from backend:", res.data);
+        setCategories(res.data.filter((cat) => cat.catid === null));
       } catch (err) {
-        console.error("Failed to fetch categories:", err);
+        console.error("Error loading categories:", err);
       }
     };
+
+    const loadService = async () => {
+      if (isEdit) {
+        try {
+          const res = await getItems(`services/${id}`);
+          const s = res.data;
+
+          setInitialValues({
+            category: s.category?._id || "",
+            subCategory: s.subCategory?._id || "",
+            name: s.name || "",
+            slug: s.slug || "",
+            shortDescription: s.shortDescription || "",
+            galleryImages: [],
+            existingGallery: s.galleryImages || [],
+            pdfFile: null,
+            existingPdf: s.pdfFile || null,
+            status: s.status,
+          });
+
+          if (quill) quill.root.innerHTML = s.description || "";
+
+          if (s.category?._id) {
+            const allCats = await getItems("categories");
+            setSubCategories(
+              allCats.data.filter((c) => c.catid === s.category._id),
+            );
+          }
+        } catch (err) {
+          console.error("Error loading service:", err);
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        setLoading(false);
+      }
+    };
+
     loadCategories();
-  }, []);
+    loadService();
+  }, [id, isEdit, quill]);
 
   const handleCategoryChange = async (categoryId, setFieldValue) => {
     setFieldValue("category", categoryId);
     setFieldValue("subCategory", "");
-
     try {
       const res = await getItems("categories");
-      const filteredSubs = res.data.filter((cat) => cat.catid === categoryId);
-      setSubCategories(filteredSubs);
+      setSubCategories(res.data.filter((c) => c.catid === categoryId));
     } catch (err) {
-      console.error("Error fetching subcategories:", err);
+      console.error(err);
       setSubCategories([]);
     }
   };
@@ -83,8 +135,14 @@ const AddServicePage = () => {
     subCategory: Yup.string().required("Sub-Category is required"),
     name: Yup.string().required("Service Name is required"),
     shortDescription: Yup.string().required("Short description is required"),
-    featuredImage: Yup.mixed().required("Featured image is required"),
   });
+
+  if (loading)
+    return (
+      <div className="flex h-screen items-center justify-center text-xs">
+        Loading...
+      </div>
+    );
 
   return (
     <div className={`h-screen w-full flex flex-col ${theme.main}`}>
@@ -93,7 +151,9 @@ const AddServicePage = () => {
           isDarkMode ? "border-gray-800" : "border-gray-200"
         }`}
       >
-        <h1 className="text-sm font-bold">Add New Service</h1>
+        <h1 className="text-sm font-bold">
+          {isEdit ? "Edit Service" : "Add New Service"}
+        </h1>
         <p className="text-[10px] opacity-50">
           Fill in all required details below
         </p>
@@ -101,17 +161,8 @@ const AddServicePage = () => {
 
       <main className="flex-1 overflow-y-auto p-4 md:p-8">
         <Formik
-          initialValues={{
-            category: "",
-            subCategory: "",
-            name: "",
-            slug: "",
-            shortDescription: "",
-            featuredImage: null,
-            galleryImages: [],
-            pdfFile: null,
-            status: true,
-          }}
+          enableReinitialize
+          initialValues={initialValues}
           validationSchema={ServiceSchema}
           onSubmit={async (values, { setSubmitting }) => {
             try {
@@ -122,22 +173,31 @@ const AddServicePage = () => {
               formData.append("slug", generateSlug(values.name));
               formData.append("shortDescription", values.shortDescription);
               formData.append("description", quill?.root.innerHTML || "");
-              if (values.featuredImage)
-                formData.append("featuredImage", values.featuredImage);
-              if (values.galleryImages?.length > 0) {
-                values.galleryImages.forEach((file) =>
-                  formData.append("galleryImages", file)
-                );
-              }
-              if (values.pdfFile) formData.append("pdfFile", values.pdfFile);
               formData.append("status", values.status);
 
-              await createItem("service", formData);
-              alert("Service created successfully!");
-              navigate("/dashboard/services");
+              // Gallery
+              if (values.galleryImages?.length > 0) {
+                values.galleryImages.forEach((file) =>
+                  formData.append("galleryImages", file),
+                );
+              }
+
+              if (values.pdfFile) {
+                formData.append("pdfFile", values.pdfFile);
+              }
+
+              if (isEdit) {
+                await updateItem(`services/${id}`, formData);
+                alert("Service updated successfully!");
+              } else {
+                await createItem("services", formData);
+                alert("Service created successfully!");
+              }
+
+              navigate("/dashboard/service");
             } catch (err) {
               console.error(err);
-              alert("Error creating service, check console");
+              alert("Error saving service, check console");
             } finally {
               setSubmitting(false);
             }
@@ -148,7 +208,6 @@ const AddServicePage = () => {
               {/* Basic Info */}
               <div className={`${theme.section} ${theme.card}`}>
                 <h2 className="text-xs font-bold mb-4">Basic Information</h2>
-
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                   <div>
                     <label className={theme.label}>
@@ -262,37 +321,7 @@ const AddServicePage = () => {
               <div className={`${theme.section} ${theme.card}`}>
                 <h2 className="text-xs font-bold mb-4">Media Upload</h2>
 
-                {/* Featured Image */}
-                <div className="mb-4">
-                  <label className={theme.label}>
-                    Featured Image <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className={theme.fileInput}
-                    onChange={(e) =>
-                      setFieldValue("featuredImage", e.target.files[0])
-                    }
-                  />
-                  {/* --- Featured Image Preview --- */}
-                  {values.featuredImage && (
-                    <div className="mt-3">
-                      <img
-                        src={URL.createObjectURL(values.featuredImage)}
-                        alt="Preview"
-                        className="h-24 w-40 object-cover rounded-lg border border-gray-500"
-                      />
-                    </div>
-                  )}
-                  <ErrorMessage
-                    name="featuredImage"
-                    component="div"
-                    className={theme.error}
-                  />
-                </div>
-
-                {/* Gallery Images */}
+                {/* Gallery */}
                 <div className="mb-4">
                   <label className={theme.label}>Gallery Images</label>
                   <input
@@ -304,26 +333,29 @@ const AddServicePage = () => {
                       setFieldValue("galleryImages", Array.from(e.target.files))
                     }
                   />
-                  {/* --- Gallery Previews --- */}
-                  {values.galleryImages?.length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {values.galleryImages.map((file, idx) => (
-                        <div key={idx} className="relative group">
-                          <img
-                            src={URL.createObjectURL(file)}
-                            alt={`gallery-${idx}`}
-                            className="h-16 w-16 object-cover rounded border border-gray-500"
-                          />
-                          <span className="absolute bottom-0 left-0 right-0 bg-black/50 text-[8px] text-white text-center truncate px-1">
-                            {file.name}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {/* Existing images */}
+                    {values.existingGallery?.map((img, idx) => (
+                      <img
+                        key={idx}
+                        src={`http://localhost:5000/${img}`}
+                        alt={`existing-${idx}`}
+                        className="h-16 w-16 object-cover rounded border border-gray-500"
+                      />
+                    ))}
+                    {/* New previews */}
+                    {values.galleryImages?.map((file, idx) => (
+                      <img
+                        key={idx}
+                        src={URL.createObjectURL(file)}
+                        alt={`new-${idx}`}
+                        className="h-16 w-16 object-cover rounded border border-gray-500"
+                      />
+                    ))}
+                  </div>
                 </div>
 
-                {/* PDF Upload */}
+                {/* PDF */}
                 <div className="mb-4">
                   <label className={theme.label}>Upload PDF</label>
                   <input
@@ -334,21 +366,31 @@ const AddServicePage = () => {
                       setFieldValue("pdfFile", e.target.files[0])
                     }
                   />
+                  {values.existingPdf && (
+                    <div className="mt-2 text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">
+                      Existing: {values.existingPdf.split("/").pop()}
+                    </div>
+                  )}
                   {values.pdfFile && (
                     <div className="mt-2 text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">
-                      {values.pdfFile.name}
+                      New: {values.pdfFile.name}
                     </div>
                   )}
                 </div>
               </div>
 
-              {/* Submit */}
               <button
                 type="submit"
                 disabled={isSubmitting}
                 className="w-full py-3 bg-(--primary) text-white rounded-lg text-sm font-semibold hover:opacity-90 transition-all"
               >
-                {isSubmitting ? "Adding..." : "Add Service"}
+                {isSubmitting
+                  ? isEdit
+                    ? "Updating..."
+                    : "Adding..."
+                  : isEdit
+                    ? "Update Service"
+                    : "Add Service"}
               </button>
             </Form>
           )}
@@ -358,4 +400,4 @@ const AddServicePage = () => {
   );
 };
 
-export default AddServicePage;
+export default AddEditServicePage;

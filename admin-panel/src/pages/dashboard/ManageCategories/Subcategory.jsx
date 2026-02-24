@@ -80,8 +80,8 @@ const Subcategory = () => {
 
     const data = new FormData();
     data.append("name", formData.name);
-    data.append("catid", parentId); // parent id
-
+    data.append("catid", parentId);
+    data.append("folder", "subcategories");
     if (!formData.id || formData.icon instanceof File) {
       data.append("icon", formData.icon);
     }
