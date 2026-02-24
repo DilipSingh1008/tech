@@ -36,11 +36,6 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       icon: <ImageIcon size={18} />,
     },
     {
-      path: "/dashboard/products",
-      name: "Products",
-      icon: <Hexagon size={18} />,
-    },
-    {
       path: "/dashboard/settings",
       name: "Settings",
       icon: <Settings size={18} />,
