@@ -1,0 +1,188 @@
+import React, { useState, useEffect } from "react";
+import { useQuill } from "react-quilljs";
+import "quill/dist/quill.snow.css";
+import { Plus, Trash2, Edit3, X } from "lucide-react";
+import { useTheme } from "../../../context/ThemeContext";
+import { getItems, createItem, updateItem, deleteItem } from "../../../services/api";
+import Searchbar from "../../../components/Searchbar";
+
+const generateSlug = (text) =>
+  text?.toLowerCase().replace(/ /g, "-").replace(/[^\w-]+/g, "");
+
+const ProductCategory = () => {
+  const { isDarkMode } = useTheme();
+
+  const theme = {
+    main: isDarkMode ? "bg-[#0b0e14] text-slate-300" : "bg-gray-50 text-gray-700",
+    card: isDarkMode ? "bg-[#151b28] border border-gray-800 text-white" : "bg-white border border-gray-200 text-gray-700",
+    input: "w-full p-2 text-sm rounded border outline-none focus:border-(--primary) focus:ring-1 focus:ring-(--primary)/30 bg-transparent",
+    label: "block text-[10px] font-bold opacity-70 mb-1 uppercase",
+    section: "p-4 md:p-6 rounded-xl border shadow-sm",
+    fileInput: "w-full text-xs file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-bold file:bg-(--primary) file:text-white cursor-pointer",
+  };
+
+  const { quill, quillRef } = useQuill({ theme: "snow" });
+
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [subCategories, setSubCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [formData, setFormData] = useState({
+    id: null, category: "", subCategory: "", name: "", slug: "", mrp: "", price: "", shortDescription: "", images: [],
+  });
+
+  // 1. Load Main Categories on Mount
+  useEffect(() => {
+    const loadInitialData = async () => {
+      try {
+        const res = await getItems("product-category?limit=100");
+        // Filter where catid is null (Top level categories)
+        setCategories(res.data.filter((cat) => !cat.catid));
+        fetchProducts();
+      } catch (err) {
+        console.error("Initialization error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadInitialData();
+  }, [searchQuery]);
+
+  const fetchProducts = async () => {
+    try {
+      const res = await getItems(`products?search=${searchQuery}`);
+      setProducts(res.data || []);
+    } catch (err) { console.error(err); }
+  };
+
+  // 2. Fixed Category Change Logic (Removed setFieldValue)
+  const handleCategoryChange = async (categoryId) => {
+    setFormData(prev => ({ ...prev, category: categoryId, subCategory: "" }));
+    
+    if (!categoryId) {
+      setSubCategories([]);
+      return;
+    }
+
+    try {
+      const res = await getItems("product-category?limit=100");
+      // Filter for subcategories belonging to the selected category
+      const filtered = res.data.filter((cat) => cat.catid === categoryId);
+      setSubCategories(filtered);
+    } catch (err) {
+      console.error("Subcategory fetch error:", err);
+    }
+  };
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    const data = new FormData();
+    Object.keys(formData).forEach(key => {
+      if (key !== "images" && key !== "id") data.append(key, formData[key]);
+    });
+    data.append("mainDescription", quill?.root.innerHTML || "");
+    formData.images.forEach(file => { if (file instanceof File) data.append("images", file); });
+
+    try {
+      formData.id ? await updateItem(`products/${formData.id}`, data) : await createItem("products", data);
+      setIsModalOpen(false);
+      fetchProducts();
+    } catch (err) { alert("Error saving"); }
+  };
+
+  if (loading) return <div className="h-screen flex items-center justify-center">Loading...</div>;
+
+  return (
+    <div className={`h-screen w-full flex flex-col ${theme.main}`}>
+      <header className={`px-6 py-4 border-b ${isDarkMode ? "border-gray-800" : "border-gray-200"}`}>
+        <h1 className="text-sm font-bold">Product Management</h1>
+      </header>
+
+      <main className="flex-1 overflow-y-auto p-4 md:p-8">
+        <div className="max-w-5xl mx-auto">
+          <div className="flex justify-between mb-6">
+            <Searchbar onChange={(e) => setSearchQuery(e.target.value)} />
+            <button onClick={() => setIsModalOpen(true)} className="px-4 py-2 bg-(--primary) text-white rounded-lg text-xs font-bold flex items-center gap-2">
+              <Plus size={16} /> Add Product
+            </button>
+          </div>
+
+          {/* Table */}
+          <div className={`${theme.card} rounded-xl overflow-hidden`}>
+            <table className="w-full text-left text-xs">
+              <thead className={`uppercase font-bold ${isDarkMode ? "bg-[#1f2637]" : "bg-gray-100"}`}>
+                <tr><th className="px-6 py-4">Name</th><th className="px-6 py-4">Category</th><th className="px-6 py-4 text-right">Actions</th></tr>
+              </thead>
+              <tbody className="divide-y divide-gray-800/50">
+                {products.map((prod) => (
+                  <tr key={prod._id} className="hover:bg-white/5">
+                    <td className="px-6 py-4">{prod.name}</td>
+                    <td className="px-6 py-4 opacity-70">{prod.category?.name || "N/A"}</td>
+                    <td className="px-6 py-4 text-right flex justify-end gap-2">
+                      <button onClick={() => { setFormData({...prod, id: prod._id, images: []}); handleCategoryChange(prod.category?._id); setIsModalOpen(true); }}><Edit3 size={15} /></button>
+                      <button onClick={() => deleteItem(`products/${prod._id}`).then(fetchProducts)}><Trash2 size={15} /></button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Modal */}
+        {isModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+            <div className={`${theme.card} rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto`}>
+              <div className="p-6 border-b border-gray-800 flex justify-between items-center">
+                <h3 className="text-sm font-bold uppercase">Product Details</h3>
+                <button onClick={() => setIsModalOpen(false)}><X size={20} /></button>
+              </div>
+
+              <form onSubmit={handleSave} className="p-6 space-y-6">
+                <div className={`${theme.section} ${theme.card}`}>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className={theme.label}>Category *</label>
+                      <select className={theme.input} value={formData.category} onChange={(e) => handleCategoryChange(e.target.value)} required>
+                        <option value="">Select Category</option>
+                        {categories.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className={theme.label}>Sub-Category *</label>
+                      <select className={theme.input} value={formData.subCategory} onChange={(e) => setFormData({...formData, subCategory: e.target.value})} disabled={!formData.category} required>
+                        <option value="">Select Sub-Category</option>
+                        {subCategories.map(s => <option key={s._id} value={s._id}>{s.name}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label className={theme.label}>Product Name *</label>
+                      <input type="text" className={theme.input} value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value, slug: generateSlug(e.target.value)})} required />
+                    </div>
+                    <div>
+                      <label className={theme.label}>Slug</label>
+                      <input type="text" className={`${theme.input} opacity-50`} value={formData.slug} readOnly />
+                    </div>
+                  </div>
+                </div>
+
+                <div className={`${theme.section} ${theme.card}`}>
+                  <label className={theme.label}>Main Description</label>
+                  <div className="rounded-xl border p-2 bg-white dark:bg-[#151b28] dark:border-gray-800">
+                    <div ref={quillRef} className="min-h-[150px]" />
+                  </div>
+                </div>
+
+                <button type="submit" className="w-full py-3 bg-(--primary) text-white rounded-lg font-bold">Save Product</button>
+              </form>
+            </div>
+          </div>
+        )}
+      </main>
+    </div>
+  );
+};
+
+export default ProductCategory;

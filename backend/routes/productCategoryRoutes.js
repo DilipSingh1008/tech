@@ -5,7 +5,8 @@ const {
   createProduct,
   getProducts,
   updateProduct,
- 
+  deleteCategory,
+  toggleCategoryStatus,
 } = require("../controllers/productCategoryController.js");
 
 const upload = require("../middlewares/upload.js");
@@ -14,7 +15,7 @@ const upload = require("../middlewares/upload.js");
 router.post("/", upload.array("images"), createProduct);
 router.get("/", getProducts);
 router.put("/:id", upload.array("images"), updateProduct);
-// router.patch("/:id", patchProduct);
-// router.delete("/:id", deleteProduct);
+router.patch("/status/:id", toggleCategoryStatus);
+router.delete("/:id", deleteCategory);
 
 module.exports = router;

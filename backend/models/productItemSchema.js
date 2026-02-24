@@ -18,6 +18,10 @@ const productItemSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    shortDescription: {
+      type: String,
+      default: "",
+    },
 
     price: {
       type: Number,
@@ -42,8 +46,12 @@ const productItemSchema = new mongoose.Schema(
 
     category: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "ProductCategory",
+      ref: "Category",
       required: true,
+    },
+    subCategory: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Category",
     },
 
     status: {
