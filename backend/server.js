@@ -13,6 +13,8 @@ const StateLocationRoute = require("./routes/stateLocation");
 const cityLocationRoute = require("./routes/cityLocationRoute");
 const siteRoute = require("./routes/settingRoute");
 const bannerRoute = require("./routes/bannerRoutes");
+const productCategoryRoutes = require("./routes/productCategoryRoutes");
+const productItemRoutes = require("./routes/productItemRoutes");
 
 dotenv.config();
 connectDB();
@@ -39,6 +41,8 @@ app.use("/api/statelocation", StateLocationRoute);
 app.use("/api/citylocation", cityLocationRoute);
 app.use("/api/setting", siteRoute)
 app.use("/api/banner", bannerRoute);
+app.use("/api/product-category", productCategoryRoutes);
+app.use("/api/product-item", productItemRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
