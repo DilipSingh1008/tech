@@ -7,6 +7,8 @@ import {
   deleteItem,
   patchItem,
 } from "../../../services/api";
+import { FiChevronRight, FiChevronLeft } from "react-icons/fi";
+
 import Searchbar from "../../../components/Searchbar";
 import { useNavigate } from "react-router-dom";
 
@@ -15,6 +17,9 @@ const ManageServicesPage = () => {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [page, setPage] = useState(1);
+  const [limit] = useState(5);
+  const [totalPages, setTotalPages] = useState(1);
   const navigate = useNavigate();
 
   const theme = {
@@ -31,13 +36,16 @@ const ManageServicesPage = () => {
 
   useEffect(() => {
     fetchServices();
-  }, []);
+  }, [page, searchQuery]);
 
   const fetchServices = async () => {
     setLoading(true);
     try {
-      const res = await getItems("services");
+      const res = await getItems(
+        `services?page=${page}&limit=${limit}&search=${searchQuery}`,
+      );
       setServices(res.data || []);
+      setTotalPages(res.pagination?.totalPages || 1);
     } catch (err) {
       console.error(err);
     } finally {
@@ -75,7 +83,12 @@ const ManageServicesPage = () => {
         <div className="max-w-5xl mx-auto">
           {/* Top */}
           <div className="flex flex-col sm:flex-row justify-between mb-4 gap-2">
-            <Searchbar onChange={(e) => setSearchQuery(e.target.value)} />
+            <Searchbar
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setPage(1);
+              }}
+            />
 
             <button
               onClick={() => navigate("/dashboard/service/add")}
@@ -200,6 +213,39 @@ const ManageServicesPage = () => {
                   ))}
               </tbody>
             </table>
+          </div>
+          {/* Pagination */}
+          <div
+            className={`flex items-center justify-between p-3 border-t ${theme.divider}`}
+          >
+            <span className="text-[11px] opacity-60">
+              Showing {services.length} entries
+            </span>
+            <div className="flex items-center gap-1">
+              <button
+                disabled={page === 1}
+                onClick={() => setPage(page - 1)}
+                className="p-1.5 cursor-pointer border rounded-md disabled:opacity-30 hover:border-(--primary) hover:text-(--primary)"
+              >
+                <FiChevronLeft size={16} />
+              </button>
+              {[...Array(totalPages)].map((_, i) => (
+                <button
+                  key={i + 1}
+                  onClick={() => setPage(i + 1)}
+                  className={`w-7 h-7 cursor-pointer text-[11px] rounded-md border transition-all ${page === i + 1 ? "bg-(--primary) text-white border-(--primary) shadow-sm" : "hover:border-(--primary) hover:text-(--primary) border-transparent"}`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+              <button
+                disabled={page === totalPages}
+                onClick={() => setPage(page + 1)}
+                className="p-1.5 border cursor-pointer rounded-md disabled:opacity-30 hover:border-(--primary) hover:text-(--primary)"
+              >
+                <FiChevronRight size={16} />
+              </button>
+            </div>
           </div>
         </div>
       </main>

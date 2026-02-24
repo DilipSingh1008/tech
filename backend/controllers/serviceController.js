@@ -61,12 +61,26 @@ exports.createService = async (req, res) => {
 
 exports.getServices = async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 5;
+    const skip = (page - 1) * limit;
+    const search = req.query.search || "";
+    const query = search ? { name: { $regex: search, $options: "i" } } : {};
+
+    const totalItems = await Service.countDocuments();
+    const totalPages = Math.ceil(totalItems / limit);
+
     const services = await Service.find()
       .populate("category", "name")
       .populate("subCategory", "name")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
 
-    res.status(200).json({ data: services });
+    res.status(200).json({
+      data: services,
+      pagination: { totalPages, currentPage: page, totalItems },
+    });
   } catch (err) {
     res
       .status(500)
