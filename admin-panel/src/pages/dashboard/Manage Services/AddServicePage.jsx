@@ -1,12 +1,13 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useTheme } from "../../../context/ThemeContext";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { useQuill } from "react-quilljs";
 import "quill/dist/quill.snow.css";
-import { createItem } from "../../../services/api";
+import { createItem, getItems } from "../../../services/api";
 import { useNavigate } from "react-router-dom";
 
+// Utility to generate slug
 const generateSlug = (text) =>
   text
     ?.toLowerCase()
@@ -17,6 +18,7 @@ const AddServicePage = () => {
   const { isDarkMode } = useTheme();
   const navigate = useNavigate();
 
+  // Quill editor
   const { quill, quillRef } = useQuill({
     theme: "snow",
     modules: {
@@ -28,6 +30,9 @@ const AddServicePage = () => {
       ],
     },
   });
+
+  const [categories, setCategories] = useState([]);
+  const [subCategories, setSubCategories] = useState([]);
 
   const theme = {
     main: isDarkMode
@@ -45,7 +50,38 @@ const AddServicePage = () => {
     section: "p-4 md:p-6 rounded-xl border shadow-sm",
   };
 
+  // Fetch categories from backend
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const res = await getItems("categories");
+        const topCategories = res.data.filter((cat) => cat.catid === null);
+        setCategories(topCategories);
+      } catch (err) {
+        console.error("Failed to fetch categories:", err);
+      }
+    };
+    loadCategories();
+  }, []);
+
+  const handleCategoryChange = async (categoryId, setFieldValue) => {
+    setFieldValue("category", categoryId);
+    setFieldValue("subCategory", "");
+
+    try {
+      const res = await getItems("categories");
+      const filteredSubs = res.data.filter((cat) => cat.catid === categoryId);
+      setSubCategories(filteredSubs);
+    } catch (err) {
+      console.error("Error fetching subcategories:", err);
+      setSubCategories([]);
+    }
+  };
+
+  // Validation handleCategoryChange
   const ServiceSchema = Yup.object().shape({
+    category: Yup.string().required("Category is required"),
+    subCategory: Yup.string().required("Sub-Category is required"),
     name: Yup.string().required("Service Name is required"),
     shortDescription: Yup.string().required("Short description is required"),
     featuredImage: Yup.mixed().required("Featured image is required"),
@@ -53,7 +89,6 @@ const AddServicePage = () => {
 
   return (
     <div className={`h-screen w-full flex flex-col ${theme.main}`}>
-      {/* Header */}
       <header
         className={`px-6 py-4 border-b ${
           isDarkMode ? "border-gray-800" : "border-gray-200"
@@ -68,24 +103,36 @@ const AddServicePage = () => {
       <main className="flex-1 overflow-y-auto p-4 md:p-8">
         <Formik
           initialValues={{
+            category: "",
+            subCategory: "",
             name: "",
             slug: "",
             shortDescription: "",
             featuredImage: null,
-            bannerImage: null,
+            galleryImages: [],
+            pdfFile: null,
             status: true,
           }}
           validationSchema={ServiceSchema}
           onSubmit={async (values, { setSubmitting }) => {
             try {
               const formData = new FormData();
+              formData.append("category", values.category);
+              formData.append("subCategory", values.subCategory);
               formData.append("name", values.name);
               formData.append("slug", generateSlug(values.name));
               formData.append("shortDescription", values.shortDescription);
               formData.append("description", quill?.root.innerHTML || "");
               if (values.featuredImage)
                 formData.append("featuredImage", values.featuredImage);
+              if (values.galleryImages?.length > 0) {
+                values.galleryImages.forEach((file) =>
+                  formData.append("galleryImages", file),
+                );
+              }
+              if (values.pdfFile) formData.append("pdfFile", values.pdfFile);
               formData.append("status", values.status);
+
               await createItem("service", formData);
               alert("Service created successfully!");
               navigate("/dashboard/services");
@@ -104,6 +151,59 @@ const AddServicePage = () => {
                 <h2 className="text-xs font-bold mb-4">Basic Information</h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  {/* Category */}
+                  <div>
+                    <label className={theme.label}>
+                      Category <span className="text-red-500">*</span>
+                    </label>
+                    <Field
+                      name="category"
+                      as="select"
+                      className={theme.input}
+                      onChange={(e) =>
+                        handleCategoryChange(e.target.value, setFieldValue)
+                      }
+                    >
+                      <option value="">Select Category</option>
+                      {categories.map((cat) => (
+                        <option key={cat._id} value={cat._id}>
+                          {cat.name}
+                        </option>
+                      ))}
+                    </Field>
+                    <ErrorMessage
+                      name="category"
+                      component="div"
+                      className={theme.error}
+                    />
+                  </div>
+
+                  {/* Sub-Category */}
+                  <div>
+                    <label className={theme.label}>
+                      Sub-Category <span className="text-red-500">*</span>
+                    </label>
+                    <Field
+                      name="subCategory"
+                      as="select"
+                      className={theme.input}
+                      disabled={!values.category}
+                    >
+                      <option value="">Select Sub-Category</option>
+                      {subCategories.map((sub) => (
+                        <option key={sub._id} value={sub._id}>
+                          {sub.name}
+                        </option>
+                      ))}
+                    </Field>
+                    <ErrorMessage
+                      name="subCategory"
+                      component="div"
+                      className={theme.error}
+                    />
+                  </div>
+
+                  {/* Service Name */}
                   <div>
                     <label className={theme.label}>
                       Service Name <span className="text-red-500">*</span>
@@ -123,12 +223,14 @@ const AddServicePage = () => {
                       className={theme.error}
                     />
                   </div>
+
+                  {/* Slug */}
                   <div>
                     <label className={theme.label}>Slug</label>
                     <Field
                       name="slug"
                       type="text"
-                      className={`${theme.input}  cursor-not-allowed`}
+                      className={`${theme.input} cursor-not-allowed`}
                       readOnly
                     />
                   </div>
@@ -163,10 +265,11 @@ const AddServicePage = () => {
                 </div>
               </div>
 
+              {/* Media Upload */}
               <div className={`${theme.section} ${theme.card}`}>
                 <h2 className="text-xs font-bold mb-4">Media Upload</h2>
 
-                {/* Featured Image (Single) */}
+                {/* Featured Image */}
                 <div className="mb-4">
                   <label className={theme.label}>
                     Featured Image <span className="text-red-500">*</span>
@@ -186,7 +289,7 @@ const AddServicePage = () => {
                   />
                 </div>
 
-                {/* Gallery Images (Multiple) */}
+                {/* Gallery Images */}
                 <div className="mb-4">
                   <label className={theme.label}>Gallery Images</label>
                   <input
@@ -198,11 +301,11 @@ const AddServicePage = () => {
                       setFieldValue("galleryImages", Array.from(e.target.files))
                     }
                   />
-                  {values.galleryImages && values.galleryImages.length > 0 && (
+                  {values.galleryImages?.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-2 text-xs">
-                      {values.galleryImages.map((file, index) => (
+                      {values.galleryImages.map((file, idx) => (
                         <span
-                          key={index}
+                          key={idx}
                           className="bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded"
                         >
                           {file.name}
@@ -230,6 +333,8 @@ const AddServicePage = () => {
                   )}
                 </div>
               </div>
+
+              {/* Submit */}
               <button
                 type="submit"
                 disabled={isSubmitting}
