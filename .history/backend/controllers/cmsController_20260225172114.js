@@ -1,6 +1,5 @@
 const CMS = require("../models/cms.js");
-const fs = require("fs");
-const path = require("path");
+
 // ⭐ custom slugify
 const makeSlug = (text = "") => {
   return text
@@ -141,7 +140,6 @@ exports.updateCMS = async (req, res) => {
       slug,
       status,
       folder,
-      existingImages,
     } = req.body;
 
     const cms = await CMS.findById(id);
@@ -158,42 +156,29 @@ exports.updateCMS = async (req, res) => {
       return res.status(400).json({ message: "Slug already exists" });
     }
 
-    // ⭐ parse existing images from frontend
-    const existingImagesFromFrontend = JSON.parse(existingImages || "[]");
-
-    console.log("existingImagesFromFrontend", existingImagesFromFrontend)
-
-    // ⭐ images to delete
-    const imagesToDelete = cms.images.filter(
-      (img) => !existingImagesFromFrontend.includes(img)
-    );
-
-    // ⭐ delete images from folder
-    imagesToDelete.forEach((img) => {
-      const filePath = path.join(__dirname, "..", img);
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-      }
-    });
-
     // ⭐ new images upload
     let newImages = [];
     if (req.files && req.files.length > 0) {
       newImages = req.files.map(
         (file) => `/uploads/${folder || "default"}/${file.filename}`
       );
+
+      // ⭐ old images delete
+      cms.images.forEach((img) => {
+        const filePath = path.join(__dirname, "..", img);
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+      });
     }
 
-    // ⭐ final images merge
-    cms.images = [...existingImagesFromFrontend, ...newImages];
-
-    // ⭐ other fields update
     cms.title = title || cms.title;
     cms.meta = meta || cms.meta;
     cms.metaDescription = metaDescription || cms.metaDescription;
     cms.shortDescription = shortDescription || cms.shortDescription;
     cms.slug = finalSlug;
-    cms.status = status !== undefined ? status === "true" || status === true : cms.status;
+    cms.status = status !== undefined ? status : cms.status;
+    cms.images = newImages.length > 0 ? newImages : cms.images;
 
     await cms.save();
 
@@ -203,8 +188,6 @@ exports.updateCMS = async (req, res) => {
       data: cms,
     });
   } catch (error) {
-    console.log(error);
-    
     res.status(500).json({ message: error.message });
   }
 };

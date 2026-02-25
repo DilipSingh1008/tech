@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const upload = require("../middlewares/upload"); //  tumhara multer
-const { createCMS, getAllCMS, getSingleCMS, updateCMS, toggleCMSStatus } = require("../controllers/cmsController");
+const { createCMS, getAllCMS, getSingleCMS, updateCMS } = require("../controllers/cmsController");
 
 //  create CMS
 router.post("/create", upload.array("images", 5), createCMS);

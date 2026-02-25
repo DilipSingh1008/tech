@@ -161,7 +161,7 @@ exports.updateCMS = async (req, res) => {
     // ⭐ parse existing images from frontend
     const existingImagesFromFrontend = JSON.parse(existingImages || "[]");
 
-    console.log("existingImagesFromFrontend", existingImagesFromFrontend)
+    console.log("existingImagesFromFrontend")
 
     // ⭐ images to delete
     const imagesToDelete = cms.images.filter(

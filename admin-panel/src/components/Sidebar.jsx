@@ -54,6 +54,11 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       icon: <Wrench size={18} />,
     },
     {
+      path: "/dashboard/cms",
+      name: "Manage CMS",
+      icon: <Wrench size={18} />,
+    },
+    {
       path: "/dashboard/settings",
       name: "Settings",
       icon: <Settings size={18} />,

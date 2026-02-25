@@ -1,6 +1,5 @@
 const CMS = require("../models/cms.js");
-const fs = require("fs");
-const path = require("path");
+
 // ⭐ custom slugify
 const makeSlug = (text = "") => {
   return text
@@ -160,8 +159,6 @@ exports.updateCMS = async (req, res) => {
 
     // ⭐ parse existing images from frontend
     const existingImagesFromFrontend = JSON.parse(existingImages || "[]");
-
-    console.log("existingImagesFromFrontend", existingImagesFromFrontend)
 
     // ⭐ images to delete
     const imagesToDelete = cms.images.filter(

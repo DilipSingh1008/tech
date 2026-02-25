@@ -24,6 +24,8 @@ import ProductCategory from "../pages/dashboard/product/ProductCategory.jsx";
 import UserPage from "../pages/dashboard/UserPage/UserPage.jsx";
 import ProductForm from "../pages/dashboard/product/ProductForm.jsx";
 import ManageRole from "../pages/dashboard/UserPage/ManageRole.jsx";
+import Cms from "../pages/dashboard/cms/Cms.jsx";
+import AddCmsForm from "../pages/dashboard/cms/AddCmsForm.jsx";
 // import ProductManagement from "../pages/dashboard/product/ProductCategory";
 
 // import ThemeToggleButton from "./components/Button";
@@ -75,6 +77,18 @@ function AppRouter() {
               <Route
                 path="/dashboard/service/add"
                 element={<AddServicePage />}
+              />
+              <Route
+                path="/dashboard/cms"
+                element={<Cms />}
+              />
+              <Route
+                path="/dashboard/add-cms"
+                element={<AddCmsForm />}
+              />
+              <Route
+                path="/dashboard/edit-cms/:id"
+                element={<AddCmsForm />}
               />
               <Route path="/dashboard/user" element={<UserPage />} />
               <Route path="/dashboard/managerole" element={<ManageRole />} />
