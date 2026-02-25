@@ -59,3 +59,25 @@ body {
   backdrop-filter: blur(10px);
   border: 1px solid var(--border-color);
 }
+
+/* Remove default blue highlight on option selection */
+select {
+  color: var(--text-main);
+  background-color: var(--card-bg);
+}
+
+select option {
+  background-color: var(--card-bg);
+  color: var(--text-main);
+}
+
+select:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+/* Removes tap highlight on mobile */
+select,
+select option {
+  -webkit-tap-highlight-color: transparent;
+}

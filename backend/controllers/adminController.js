@@ -2,7 +2,7 @@ const Admin = require("../models/admin.js");
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-
+const Role = require("../models/Role");
 // ⭐ get profile
 exports.getProfile = async (req, res) => {
   try {
@@ -93,78 +93,141 @@ exports.register = async (req, res) => {
 };
 // Login
 
+// exports.login = async (req, res) => {
+//   try {
+//     const { email, password } = req.body;
+//     // console.log(email);
+//     // console.log(password);
+
+//     // ⭐ find admin
+//     // const admin = await Admin.findOne({
+//     //   email: email.toLowerCase(),
+//     // });
+//     let account = await Admin.findOne({ email: email.toLowerCase() });
+
+//     let roleType = "admin";
+
+//     // if (!admin) return res.status(400).json({ message: "Admin not found" });
+
+//     if (!account) {
+//       account = await User.findOne({
+//         email: email.toLowerCase(),
+//         role: "sub-admin",
+//       });
+//       roleType = "sub-admin";
+//     }
+
+//     if (!account) {
+//       return res.status(400).json({ message: "Account not found" });
+//     }
+
+//     // ⭐ compare password (model method)
+//     let isMatch = false;
+
+//     if (roleType === "admin") {
+//       isMatch = await account.comparePassword(password);
+//     } else if (roleType === "sub-admin") {
+//       isMatch = await bcrypt.compare(password, account.password);
+//     }
+
+//     if (!isMatch) {
+//       return res.status(400).json({ message: "Invalid password" });
+//     }
+
+//     // ⭐ create token
+//     // const token = jwt.sign(
+//     //   {
+//     //     id: admin._id,
+//     //     role: admin.role,
+//     //   },
+//     //   process.env.JWT_SECRET,
+//     //   { expiresIn: "1d" },
+//     // );
+//     const token = jwt.sign(
+//       {
+//         id: account._id,
+//         role: roleType,
+//       },
+//       process.env.JWT_SECRET,
+//       { expiresIn: "1d" },
+//     );
+
+//     console.log("LOGIN SECRET:", process.env.JWT_SECRET);
+
+//     console.log("LOGIN SECRET:", process.env.JWT_SECRET);
+
+//     // res.json({
+//     //   token,
+//     //   admin: {
+//     //     id: admin._id,
+//     //     fullName: admin.fullName,
+//     //     email: admin.email,
+//     //     role: admin.role,
+//     //   },
+//     // });
+//     res.json({
+//       token,
+//       user: {
+//         id: account._id,
+//         fullName: account.fullName || account.name,
+//         email: account.email,
+//         role: roleType,
+//       },
+//     });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ message: "Server error" });
+//   }
+// };
+
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    console.log(email);
-    console.log(password);
 
-    // ⭐ find admin
-    // const admin = await Admin.findOne({
-    //   email: email.toLowerCase(),
-    // });
+    if (!email || !password) {
+      return res
+        .status(400)
+        .json({ message: "Email and password are required" });
+    }
+
     let account = await Admin.findOne({ email: email.toLowerCase() });
-
     let roleType = "admin";
-
-    // if (!admin) return res.status(400).json({ message: "Admin not found" });
 
     if (!account) {
       account = await User.findOne({
         email: email.toLowerCase(),
-        role: "sub-admin",
-      });
-      roleType = "sub-admin";
+        status: true,
+      }).populate("role", "name");
+      roleType = account ? account.role.name : null;
     }
 
     if (!account) {
       return res.status(400).json({ message: "Account not found" });
     }
 
-    // ⭐ compare password (model method)
-    let isMatch = false;
-
-    if (roleType === "admin") {
-      isMatch = await account.comparePassword(password);
-    } else if (roleType === "sub-admin") {
-      isMatch = await bcrypt.compare(password, account.password);
+    const allowedRoles = ["sub-admin", "admin", "super-admin"];
+    if (!allowedRoles.includes(roleType)) {
+      return res.status(403).json({ message: "Access denied for your role" });
     }
+
+    let isMatch = account.comparePassword
+      ? await account.comparePassword(password)
+      : await bcrypt.compare(password, account.password);
 
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid password" });
     }
 
-    // ⭐ create token
-    // const token = jwt.sign(
-    //   {
-    //     id: admin._id,
-    //     role: admin.role,
-    //   },
-    //   process.env.JWT_SECRET,
-    //   { expiresIn: "1d" },
-    // );
     const token = jwt.sign(
       {
         id: account._id,
         role: roleType,
+        fullName: account.fullName || account.name,
       },
       process.env.JWT_SECRET,
       { expiresIn: "1d" },
     );
 
-    console.log("LOGIN SECRET:", process.env.JWT_SECRET);
-
-    console.log("LOGIN SECRET:", process.env.JWT_SECRET);
-
-    // res.json({
-    //   token,
-    //   admin: {
-    //     id: admin._id,
-    //     fullName: admin.fullName,
-    //     email: admin.email,
-    //     role: admin.role,
-    //   },
-    // });
     res.json({
       token,
       user: {
@@ -172,6 +235,7 @@ exports.login = async (req, res) => {
         fullName: account.fullName || account.name,
         email: account.email,
         role: roleType,
+        image: account.image || "",
       },
     });
   } catch (err) {

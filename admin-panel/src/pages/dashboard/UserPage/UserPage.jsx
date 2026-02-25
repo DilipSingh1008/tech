@@ -41,7 +41,7 @@ const UserPage = () => {
   const [page, setPage] = useState(1);
   const [limit] = useState(5);
   const [totalPages, setTotalPages] = useState(1);
-
+  const [roles, setRoles] = useState([]);
   const theme = {
     main: isDarkMode
       ? "bg-[#0b0e14] text-slate-300"
@@ -55,6 +55,18 @@ const UserPage = () => {
     divider: isDarkMode ? "divide-gray-800" : "divide-gray-100",
   };
 
+  useEffect(() => {
+    fetchRoles();
+  }, []);
+  const fetchRoles = async () => {
+    try {
+      const res = await getItems("role?limit=100");
+      console.log(res);
+      setRoles(res.data || []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
   useEffect(() => {
     fetchUsers();
   }, [page, searchQuery]);
@@ -180,7 +192,7 @@ const UserPage = () => {
                         </td>
                         <td className="px-4 py-2.5 text-sm">{u.email}</td>
                         <td className="px-4 py-2.5 text-sm capitalize">
-                          {u.role}
+                          {u.role?.name || u.role}{" "}
                         </td>
 
                         <td className="px-4 py-2.5">
@@ -301,7 +313,7 @@ const UserPage = () => {
                     name: editingUser?.name || "",
                     email: editingUser?.email || "",
                     password: "",
-                    role: editingUser?.role || "user",
+                    role: editingUser?.role?._id || "",
                     image: null,
                     isEdit: !!editingUser,
                   }}
@@ -311,7 +323,7 @@ const UserPage = () => {
                       const formData = new FormData();
                       formData.append("name", values.name);
                       formData.append("email", values.email);
-                      formData.append("role", values.role.toLowerCase());
+                      formData.append("roleId", values.role);
                       formData.append("folder", "User");
 
                       if (!editingUser) {
@@ -392,7 +404,7 @@ const UserPage = () => {
                       )}
 
                       {/* Role */}
-                      <div>
+                      {/* <div>
                         <label className="block text-[10px] font-bold opacity-50 uppercase mb-1">
                           Role
                         </label>
@@ -409,8 +421,41 @@ const UserPage = () => {
                           component="div"
                           className="text-red-500 text-[10px]"
                         />
-                      </div>
+                      </div> */}
+                      <div>
+                        <label className="block text-[10px] font-bold opacity-50 uppercase mb-1">
+                          Role
+                        </label>
 
+                        <Field
+                          as="select"
+                          name="role"
+                          className="w-full p-2 text-sm rounded-lg 
+bg-[var(--card-bg)] 
+text-[var(--text-main)]
+border border-[var(--border-color)]
+outline-none 
+focus:border-[var(--primary)]
+appearance-none"
+                        >
+                          <option value="">Select Role</option>
+
+                          {roles
+                            .filter((r) => r.status === true)
+                            .map((role) => (
+                              <option key={role._id} value={role._id}>
+                                {role.name.charAt(0).toUpperCase() +
+                                  role.name.slice(1)}
+                              </option>
+                            ))}
+                        </Field>
+
+                        <ErrorMessage
+                          name="role"
+                          component="div"
+                          className="text-red-500 text-[10px]"
+                        />
+                      </div>
                       <div>
                         <label className="block text-[10px] font-bold opacity-50 uppercase mb-1">
                           User Image (200x200 px){" "}
