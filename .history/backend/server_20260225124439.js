@@ -17,9 +17,15 @@ const bannerRoute = require("./routes/bannerRoutes");
 const productCategoryRoutes = require("./routes/productCategoryRoutes");
 const productItemRoutes = require("./routes/productItemRoutes");
 const serviceRoutes = require("./routes/serviceRoutes");
+<<<<<<< HEAD
 const authRoutes = require("./routes/authRoutes")
 const userRoute = require("./routes/userRoutes")
 
+=======
+const authRoutes = require("./routes/authRoutes");
+const userRoute = require("./routes/userRoutes");
+dotenv.config();
+>>>>>>> 90bf41958877198ae72bea93517034c3680f2e46
 connectDB();
 
 const app = express();
