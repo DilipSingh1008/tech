@@ -21,6 +21,7 @@ import ProductCategoryItems from "../pages/dashboard/product/ProductCategoryItem
 import ServicePage from "../pages/dashboard/Manage Services/ServicePage.jsx";
 import AddServicePage from "../pages/dashboard/Manage Services/AddServicePage.jsx";
 import ProductCategory from "../pages/dashboard/product/ProductCategory.jsx";
+import UserPage from "../pages/dashboard/UserPage/UserPage.jsx";
 // import ProductManagement from "../pages/dashboard/product/ProductCategory";
 
 // import ThemeToggleButton from "./components/Button";
@@ -68,6 +69,7 @@ function AppRouter() {
                 path="/dashboard/service/add"
                 element={<AddServicePage />}
               />
+              <Route path="/dashboard/user" element={<UserPage />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />

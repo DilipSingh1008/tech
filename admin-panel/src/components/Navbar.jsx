@@ -13,6 +13,9 @@ const getPageTitle = () => {
   if (path === "/dashboard/categories") return "Categories";
   if (path === "/dashboard/location") return "Location";
   if (path === "/dashboard/profile") return "Account Settings";
+  if (path === "/dashboard/user") return "Users";
+  if (path === "/dashboard/service") return "Services";
+  if (path.startsWith("/dashboard/service/")) return "Add Services";
   if (path.startsWith("/dashboard/category/")) return "Sub - Categories";
   if (path.startsWith("/dashboard/location/")) return "Stattes";
   if (path.startsWith("/dashboard/citylocation/")) return "Cities";

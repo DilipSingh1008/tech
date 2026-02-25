@@ -19,7 +19,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       name: "Dashboard",
       icon: <LayoutDashboard size={18} />,
     },
-    { path: "/dashboard/users", name: "Users", icon: <Users size={18} /> },
+    { path: "/dashboard/user", name: "Users", icon: <Users size={18} /> },
     {
       path: "/dashboard/location",
       name: "Location",
