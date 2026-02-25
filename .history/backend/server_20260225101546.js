@@ -17,7 +17,6 @@ const productCategoryRoutes = require("./routes/productCategoryRoutes");
 const productItemRoutes = require("./routes/productItemRoutes");
 const serviceRoutes = require("./routes/serviceRoutes");
 const authRoutes = require("./routes/authRoutes")
-const userRoute = require("./routes/userRoutes")
 dotenv.config();
 connectDB();
 
@@ -47,8 +46,6 @@ app.use("/api/product-category", productCategoryRoutes);
 app.use("/api/product-item", productItemRoutes);
 app.use("/api/services", serviceRoutes);
 app.use("/api/admin", authRoutes);
-app.use("/user", userRoute);
-
 
 
 

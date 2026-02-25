@@ -30,7 +30,7 @@ const ProfilePage = () => {
         if (values.photo) formData.append("photo", values.photo);
 
         // API Call to updateProfile
-        await updateItem("admin/rofile", formData); 
+        await updateItem("/admin/rofile", formData); 
         alert("Profile updated successfully!");
       } catch (err) {
         console.error(err);
@@ -54,7 +54,7 @@ const ProfilePage = () => {
     }),
     onSubmit: async (values, { resetForm }) => {
       try {
-        await updateItem("admin/change-password", values);
+        await updateItem("/change-password", values);
         alert("Password changed!");
         resetForm();
       } catch (err) {
@@ -67,7 +67,7 @@ const ProfilePage = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await getItems("admin/profile"); // Assuming getItems handles the GET request
+        const res = await getItems("/profile"); // Assuming getItems handles the GET request
         profileForm.setValues({
           fullName: res.data.fullName || "",
           email: res.data.email || "",
