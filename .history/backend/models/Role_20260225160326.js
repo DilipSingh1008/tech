@@ -19,3 +19,4 @@ const roleSchema = new mongoose.Schema(
 );
 
 module.exports = mongoose.model("Role", roleSchema);
+app.use("/api/role", roleRoutes);
