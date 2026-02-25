@@ -15,3 +15,4 @@ router.put("/:id", upload.single("image"), updateUser);
 router.delete("/:id", deleteUser);
 
 module.exports = router;
+app.use("/user", require("./routes/userRoutes"));
