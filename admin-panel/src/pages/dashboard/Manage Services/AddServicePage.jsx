@@ -43,9 +43,9 @@ const AddEditServicePage = () => {
     slug: "",
     shortDescription: "",
     galleryImages: [],
-    existingGallery: [], // for edit: existing images
+    existingGallery: [], 
     pdfFile: null,
-    existingPdf: null, // for edit: existing pdf
+    existingPdf: null, 
     status: true,
   });
 

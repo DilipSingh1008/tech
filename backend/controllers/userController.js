@@ -1,29 +1,25 @@
 const User = require("../models/User");
 const fs = require("fs");
+const path = require("path");
 
-// ✅ CREATE USER (Admin)
 exports.createUser = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
-
-    // Check existing email
     const existing = await User.findOne({ email });
     if (existing) {
-      return res.status(400).json({
-        message: "Email already exists",
-      });
+      return res.status(400).json({ message: "Email already exists" });
     }
 
-    const imagePath = req.file ? `/uploads/User/${req.file.filename}` : "";
-
-    const user = new User({
+    const imagePath = req.file ? req.file.path.replace(/\\/g, "/") : "";
+    console.log("image", imagePath);
+    const user = await User.create({
       name,
       email,
       password,
-      role,
+      role: role || "user",
       image: imagePath,
+      status: true,
     });
-
     await user.save();
 
     res.status(201).json({
@@ -31,13 +27,10 @@ exports.createUser = async (req, res) => {
       data: user,
     });
   } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
+    console.error(error);
+    res.status(500).json({ message: error.message });
   }
 };
-
-// ✅ GET USERS (Pagination + Search)
 exports.getUsers = async (req, res) => {
   try {
     const page = Number(req.query.page) || 1;
@@ -69,7 +62,6 @@ exports.getUsers = async (req, res) => {
   }
 };
 
-// ✅ UPDATE USER
 exports.updateUser = async (req, res) => {
   try {
     const { name, email, role, status } = req.body;
@@ -77,7 +69,6 @@ exports.updateUser = async (req, res) => {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    // Update image
     if (req.file) {
       if (user.image && fs.existsSync("." + user.image)) {
         fs.unlinkSync("." + user.image);
@@ -101,7 +92,6 @@ exports.updateUser = async (req, res) => {
   }
 };
 
-// ✅ DELETE USER
 exports.deleteUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);

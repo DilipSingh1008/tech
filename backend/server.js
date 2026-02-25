@@ -16,8 +16,8 @@ const bannerRoute = require("./routes/bannerRoutes");
 const productCategoryRoutes = require("./routes/productCategoryRoutes");
 const productItemRoutes = require("./routes/productItemRoutes");
 const serviceRoutes = require("./routes/serviceRoutes");
-const authRoutes = require("./routes/authRoutes")
-const userRoute = require("./routes/userRoutes")
+const authRoutes = require("./routes/authRoutes");
+const userRoute = require("./routes/userRoutes");
 dotenv.config();
 connectDB();
 
@@ -27,7 +27,7 @@ app.use(
   cors({
     origin: "http://localhost:5173",
     credentials: true,
-  })
+  }),
 );
 
 app.use(express.json());
@@ -41,16 +41,13 @@ app.use("/api/subcategories", subCategoryRoutes);
 app.use("/api/countrylocation", countryLocationRoute);
 app.use("/api/statelocation", StateLocationRoute);
 app.use("/api/citylocation", cityLocationRoute);
-app.use("/api/setting", siteRoute)
+app.use("/api/setting", siteRoute);
 app.use("/api/banner", bannerRoute);
 app.use("/api/product-category", productCategoryRoutes);
 app.use("/api/product-item", productItemRoutes);
 app.use("/api/services", serviceRoutes);
 app.use("/api/admin", authRoutes);
-app.use("/user", userRoute);
-
-
-
+app.use("/api/user", userRoute);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
