@@ -13,19 +13,19 @@ exports.getCountries = async (req, res) => {
     page = parseInt(page);
     limit = parseInt(limit);
 
-    // ⭐ sorting
+    //  sorting
     const sortOption = {};
     sortOption[sortBy] = order === "asc" ? 1 : -1;
 
-    // ⭐ search filter
+    //  search filter
     const searchFilter = {
       name: { $regex: search, $options: "i" }, // case insensitive search
     };
 
-    // ⭐ total count with search
+    //  total count with search
     const total = await Country.countDocuments(searchFilter);
 
-    // ⭐ data
+    //  data
     const countries = await Country.find(searchFilter)
       .sort(sortOption)
       .skip((page - 1) * limit)
@@ -142,7 +142,7 @@ exports.toggleCountryStatus = async (req, res) => {
 
 
 
-    // ⭐ toggle logic
+    //  toggle logic
     existingCountry.status = !existingCountry.status;
 
     await existingCountry.save();

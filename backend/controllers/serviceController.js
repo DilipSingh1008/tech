@@ -70,7 +70,7 @@ exports.getServices = async (req, res) => {
     const totalItems = await Service.countDocuments();
     const totalPages = Math.ceil(totalItems / limit);
 
-    const services = await Service.find()
+    const services = await Service.find(query)
       .populate("category", "name")
       .populate("subCategory", "name")
       .sort({ createdAt: -1 })

@@ -70,12 +70,12 @@ const ManageServicesPage = () => {
     }
   };
 
-  if (loading)
-    return (
-      <div className="flex h-screen items-center justify-center text-xs">
-        Loading...
-      </div>
-    );
+  // if (loading)
+  //   return (
+  //     <div className="flex h-screen items-center justify-center text-xs">
+  //       Loading...
+  //     </div>
+  //   );
 
   return (
     <div className={`h-screen w-full flex flex-col ${theme.main}`}>
@@ -131,11 +131,14 @@ const ManageServicesPage = () => {
               </thead>
 
               <tbody>
-                {services
-                  .filter((s) =>
-                    s.name?.toLowerCase().includes(searchQuery.toLowerCase()),
-                  )
-                  .map((s, index) => (
+                {loading ? (
+                  <tr>
+                    <td colSpan={8} className="text-center py-6 opacity-50">
+                      Loading...
+                    </td>
+                  </tr>
+                ) : (
+                  services.map((s, index) => (
                     <tr
                       key={s._id}
                       className="border-t hover:bg-gray-100 dark:hover:bg-[#1a2030]"
@@ -210,7 +213,8 @@ const ManageServicesPage = () => {
                         </div>
                       </td>
                     </tr>
-                  ))}
+                  ))
+                )}
               </tbody>
             </table>
           </div>

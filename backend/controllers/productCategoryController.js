@@ -23,7 +23,8 @@ exports.createProduct = async (req, res) => {
     } = req.body;
 
     //  validation
-    if (!category) return res.status(400).json({ message: "Category required" });
+    if (!category)
+      return res.status(400).json({ message: "Category required" });
     if (!name) return res.status(400).json({ message: "Name required" });
     if (!price) return res.status(400).json({ message: "Price required" });
 
@@ -62,14 +63,12 @@ exports.getProducts = async (req, res) => {
     page = Number(page);
     limit = Number(limit);
 
-    const query = search
-      ? { name: { $regex: search, $options: "i" } }
-      : {};
+    const query = search ? { name: { $regex: search, $options: "i" } } : {};
 
     const products = await productItemSchema
       .find(query)
-      .populate("category", "name")       //  category name
-      .populate("subCategory", "name")    //  subcategory name
+      .populate("category", "name") //  category name
+      .populate("subCategory", "name") //  subcategory name
       .sort({ [sortBy]: order === "desc" ? -1 : 1 })
       .skip((page - 1) * limit)
       .limit(limit)
@@ -87,9 +86,12 @@ exports.getProducts = async (req, res) => {
 };
 
 //  GET SINGLE CATEGORY
-exports.getCategoryById = async (req, res) => {
+exports.getProdutsById = async (req, res) => {
   try {
-    const category = await ProductCategory.findById(req.params.id);
+    const category = await productItemSchema
+      .findById(req.params.id)
+      .populate("category", "name")
+      .populate("subCategory", "name");
 
     if (!category)
       return res.status(404).json({ message: "Category not found" });
@@ -103,20 +105,37 @@ exports.getCategoryById = async (req, res) => {
 
 //  UPDATE CATEGORY
 
-
 exports.updateProduct = async (req, res) => {
   try {
+    const {
+      category,
+      name,
+      price,
+      slug,
+      mrp,
+      subCategory,
+      shortDescription,
+      mainDescription,
+    } = req.body;
+
+    //  validation
+    if (!category)
+      return res.status(400).json({ message: "Category required" });
+    if (!name) return res.status(400).json({ message: "Name required" });
+    if (!price) return res.status(400).json({ message: "Price required" });
+
     const product = await productItemSchema.findById(req.params.id);
 
-    if (!product)
-      return res.status(404).json({ message: "Product not found" });
+    // log
+
+    if (!product) return res.status(404).json({ message: "Product not found" });
 
     //  keep images sent from frontend
     const existingImages = JSON.parse(req.body.existingImages || "[]");
 
     //  find deleted images
     const deletedImages = product.images.filter(
-      (img) => !existingImages.includes(img)
+      (img) => !existingImages.includes(img),
     );
 
     //  delete from server
@@ -133,10 +152,17 @@ exports.updateProduct = async (req, res) => {
     const updated = await productItemSchema.findByIdAndUpdate(
       req.params.id,
       {
-        ...req.body,
+        category,
+        name,
+        salePrice: price,
+        slug,
+        price: mrp,
+        subCategory: subCategory,
+        shortDescription,
+        mainDescription,
         images: finalImages,
       },
-      { new: true }
+      { new: true },
     );
 
     res.json(updated);
