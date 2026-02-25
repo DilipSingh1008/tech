@@ -20,7 +20,6 @@ const serviceRoutes = require("./routes/serviceRoutes");
 const authRoutes = require("./routes/authRoutes")
 const userRoute = require("./routes/userRoutes")
 const cmsRoute = require("./routes/cmsRoute")
-const roleRoutes = require("./routes/role")
 
 connectDB();
 
@@ -52,9 +51,6 @@ app.use("/api/services", serviceRoutes);
 app.use("/api/admin", authRoutes);
 app.use("/api/user", userRoute);
 app.use("/api/cms", cmsRoute)
-app.use("/api/role", roleRoutes);
-
-
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
