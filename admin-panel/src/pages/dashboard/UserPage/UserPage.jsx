@@ -411,7 +411,6 @@ const UserPage = () => {
                         />
                       </div>
 
-                      {/* Image */}
                       <div>
                         <label className="block text-[10px] font-bold opacity-50 uppercase mb-1">
                           User Image (200x200 px){" "}
@@ -451,7 +450,6 @@ const UserPage = () => {
                         />
                       </div>
 
-                      {/* Submit */}
                       <button
                         type="submit"
                         className="w-full py-2 mt-2 bg-(--primary) text-white rounded-lg text-xs font-bold hover:bg-(--primary) transition-all"

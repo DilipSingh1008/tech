@@ -10,6 +10,7 @@ import {
   LocationEdit,
   ImageIcon,
   Wrench,
+  Shield,
 } from "lucide-react";
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
@@ -19,6 +20,12 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       name: "Dashboard",
       icon: <LayoutDashboard size={18} />,
     },
+    {
+      path: "/dashboard/managerole",
+      name: "ManageRole",
+      icon: <Shield size={18} />,
+    },
+
     { path: "/dashboard/user", name: "Users", icon: <Users size={18} /> },
     {
       path: "/dashboard/location",
