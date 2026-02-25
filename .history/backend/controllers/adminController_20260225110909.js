@@ -44,14 +44,14 @@ exports.updateProfile = async (req, res) => {
 // ⭐ change password
 exports.changePassword = async (req, res) => {
   try {
-    const {  newPassword } = req.body;
+    const { currentPassword, newPassword } = req.body;
 
     const admin = await Admin.findById(req.user.id);
 
-    // const isMatch = await admin.comparePassword(currentPassword);
+    const isMatch = await admin.comparePassword(currentPassword);
 
-    // if (!isMatch)
-    //   return res.status(400).json({ message: "Current password incorrect" });
+    if (!isMatch)
+      return res.status(400).json({ message: "Current password incorrect" });
 
     admin.password = newPassword;
     await admin.save();
@@ -125,11 +125,9 @@ exports.login = async (req, res) => {
         id: admin._id,
         role: admin.role,
       },
-      process.env.JWT_SECRET,
+      process.env.JWT_SECRET || "secretkey123",
       { expiresIn: "1d" }
     );
-
-    console.log("LOGIN SECRET:", process.env.JWT_SECRET);
 
     res.json({
       token,

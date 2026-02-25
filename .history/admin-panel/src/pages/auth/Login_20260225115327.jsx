@@ -38,7 +38,7 @@ const Login = () => {
      console.log(response.data);
      
 
-    
+     localStorage.setItem("adminToken", response.data.token);
         
         // Success feedback
         navigate("/dashboard", { state: { message: "Item updated successfully!" } });
@@ -122,13 +122,13 @@ const Login = () => {
             <button
               type="submit"
               disabled={formik.isSubmitting || !formik.dirty}
-              className="w-full cursor-pointer py-3 bg-[var(--primary)] hover:opacity-90 text-[var(--main-bg)] font-bold rounded-xl transition-all flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-50 shadow-lg"
+              className="w-full py-3 bg-[var(--primary)] hover:opacity-90 text-[var(--main-bg)] font-bold rounded-xl transition-all flex items-center justify-center gap-2 active:scale-[0.98] disabled:opacity-50 shadow-lg"
             >
               {formik.isSubmitting ? (
                 <Loader2 className="animate-spin" size={20} />
               ) : (
                 <>
-                  <Save size={18} /> Login
+                  <Save size={18} /> Update Changes
                 </>
               )}
             </button>

@@ -35,7 +35,6 @@ export const createItem = async (resource, data) => {
 
     const response = await api.post(`/${resource}`, data, { headers });
     console.log(response);
-     localStorage.setItem("adminToken", response.data.token);
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;
@@ -68,12 +67,7 @@ export const updateItem = async (resource, data) => {
         ? { "Content-Type": "multipart/form-data" }
         : { "Content-Type": "application/json" };
 
-    const response = await api.put(`/${resource}`, data, {
-      headers: {
-        ...headers, // ⭐ merge
-      },
-    });
-
+    const response = await api.put(`/${resource}`, data, { headers });
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;

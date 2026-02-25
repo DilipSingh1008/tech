@@ -49,7 +49,7 @@ const ProfilePage = () => {
   const [passwordSuccess, setPasswordSuccess] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-
+  const storedPasswordRef = React.useRef("");
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
@@ -102,6 +102,7 @@ const ProfilePage = () => {
           photo: null,
         });
 
+        if (data?.password) storedPasswordRef.current = data.password;
         if (data?.photo) setProfilePhotoPreview(data.photo);
       } catch (err) {
         console.error(err);
@@ -129,6 +130,7 @@ const ProfilePage = () => {
     onSubmit: async (values, { resetForm }) => {
       try {
         await updateItem("admin/change-password", {
+          currentPassword: storedPasswordRef.current,
           newPassword: values.newPassword,
         });
         setPasswordSuccess(true);
@@ -286,7 +288,7 @@ const ProfilePage = () => {
                   <button
                     type="submit"
                     disabled={profileForm.isSubmitting}
-                    className="flex items-center cursor-pointer gap-2 px-5 py-2 bg-[var(--primary)] text-white text-sm font-medium rounded-lg hover:shadow-lg transition-all disabled:opacity-50"
+                    className="flex items-center gap-2 px-5 py-2 bg-[var(--primary)] text-white text-sm font-medium rounded-lg hover:shadow-lg transition-all disabled:opacity-50"
                   >
                     {profileForm.isSubmitting ? (
                       <Loader2 size={14} className="animate-spin" />
@@ -364,7 +366,7 @@ const ProfilePage = () => {
                     <button
                       type="submit"
                       disabled={passwordForm.isSubmitting}
-                      className="flex items-center cursor-pointer gap-2 px-5 py-2 bg-[var(--primary)] text-white text-sm font-medium rounded-lg hover:shadow-lg transition-all disabled:opacity-50"
+                      className="flex items-center gap-2 px-5 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-all disabled:opacity-50 shadow-sm hover:shadow-md"
                     >
                       {passwordForm.isSubmitting ? (
                         <Loader2 size={14} className="animate-spin" />

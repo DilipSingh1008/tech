@@ -6,6 +6,7 @@ import {
   Camera,
   Save,
   ShieldCheck,
+  ChevronRight,
   Loader2,
   Eye,
   EyeOff,
@@ -15,41 +16,17 @@ import Navbar from "../../components/Navbar";
 import Sidebar from "../../components/Sidebar";
 import { getItems, updateItem } from "../../services/api.js";
 
-// Defined OUTSIDE the component to prevent remount on every render
-const inputClass = (touched, error) =>
-  `w-full px-3 py-2 text-sm rounded-lg border bg-white dark:bg-transparent outline-none transition-all ${
-    touched && error
-      ? "border-red-400 focus:border-red-400"
-      : "border-gray-200 focus:border-[var(--primary)]"
-  }`;
-
-const PasswordInput = ({ field, placeholder, show, onToggle, form }) => (
-  <div className="relative">
-    <input
-      type={show ? "text" : "password"}
-      placeholder={placeholder}
-      {...form.getFieldProps(field)}
-      className={`${inputClass(form.touched[field], form.errors[field])} pr-10`}
-    />
-    <button
-      type="button"
-      onClick={onToggle}
-      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-    >
-      {show ? <EyeOff size={14} /> : <Eye size={14} />}
-    </button>
-  </div>
-);
-
 const ProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [profilePhotoPreview, setProfilePhotoPreview] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [profileSuccess, setProfileSuccess] = useState(false);
   const [passwordSuccess, setPasswordSuccess] = useState(false);
+
+  // Password visibility toggles
+  const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
@@ -58,33 +35,6 @@ const ProfilePage = () => {
     email: "",
     phone: "",
     photo: null,
-  });
-
-  // Formik for Basic Information (declared before useEffect that calls profileForm.setValues)
-  const profileForm = useFormik({
-    initialValues: initialProfileValues,
-    enableReinitialize: true,
-    validationSchema: Yup.object({
-      fullName: Yup.string().required("Full name is required"),
-      email: Yup.string().email("Invalid email").required("Required"),
-      phone: Yup.string().required("Phone number is required"),
-    }),
-    onSubmit: async (values) => {
-      try {
-        const formData = new FormData();
-        formData.append("fullName", values.fullName);
-        formData.append("email", values.email);
-        formData.append("phone", values.phone);
-        if (values.photo) {
-          formData.append("photo", values.photo);
-        }
-        await updateItem("admin/profile", formData);
-        setProfileSuccess(true);
-        setTimeout(() => setProfileSuccess(false), 3000);
-      } catch (err) {
-        alert(err.response?.data?.message || "Failed to update profile");
-      }
-    },
   });
 
   // Fetch Profile Data on Mount
@@ -112,13 +62,43 @@ const ProfilePage = () => {
     fetchProfile();
   }, []);
 
+  // Formik for Basic Information
+  const profileForm = useFormik({
+    initialValues: initialProfileValues,
+    enableReinitialize: true,
+    validationSchema: Yup.object({
+      fullName: Yup.string().required("Full name is required"),
+      email: Yup.string().email("Invalid email").required("Required"),
+      phone: Yup.string().required("Phone number is required"),
+    }),
+    onSubmit: async (values) => {
+      try {
+        const formData = new FormData();
+        formData.append("fullName", values.fullName);
+        formData.append("email", values.email);
+        formData.append("phone", values.phone);
+        if (values.photo) {
+          formData.append("photo", values.photo);
+        }
+
+        await updateItem("admin/profile", formData);
+        setProfileSuccess(true);
+        setTimeout(() => setProfileSuccess(false), 3000);
+      } catch (err) {
+        alert(err.response?.data?.message || "Failed to update profile");
+      }
+    },
+  });
+
   // Formik for Password Change
   const passwordForm = useFormik({
     initialValues: {
+      currentPassword: "",
       newPassword: "",
       confirmPassword: "",
     },
     validationSchema: Yup.object({
+      currentPassword: Yup.string().required("Current password is required"),
       newPassword: Yup.string()
         .min(6, "Password must be at least 6 characters")
         .required("New password is required"),
@@ -129,6 +109,7 @@ const ProfilePage = () => {
     onSubmit: async (values, { resetForm }) => {
       try {
         await updateItem("admin/change-password", {
+          currentPassword: values.currentPassword,
           newPassword: values.newPassword,
         });
         setPasswordSuccess(true);
@@ -155,6 +136,31 @@ const ProfilePage = () => {
       </div>
     );
   }
+
+  const inputClass = (touched, error) =>
+    `w-full px-3 py-2 text-sm rounded-lg border bg-white dark:bg-transparent outline-none transition-all ${
+      touched && error
+        ? "border-red-400 focus:border-red-400"
+        : "border-gray-200 focus:border-[var(--primary)]"
+    }`;
+
+  const PasswordInput = ({ field, placeholder, show, onToggle, form }) => (
+    <div className="relative">
+      <input
+        type={show ? "text" : "password"}
+        placeholder={placeholder}
+        {...form.getFieldProps(field)}
+        className={`${inputClass(form.touched[field], form.errors[field])} pr-10`}
+      />
+      <button
+        type="button"
+        onClick={onToggle}
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+      >
+        {show ? <EyeOff size={14} /> : <Eye size={14} />}
+      </button>
+    </div>
+  );
 
   return (
     <div className="flex h-screen bg-[var(--main-bg)] text-[var(--text-main)] font-sans antialiased">
@@ -206,6 +212,7 @@ const ProfilePage = () => {
 
                   {/* Input Grid */}
                   <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                    {/* Full Name */}
                     <div className="space-y-1.5">
                       <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide ml-1">
                         Full Name
@@ -218,13 +225,15 @@ const ProfilePage = () => {
                           profileForm.errors.fullName
                         )}
                       />
-                      {profileForm.touched.fullName && profileForm.errors.fullName && (
-                        <p className="text-[10px] text-red-500 ml-1">
-                          {profileForm.errors.fullName}
-                        </p>
-                      )}
+                      {profileForm.touched.fullName &&
+                        profileForm.errors.fullName && (
+                          <p className="text-[10px] text-red-500 ml-1">
+                            {profileForm.errors.fullName}
+                          </p>
+                        )}
                     </div>
 
+                    {/* Role (Read Only) */}
                     <div className="space-y-1.5">
                       <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide ml-1">
                         Role
@@ -237,6 +246,7 @@ const ProfilePage = () => {
                       />
                     </div>
 
+                    {/* Email */}
                     <div className="space-y-1.5">
                       <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide ml-1">
                         Email
@@ -249,13 +259,15 @@ const ProfilePage = () => {
                           profileForm.errors.email
                         )}
                       />
-                      {profileForm.touched.email && profileForm.errors.email && (
-                        <p className="text-[10px] text-red-500 ml-1">
-                          {profileForm.errors.email}
-                        </p>
-                      )}
+                      {profileForm.touched.email &&
+                        profileForm.errors.email && (
+                          <p className="text-[10px] text-red-500 ml-1">
+                            {profileForm.errors.email}
+                          </p>
+                        )}
                     </div>
 
+                    {/* Phone */}
                     <div className="space-y-1.5">
                       <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide ml-1">
                         Phone
@@ -268,11 +280,12 @@ const ProfilePage = () => {
                           profileForm.errors.phone
                         )}
                       />
-                      {profileForm.touched.phone && profileForm.errors.phone && (
-                        <p className="text-[10px] text-red-500 ml-1">
-                          {profileForm.errors.phone}
-                        </p>
-                      )}
+                      {profileForm.touched.phone &&
+                        profileForm.errors.phone && (
+                          <p className="text-[10px] text-red-500 ml-1">
+                            {profileForm.errors.phone}
+                          </p>
+                        )}
                     </div>
                   </div>
                 </div>
@@ -286,7 +299,7 @@ const ProfilePage = () => {
                   <button
                     type="submit"
                     disabled={profileForm.isSubmitting}
-                    className="flex items-center cursor-pointer gap-2 px-5 py-2 bg-[var(--primary)] text-white text-sm font-medium rounded-lg hover:shadow-lg transition-all disabled:opacity-50"
+                    className="flex items-center gap-2 px-5 py-2 bg-[var(--primary)] text-white text-sm font-medium rounded-lg hover:shadow-lg transition-all disabled:opacity-50"
                   >
                     {profileForm.isSubmitting ? (
                       <Loader2 size={14} className="animate-spin" />
@@ -310,10 +323,31 @@ const ProfilePage = () => {
 
               <form onSubmit={passwordForm.handleSubmit} className="p-6 md:p-8 space-y-6">
                 <p className="text-xs text-gray-400">
-                  Set a new password for your account. Must be at least 6 characters.
+                  Enter your current password along with a new password to update your credentials.
                 </p>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                  {/* Current Password */}
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide">
+                      Current Password
+                    </label>
+                    <PasswordInput
+                      field="currentPassword"
+                      placeholder="••••••••"
+                      show={showCurrent}
+                      onToggle={() => setShowCurrent((v) => !v)}
+                      form={passwordForm}
+                    />
+                    {passwordForm.touched.currentPassword &&
+                      passwordForm.errors.currentPassword && (
+                        <p className="text-[10px] text-red-500">
+                          {passwordForm.errors.currentPassword}
+                        </p>
+                      )}
+                  </div>
+
+                  {/* New Password */}
                   <div className="space-y-1.5">
                     <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide">
                       New Password
@@ -325,13 +359,15 @@ const ProfilePage = () => {
                       onToggle={() => setShowNew((v) => !v)}
                       form={passwordForm}
                     />
-                    {passwordForm.touched.newPassword && passwordForm.errors.newPassword && (
-                      <p className="text-[10px] text-red-500">
-                        {passwordForm.errors.newPassword}
-                      </p>
-                    )}
+                    {passwordForm.touched.newPassword &&
+                      passwordForm.errors.newPassword && (
+                        <p className="text-[10px] text-red-500">
+                          {passwordForm.errors.newPassword}
+                        </p>
+                      )}
                   </div>
 
+                  {/* Confirm New Password */}
                   <div className="space-y-1.5">
                     <label className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide">
                       Confirm New
@@ -343,11 +379,12 @@ const ProfilePage = () => {
                       onToggle={() => setShowConfirm((v) => !v)}
                       form={passwordForm}
                     />
-                    {passwordForm.touched.confirmPassword && passwordForm.errors.confirmPassword && (
-                      <p className="text-[10px] text-red-500">
-                        {passwordForm.errors.confirmPassword}
-                      </p>
-                    )}
+                    {passwordForm.touched.confirmPassword &&
+                      passwordForm.errors.confirmPassword && (
+                        <p className="text-[10px] text-red-500">
+                          {passwordForm.errors.confirmPassword}
+                        </p>
+                      )}
                   </div>
                 </div>
 
@@ -364,14 +401,16 @@ const ProfilePage = () => {
                     <button
                       type="submit"
                       disabled={passwordForm.isSubmitting}
-                      className="flex items-center cursor-pointer gap-2 px-5 py-2 bg-[var(--primary)] text-white text-sm font-medium rounded-lg hover:shadow-lg transition-all disabled:opacity-50"
+                      className="flex items-center gap-2 px-5 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-all disabled:opacity-50 shadow-sm hover:shadow-md"
                     >
                       {passwordForm.isSubmitting ? (
                         <Loader2 size={14} className="animate-spin" />
                       ) : (
                         <ShieldCheck size={14} />
                       )}
-                      {passwordForm.isSubmitting ? "Updating..." : "Update Password"}
+                      {passwordForm.isSubmitting
+                        ? "Updating..."
+                        : "Update Password"}
                     </button>
                   </div>
                 </div>

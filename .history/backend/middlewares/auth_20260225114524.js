@@ -35,8 +35,7 @@ module.exports = (roles = []) => {
       req.user = decoded;
       next();
     } catch (err) {
-      console.log("JWT ERROR:", err.message);
-  return res.status(403).json({ message: err.message });
+      return res.status(403).json({ message: "Invalid token" });
     }
   };
 };

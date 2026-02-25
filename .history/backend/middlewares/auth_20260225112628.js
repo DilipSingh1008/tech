@@ -18,14 +18,9 @@ module.exports = (roles = []) => {
 
       const token = authHeader.split(" ")[1];
 
-      console.log(token);
-
-      console.log("VERIFY SECRET:", process.env.JWT_SECRET);
-      
-
       const decoded = jwt.verify(
         token,
-        process.env.JWT_SECRET
+        process.env.JWT_SECRET || "secretkey123"
       );
 
       // ⭐ role check
@@ -35,8 +30,7 @@ module.exports = (roles = []) => {
       req.user = decoded;
       next();
     } catch (err) {
-      console.log("JWT ERROR:", err.message);
-  return res.status(403).json({ message: err.message });
+      return res.status(403).json({ message: "Invalid token" });
     }
   };
 };

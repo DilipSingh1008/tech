@@ -44,14 +44,14 @@ exports.updateProfile = async (req, res) => {
 // ⭐ change password
 exports.changePassword = async (req, res) => {
   try {
-    const {  newPassword } = req.body;
+    const { currentPassword, newPassword } = req.body;
 
     const admin = await Admin.findById(req.user.id);
 
-    // const isMatch = await admin.comparePassword(currentPassword);
+    const isMatch = await admin.comparePassword(currentPassword);
 
-    // if (!isMatch)
-    //   return res.status(400).json({ message: "Current password incorrect" });
+    if (!isMatch)
+      return res.status(400).json({ message: "Current password incorrect" });
 
     admin.password = newPassword;
     await admin.save();

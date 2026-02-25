@@ -50,7 +50,6 @@ const ProfilePage = () => {
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
-
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   const [initialProfileValues] = useState({
@@ -286,7 +285,7 @@ const ProfilePage = () => {
                   <button
                     type="submit"
                     disabled={profileForm.isSubmitting}
-                    className="flex items-center cursor-pointer gap-2 px-5 py-2 bg-[var(--primary)] text-white text-sm font-medium rounded-lg hover:shadow-lg transition-all disabled:opacity-50"
+                    className="flex items-center gap-2 px-5 py-2 bg-[var(--primary)] text-white text-sm font-medium rounded-lg hover:shadow-lg transition-all disabled:opacity-50"
                   >
                     {profileForm.isSubmitting ? (
                       <Loader2 size={14} className="animate-spin" />
@@ -364,7 +363,7 @@ const ProfilePage = () => {
                     <button
                       type="submit"
                       disabled={passwordForm.isSubmitting}
-                      className="flex items-center cursor-pointer gap-2 px-5 py-2 bg-[var(--primary)] text-white text-sm font-medium rounded-lg hover:shadow-lg transition-all disabled:opacity-50"
+                      className="flex items-center gap-2 px-5 py-2 bg-[var(--primary)] text-white text-sm font-medium rounded-lg hover:shadow-lg transition-all disabled:opacity-50"
                     >
                       {passwordForm.isSubmitting ? (
                         <Loader2 size={14} className="animate-spin" />

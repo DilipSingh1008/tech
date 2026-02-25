@@ -1,16 +1,10 @@
 const jwt = require("jsonwebtoken");
 
-
+const jwt = require("jsonwebtoken");
 
 module.exports = (roles = []) => {
   return (req, res, next) => {
     try {
-
-      console.log("hii");
-      
-
-      console.log(req.headers);
-      
       const authHeader = req.headers.authorization;
 
       if (!authHeader || !authHeader.startsWith("Bearer "))
@@ -18,14 +12,9 @@ module.exports = (roles = []) => {
 
       const token = authHeader.split(" ")[1];
 
-      console.log(token);
-
-      console.log("VERIFY SECRET:", process.env.JWT_SECRET);
-      
-
       const decoded = jwt.verify(
         token,
-        process.env.JWT_SECRET
+        process.env.JWT_SECRET || "secretkey123"
       );
 
       // ⭐ role check
@@ -35,8 +24,7 @@ module.exports = (roles = []) => {
       req.user = decoded;
       next();
     } catch (err) {
-      console.log("JWT ERROR:", err.message);
-  return res.status(403).json({ message: err.message });
+      return res.status(403).json({ message: "Invalid token" });
     }
   };
 };

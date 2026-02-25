@@ -16,11 +16,11 @@ router.get("/profile", auth(), adminController.getProfile);
 
 router.put(
   "/profile",
-  auth(),
+  auth,
   upload.single("photo"),
   adminController.updateProfile
 );
 
-router.put("/change-password", auth(), adminController.changePassword);
+router.put("/change-password", auth, adminController.changePassword);
 
 module.exports = router;
