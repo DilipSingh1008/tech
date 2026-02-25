@@ -62,9 +62,11 @@ const UserPage = () => {
   const fetchUsers = async () => {
     setLoading(true);
     try {
+      console.log(searchQuery);
       const res = await getItems(
         `user?page=${page}&limit=${limit}&search=${searchQuery}`,
       );
+      console.log(res);
       setUsers(res.data || []);
       setTotalPages(res.pagination?.totalPages || 1);
     } catch (err) {
@@ -111,19 +113,24 @@ const UserPage = () => {
     }),
   });
 
-  if (loading)
-    return (
-      <div className="flex h-screen items-center justify-center text-xs font-medium">
-        Loading...
-      </div>
-    );
+  //   if (loading)
+  //     return (
+  //       <div className="flex h-screen items-center justify-center text-xs font-medium">
+  //         Loading...
+  //       </div>
+  //     );
   console.log(users);
   return (
     <div className={`h-screen w-full flex flex-col ${theme.main}`}>
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-5xl mx-auto">
           <div className="flex cursor-pointer items-center justify-between mb-4">
-            <Searchbar onChange={(e) => setSearchQuery(e.target.value)} />
+            <Searchbar
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setPage(1);
+              }}
+            />
             <button
               onClick={() => {
                 setEditingUser(null);
@@ -155,70 +162,76 @@ const UserPage = () => {
                 </thead>
 
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                  {users.map((u, index) => (
-                    <tr
-                      key={u._id}
-                      className="hover:bg-indigo-500/5 transition-colors"
-                    >
-                      <td className="px-4 py-2.5 font-semibold">
-                        {(page - 1) * limit + index + 1}
-                      </td>
-                      <td className="px-4 py-2.5 font-semibold text-sm">
-                        {u.name}
-                      </td>
-                      <td className="px-4 py-2.5 text-sm">{u.email}</td>
-                      <td className="px-4 py-2.5 text-sm capitalize">
-                        {u.role}
-                      </td>
+                  {loading ? (
+                    <div className="flex h-screen items-center justify-center text-xs font-medium">
+                      Loading...
+                    </div>
+                  ) : (
+                    users.map((u, index) => (
+                      <tr
+                        key={u._id}
+                        className="hover:bg-indigo-500/5 transition-colors"
+                      >
+                        <td className="px-4 py-2.5 font-semibold">
+                          {(page - 1) * limit + index + 1}
+                        </td>
+                        <td className="px-4 py-2.5 font-semibold text-sm">
+                          {u.name}
+                        </td>
+                        <td className="px-4 py-2.5 text-sm">{u.email}</td>
+                        <td className="px-4 py-2.5 text-sm capitalize">
+                          {u.role}
+                        </td>
 
-                      <td className="px-4 py-2.5">
-                        <div className="w-8 h-8 rounded bg-gray-500/10 border border-gray-500/10 overflow-hidden flex items-center justify-center">
-                          {u.image ? (
-                            <img
-                              src={`http://localhost:5000/${u.image}`}
-                              className="w-full h-full object-cover"
-                              alt="user"
-                            />
-                          ) : (
-                            <ImageIcon size={14} className="opacity-30" />
-                          )}
-                        </div>
-                      </td>
+                        <td className="px-4 py-2.5">
+                          <div className="w-8 h-8 rounded bg-gray-500/10 border border-gray-500/10 overflow-hidden flex items-center justify-center">
+                            {u.image ? (
+                              <img
+                                src={`http://localhost:5000/${u.image}`}
+                                className="w-full h-full object-cover"
+                                alt="user"
+                              />
+                            ) : (
+                              <ImageIcon size={14} className="opacity-30" />
+                            )}
+                          </div>
+                        </td>
 
-                      <td className="px-4 py-2.5">
-                        <button
-                          onClick={() => handleToggleStatus(u._id, u.status)}
-                          className={`cursor-pointer w-8 h-4 rounded-full relative transition-colors ${
-                            u.status ? "bg-(--primary)" : "bg-gray-400"
-                          }`}
-                        >
-                          <div
-                            className={`cursor-pointer absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${
-                              u.status ? "left-4.5" : "left-0.5"
+                        <td className="px-4 py-2.5">
+                          <button
+                            onClick={() => handleToggleStatus(u._id, u.status)}
+                            className={`cursor-pointer w-8 h-4 rounded-full relative transition-colors ${
+                              u.status ? "bg-(--primary)" : "bg-gray-400"
                             }`}
-                          />
-                        </button>
-                      </td>
+                          >
+                            <div
+                              className={`cursor-pointer absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${
+                                u.status ? "left-4.5" : "left-0.5"
+                              }`}
+                            />
+                          </button>
+                        </td>
 
-                      <td className="px-4 py-2.5 text-right flex justify-end gap-1">
-                        <button
-                          onClick={() => {
-                            setEditingUser(u);
-                            setIsModalOpen(true);
-                          }}
-                          className="p-1.5 cursor-pointer hover:text-(--primary)"
-                        >
-                          <Edit3 size={14} />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(u._id)}
-                          className="p-1.5 cursor-pointer hover:text-red-500"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                        <td className="px-4 py-2.5 text-right flex justify-end gap-1">
+                          <button
+                            onClick={() => {
+                              setEditingUser(u);
+                              setIsModalOpen(true);
+                            }}
+                            className="p-1.5 cursor-pointer hover:text-(--primary)"
+                          >
+                            <Edit3 size={14} />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(u._id)}
+                            className="p-1.5 cursor-pointer hover:text-red-500"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
@@ -389,7 +402,7 @@ const UserPage = () => {
                           className="w-full p-2 text-sm rounded-lg bg-gray-500/5 border border-gray-500/20 outline-none focus:border-(--primary)"
                         >
                           <option value="user">User</option>
-                          <option value="admin">Admin</option>
+                          <option value="sub-admin">Sub-Admin</option>
                         </Field>
                         <ErrorMessage
                           name="role"

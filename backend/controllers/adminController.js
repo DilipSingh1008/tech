@@ -1,7 +1,7 @@
 const Admin = require("../models/admin.js");
+const User = require("../models/User");
 const jwt = require("jsonwebtoken");
-// const bcrypt = require("bcrypt");
-
+const bcrypt = require("bcrypt");
 
 // ⭐ get profile
 exports.getProfile = async (req, res) => {
@@ -14,8 +14,6 @@ exports.getProfile = async (req, res) => {
   }
 };
 
-
-
 // ⭐ update profile
 exports.updateProfile = async (req, res) => {
   try {
@@ -27,11 +25,9 @@ exports.updateProfile = async (req, res) => {
       updateData.photo = req.file.path;
     }
 
-    const admin = await Admin.findByIdAndUpdate(
-      req.user.id,
-      updateData,
-      { new: true }
-    ).select("-password");
+    const admin = await Admin.findByIdAndUpdate(req.user.id, updateData, {
+      new: true,
+    }).select("-password");
 
     res.status(200).json(admin);
   } catch (error) {
@@ -39,12 +35,10 @@ exports.updateProfile = async (req, res) => {
   }
 };
 
-
-
 // ⭐ change password
 exports.changePassword = async (req, res) => {
   try {
-    const {  newPassword } = req.body;
+    const { newPassword } = req.body;
 
     const admin = await Admin.findById(req.user.id);
 
@@ -61,7 +55,6 @@ exports.changePassword = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
 
 exports.register = async (req, res) => {
   try {
@@ -100,44 +93,85 @@ exports.register = async (req, res) => {
 };
 // Login
 
-
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
+    console.log(email);
+    console.log(password);
 
     // ⭐ find admin
-    const admin = await Admin.findOne({
-      email: email.toLowerCase(),
-    });
+    // const admin = await Admin.findOne({
+    //   email: email.toLowerCase(),
+    // });
+    let account = await Admin.findOne({ email: email.toLowerCase() });
 
-    if (!admin)
-      return res.status(400).json({ message: "Admin not found" });
+    let roleType = "admin";
+
+    // if (!admin) return res.status(400).json({ message: "Admin not found" });
+
+    if (!account) {
+      account = await User.findOne({
+        email: email.toLowerCase(),
+        role: "sub-admin",
+      });
+      roleType = "sub-admin";
+    }
+
+    if (!account) {
+      return res.status(400).json({ message: "Account not found" });
+    }
 
     // ⭐ compare password (model method)
-    const isMatch = await admin.comparePassword(password);
+    let isMatch = false;
 
-    if (!isMatch)
+    if (roleType === "admin") {
+      isMatch = await account.comparePassword(password);
+    } else if (roleType === "sub-admin") {
+      isMatch = await bcrypt.compare(password, account.password);
+    }
+
+    if (!isMatch) {
       return res.status(400).json({ message: "Invalid password" });
+    }
 
     // ⭐ create token
+    // const token = jwt.sign(
+    //   {
+    //     id: admin._id,
+    //     role: admin.role,
+    //   },
+    //   process.env.JWT_SECRET,
+    //   { expiresIn: "1d" },
+    // );
     const token = jwt.sign(
       {
-        id: admin._id,
-        role: admin.role,
+        id: account._id,
+        role: roleType,
       },
       process.env.JWT_SECRET,
-      { expiresIn: "1d" }
+      { expiresIn: "1d" },
     );
 
     console.log("LOGIN SECRET:", process.env.JWT_SECRET);
 
+    console.log("LOGIN SECRET:", process.env.JWT_SECRET);
+
+    // res.json({
+    //   token,
+    //   admin: {
+    //     id: admin._id,
+    //     fullName: admin.fullName,
+    //     email: admin.email,
+    //     role: admin.role,
+    //   },
+    // });
     res.json({
       token,
-      admin: {
-        id: admin._id,
-        fullName: admin.fullName,
-        email: admin.email,
-        role: admin.role,
+      user: {
+        id: account._id,
+        fullName: account.fullName || account.name,
+        email: account.email,
+        role: roleType,
       },
     });
   } catch (err) {

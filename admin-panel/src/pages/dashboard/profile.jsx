@@ -50,7 +50,6 @@ const ProfilePage = () => {
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
-
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   const [initialProfileValues] = useState({
@@ -161,7 +160,6 @@ const ProfilePage = () => {
       <div className="flex-1 flex flex-col min-w-0">
         <main className="flex-1 overflow-y-auto bg-[#fafafa] dark:bg-[var(--main-bg)]">
           <div className="mx-auto p-1 md:p-10 space-y-10">
-
             {/* --- BASIC INFORMATION FORM --- */}
             <div className="bg-white dark:bg-[var(--card-bg)] rounded-xl shadow-sm overflow-hidden">
               <div className="p-1 px-6 py-4 border-b border-gray-50 bg-gray-50/50 dark:bg-white/5">
@@ -215,14 +213,15 @@ const ProfilePage = () => {
                         {...profileForm.getFieldProps("fullName")}
                         className={inputClass(
                           profileForm.touched.fullName,
-                          profileForm.errors.fullName
+                          profileForm.errors.fullName,
                         )}
                       />
-                      {profileForm.touched.fullName && profileForm.errors.fullName && (
-                        <p className="text-[10px] text-red-500 ml-1">
-                          {profileForm.errors.fullName}
-                        </p>
-                      )}
+                      {profileForm.touched.fullName &&
+                        profileForm.errors.fullName && (
+                          <p className="text-[10px] text-red-500 ml-1">
+                            {profileForm.errors.fullName}
+                          </p>
+                        )}
                     </div>
 
                     <div className="space-y-1.5">
@@ -246,14 +245,15 @@ const ProfilePage = () => {
                         {...profileForm.getFieldProps("email")}
                         className={inputClass(
                           profileForm.touched.email,
-                          profileForm.errors.email
+                          profileForm.errors.email,
                         )}
                       />
-                      {profileForm.touched.email && profileForm.errors.email && (
-                        <p className="text-[10px] text-red-500 ml-1">
-                          {profileForm.errors.email}
-                        </p>
-                      )}
+                      {profileForm.touched.email &&
+                        profileForm.errors.email && (
+                          <p className="text-[10px] text-red-500 ml-1">
+                            {profileForm.errors.email}
+                          </p>
+                        )}
                     </div>
 
                     <div className="space-y-1.5">
@@ -265,14 +265,15 @@ const ProfilePage = () => {
                         {...profileForm.getFieldProps("phone")}
                         className={inputClass(
                           profileForm.touched.phone,
-                          profileForm.errors.phone
+                          profileForm.errors.phone,
                         )}
                       />
-                      {profileForm.touched.phone && profileForm.errors.phone && (
-                        <p className="text-[10px] text-red-500 ml-1">
-                          {profileForm.errors.phone}
-                        </p>
-                      )}
+                      {profileForm.touched.phone &&
+                        profileForm.errors.phone && (
+                          <p className="text-[10px] text-red-500 ml-1">
+                            {profileForm.errors.phone}
+                          </p>
+                        )}
                     </div>
                   </div>
                 </div>
@@ -308,9 +309,13 @@ const ProfilePage = () => {
                 </h2>
               </div>
 
-              <form onSubmit={passwordForm.handleSubmit} className="p-6 md:p-8 space-y-6">
+              <form
+                onSubmit={passwordForm.handleSubmit}
+                className="p-6 md:p-8 space-y-6"
+              >
                 <p className="text-xs text-gray-400">
-                  Set a new password for your account. Must be at least 6 characters.
+                  Set a new password for your account. Must be at least 6
+                  characters.
                 </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -325,11 +330,12 @@ const ProfilePage = () => {
                       onToggle={() => setShowNew((v) => !v)}
                       form={passwordForm}
                     />
-                    {passwordForm.touched.newPassword && passwordForm.errors.newPassword && (
-                      <p className="text-[10px] text-red-500">
-                        {passwordForm.errors.newPassword}
-                      </p>
-                    )}
+                    {passwordForm.touched.newPassword &&
+                      passwordForm.errors.newPassword && (
+                        <p className="text-[10px] text-red-500">
+                          {passwordForm.errors.newPassword}
+                        </p>
+                      )}
                   </div>
 
                   <div className="space-y-1.5">
@@ -343,11 +349,12 @@ const ProfilePage = () => {
                       onToggle={() => setShowConfirm((v) => !v)}
                       form={passwordForm}
                     />
-                    {passwordForm.touched.confirmPassword && passwordForm.errors.confirmPassword && (
-                      <p className="text-[10px] text-red-500">
-                        {passwordForm.errors.confirmPassword}
-                      </p>
-                    )}
+                    {passwordForm.touched.confirmPassword &&
+                      passwordForm.errors.confirmPassword && (
+                        <p className="text-[10px] text-red-500">
+                          {passwordForm.errors.confirmPassword}
+                        </p>
+                      )}
                   </div>
                 </div>
 
@@ -371,13 +378,14 @@ const ProfilePage = () => {
                       ) : (
                         <ShieldCheck size={14} />
                       )}
-                      {passwordForm.isSubmitting ? "Updating..." : "Update Password"}
+                      {passwordForm.isSubmitting
+                        ? "Updating..."
+                        : "Update Password"}
                     </button>
                   </div>
                 </div>
               </form>
             </div>
-
           </div>
         </main>
       </div>
