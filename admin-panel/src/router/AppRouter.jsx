@@ -26,6 +26,9 @@ import ProductForm from "../pages/dashboard/product/ProductForm.jsx";
 import ManageRole from "../pages/dashboard/UserPage/ManageRole.jsx";
 import Cms from "../pages/dashboard/cms/Cms.jsx";
 import AddCmsForm from "../pages/dashboard/cms/AddCmsForm.jsx";
+import DashboardShow from "../pages/dashboard/DashboardShow.jsx";
+import ManageFaqCategory from "../pages/dashboard/faq-category/ManageFaqCategory.jsx";
+import ManageFaq from "../pages/dashboard/faq-category/ManageFaq.jsx";
 // import ProductManagement from "../pages/dashboard/product/ProductCategory";
 
 // import ThemeToggleButton from "./components/Button";
@@ -41,6 +44,7 @@ function AppRouter() {
 
             <Route path="forgot-password" element={<ForgotPassword />} />
             <Route path="/dashboard" element={<Dashboard />}>
+              <Route path="/dashboard" element={<DashboardShow />} />
               <Route path="profile" element={<Profile />} />
               {/* <Route path="/dashboard/*" element={<Dashboard />} /> */}
               <Route path="/dashboard/location" element={<Location />} />
@@ -78,20 +82,16 @@ function AppRouter() {
                 path="/dashboard/service/add"
                 element={<AddServicePage />}
               />
-              <Route
-                path="/dashboard/cms"
-                element={<Cms />}
-              />
-              <Route
-                path="/dashboard/add-cms"
-                element={<AddCmsForm />}
-              />
-              <Route
-                path="/dashboard/edit-cms/:id"
-                element={<AddCmsForm />}
-              />
+              <Route path="/dashboard/cms" element={<Cms />} />
+              <Route path="/dashboard/add-cms" element={<AddCmsForm />} />
+              <Route path="/dashboard/edit-cms/:id" element={<AddCmsForm />} />
               <Route path="/dashboard/user" element={<UserPage />} />
               <Route path="/dashboard/managerole" element={<ManageRole />} />
+              <Route
+                path="/dashboard/faq-category"
+                element={<ManageFaqCategory />}
+              />
+              <Route path="/dashboard/manage-faq" element={<ManageFaq />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />

@@ -59,6 +59,16 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       icon: <Wrench size={18} />,
     },
     {
+      path: "/dashboard/faq-category",
+      name: "FAQ Category",
+      icon: <Wrench size={18} />,
+    },
+    {
+      path: "/dashboard/manage-faq",
+      name: "Manage FAQ",
+      icon: <Settings size={18} />,
+    },
+    {
       path: "/dashboard/settings",
       name: "Settings",
       icon: <Settings size={18} />,

@@ -17,11 +17,12 @@ const bannerRoute = require("./routes/bannerRoutes");
 const productCategoryRoutes = require("./routes/productCategoryRoutes");
 const productItemRoutes = require("./routes/productItemRoutes");
 const serviceRoutes = require("./routes/serviceRoutes");
-const authRoutes = require("./routes/authRoutes")
-const userRoute = require("./routes/userRoutes")
-const cmsRoute = require("./routes/cmsRoute")
-const roleRoutes = require("./routes/role")
-
+const authRoutes = require("./routes/authRoutes");
+const userRoute = require("./routes/userRoutes");
+const cmsRoute = require("./routes/cmsRoute");
+const roleRoutes = require("./routes/role");
+const faqCategoryRoutes = require("./routes/faqCategoryRoutes");
+const manageFaqRoutes = require("./routes/manageFaqRoutes");
 connectDB();
 
 const app = express();
@@ -51,10 +52,10 @@ app.use("/api/product-item", productItemRoutes);
 app.use("/api/services", serviceRoutes);
 app.use("/api/admin", authRoutes);
 app.use("/api/user", userRoute);
-app.use("/api/cms", cmsRoute)
+app.use("/api/cms", cmsRoute);
 app.use("/api/role", roleRoutes);
-
-
+app.use("/api/faq-category", faqCategoryRoutes);
+app.use("/api/manage-faq", manageFaqRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
