@@ -91,7 +91,7 @@ const ProductCategory = () => {
 
   return (
     <div className={`h-screen w-full flex flex-col ${theme.main}`}>
-      <header
+      {/* <header
         className={`px-6 py-4 border-b ${
           isDarkMode ? "border-gray-800" : "border-gray-200"
         }`}
@@ -100,9 +100,9 @@ const ProductCategory = () => {
         <p className="text-[10px] opacity-50">
           Manage your categories and product details
         </p>
-      </header>
+      </header> */}
 
-      <main className="flex-1 overflow-y-auto p-4 md:p-8">
+      <main className="flex-1 overflow-y-auto p-4 pt-0 md:p-8">
         <div className="max-w-5xl mx-auto">
 
           {/* Top Bar */}

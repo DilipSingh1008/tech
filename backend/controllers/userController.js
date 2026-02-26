@@ -36,9 +36,14 @@ exports.getUsers = async (req, res) => {
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 5;
     const search = req.query.search || "";
+    const sortBy = req.query.sortBy || "createdAt";
+    const order = req.query.order || "desc";
 
     const query = {
-      name: { $regex: search, $options: "i" },
+      $or: [
+        { name: { $regex: search, $options: "i" } },
+        { email: { $regex: search, $options: "i" } },
+      ],
     };
 
     const total = await User.countDocuments(query);
@@ -48,7 +53,7 @@ exports.getUsers = async (req, res) => {
       .select("-password")
       .skip((page - 1) * limit)
       .limit(limit)
-      .sort({ createdAt: -1 });
+      .sort({ [sortBy]: order === "asc" ? 1 : -1 });
 
     res.json({
       data: users,
