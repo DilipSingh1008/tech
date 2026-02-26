@@ -89,7 +89,7 @@ const Cms = () => {
 
   return (
     <div className={`h-screen w-full flex flex-col ${theme.main}`}>
-      <main className="flex-1 overflow-y-auto p-4 md:p-6">
+      <main className="flex-1 overflow-y-auto">
         <div className="max-w-5xl mx-auto">
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
@@ -117,7 +117,7 @@ const Cms = () => {
                   className={`uppercase tracking-wider font-bold ${theme.header}`}
                 >
                   <tr>
-                    <th className="px-4 py-3 w-16">#</th>
+                    <th className="px-4 py-3 w-16">ID</th>
                     <th
                       className="px-4 py-3 cursor-pointer hover:text-(--primary) transition-colors"
                       onClick={() => handleSort("title")}

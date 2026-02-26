@@ -8,6 +8,7 @@ import {
   createItem,
   updateItem,
   deleteItem,
+  patchItem,
 } from "../../../services/api";
 import { FiChevronRight, FiChevronLeft } from "react-icons/fi";
 import Searchbar from "../../../components/Searchbar";
@@ -76,6 +77,18 @@ const ManageFaqCategory = () => {
     }
     setPage(1);
   };
+  const handleToggleStatus = async (id, currentStatus) => {
+    try {
+      await patchItem(`faq-category/toggle-status/${id}`, {});
+      setCategories((prev) =>
+        prev.map((faq) =>
+          faq._id === id ? { ...faq, status: !currentStatus } : faq,
+        ),
+      );
+    } catch (err) {
+      console.error("Failed to toggle FAQ status", err);
+    }
+  };
   return (
     <div className={`h-screen w-full flex flex-col ${theme.main}`}>
       <main className="flex-1 overflow-y-auto">
@@ -134,6 +147,7 @@ const ManageFaqCategory = () => {
                           : "↕"}
                       </span>
                     </th>
+                    <th className="px-4 py-3 w-24">Status</th>
                     <th className="px-4 py-3 text-right w-24">Action</th>
                   </tr>
                 </thead>
@@ -161,6 +175,22 @@ const ManageFaqCategory = () => {
 
                         <td className="px-4 py-2.5 text-xs opacity-80 max-w-xs truncate">
                           {item.description}
+                        </td>
+                        <td className="px-4 py-2.5">
+                          <button
+                            onClick={() =>
+                              handleToggleStatus(item._id, item.status)
+                            }
+                            className={`cursor-pointer w-8 h-4 rounded-full relative transition-colors ${
+                              item.status ? "bg-(--primary)" : "bg-gray-400"
+                            }`}
+                          >
+                            <div
+                              className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${
+                                item.status ? "left-4.5" : "left-0.5"
+                              }`}
+                            />
+                          </button>
                         </td>
 
                         <td className="px-4 py-2.5 text-right flex justify-end gap-1">
