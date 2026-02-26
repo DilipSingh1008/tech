@@ -127,7 +127,7 @@ const ProductCategory = () => {
               <table className="w-full text-left text-xs border-collapse">
                 <thead className={`uppercase tracking-wider font-bold ${theme.header}`}>
                   <tr>
-                    <th className="px-4 py-3 w-16">ID</th>
+                    <th className="px-4 py-3 w-16">#</th>
                     <th
                       className="px-4 py-3 cursor-pointer hover:text-(--primary) transition-colors"
                       onClick={() => handleSort("name")}

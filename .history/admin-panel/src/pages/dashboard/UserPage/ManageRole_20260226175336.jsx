@@ -130,7 +130,7 @@ const ManageRole = () => {
 
                     {/* ── Sortable: Role Name ── */}
                     <th
-                      className="px-4 py-3 cursor-pointer w-[100px] hover:text-(--primary) transition-colors"
+                      className="px-4 py-3 cursor-pointer hover:text-(--primary) transition-colors"
                       onClick={() => handleSort("name")}
                     >
                       <div className="flex items-center gap-1">

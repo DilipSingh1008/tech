@@ -130,14 +130,14 @@ const ManageRole = () => {
 
                     {/* ── Sortable: Role Name ── */}
                     <th
-                      className="px-4 py-3 cursor-pointer w-[100px] hover:text-(--primary) transition-colors"
+                      className="px-4 py-3 cursor-pointer hover:text-(--primary) transition-colors"
                       onClick={() => handleSort("name")}
                     >
                       <div className="flex items-center gap-1">
                         Role Name <SortIcon field="name" />
                       </div>
                     </th>
-                     <th className="px-4 py-3 w-24" onClick={() => navigate("/dashboard/manage-permissio")}>Permissions</th>
+                     <th className="px-4 py-3 cursor-pointer w-24" onClick={() => navigate("/dashboard/manage-permissio")}>Permissions</th>
                     <th className="px-4 py-3 w-24">Status</th>
                     <th className="px-4 py-3 text-right w-24">Action</th>
                   </tr>
@@ -168,10 +168,6 @@ const ManageRole = () => {
 
                         <td className="px-4 py-2.5 font-semibold text-sm capitalize">
                           {role.name}
-                        </td>
-
-                         <td className="px-4 py-2.5 hover:text-blue-400 font-semibold cursor-pointer text-sm capitalize" onClick={() => navigate("/dashboard/manage-permission")}>
-                          Manage
                         </td>
 
                         <td className="px-4 py-2.5">

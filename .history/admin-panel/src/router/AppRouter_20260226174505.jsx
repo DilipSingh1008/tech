@@ -29,7 +29,6 @@ import AddCmsForm from "../pages/dashboard/cms/AddCmsForm.jsx";
 import DashboardShow from "../pages/dashboard/DashboardShow.jsx";
 import ManageFaqCategory from "../pages/dashboard/faq-category/ManageFaqCategory.jsx";
 import ManageFaq from "../pages/dashboard/faq-category/ManageFaq.jsx";
-import ManagePermissions from "../pages/dashboard/UserPage/ManagePermissions.jsx";
 // import ProductManagement from "../pages/dashboard/product/ProductCategory";
 
 // import ThemeToggleButton from "./components/Button";
@@ -88,7 +87,7 @@ function AppRouter() {
               <Route path="/dashboard/edit-cms/:id" element={<AddCmsForm />} />
               <Route path="/dashboard/user" element={<UserPage />} />
               <Route path="/dashboard/managerole" element={<ManageRole />} />
-              <Route path="/dashboard/manage-permission" element={<ManagePermissions />} />
+              <Route path="/dashboard/manage-permission" element={<ManageRole />} />
 
               <Route
                 path="/dashboard/faq-category"

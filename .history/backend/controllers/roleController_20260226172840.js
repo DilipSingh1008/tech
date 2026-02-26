@@ -122,16 +122,3 @@ exports.updatePermissions = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
-
-exports.getPermissions = async (req, res) => {
-  try {
-    const role = await Role.findById(req.params.id).select("permissions name");
-
-    if (!role) return res.status(404).json({ message: "Role not found" });
-
-    res.json(role);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
