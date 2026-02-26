@@ -97,3 +97,19 @@ exports.deleteFaqCategory = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+exports.toggleFaqStatus = async (req, res) => {
+  try {
+    const faq = await FaqCategory.findById(req.params.id);
+    if (!faq) return res.status(404).json({ message: "FAQ not found" });
+
+    faq.status = !faq.status;
+    await faq.save();
+
+    res
+      .status(200)
+      .json({ success: true, message: "FAQ status updated", data: faq });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

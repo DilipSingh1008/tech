@@ -1,11 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useTheme } from "../../../context/ThemeContext";
 import { Plus, Trash2, Edit3 } from "lucide-react";
-import {
-  getItems,
-  deleteItem,
-  patchItem,
-} from "../../../services/api";
+import { getItems, deleteItem, patchItem } from "../../../services/api";
 import { FiChevronRight, FiChevronLeft } from "react-icons/fi";
 import Searchbar from "../../../components/Searchbar";
 import { useNavigate } from "react-router-dom";
@@ -92,7 +88,6 @@ const ManageServicesPage = () => {
     <div className={`h-screen w-full flex flex-col ${theme.main}`}>
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-5xl mx-auto">
-
           {/* Top bar */}
           <div className="flex flex-col sm:flex-row justify-between mb-4 gap-2">
             <Searchbar
@@ -110,13 +105,14 @@ const ManageServicesPage = () => {
           </div>
 
           {/* Table */}
-          <div className={`rounded-xl border shadow-sm overflow-x-auto ${theme.card}`}>
+          <div
+            className={`rounded-xl border shadow-sm overflow-x-auto ${theme.card}`}
+          >
             <table className="min-w-[900px] w-full text-xs">
               <thead className={`uppercase font-bold ${theme.header}`}>
                 <tr>
                   <th className="px-2 py-3 text-left whitespace-nowrap">ID</th>
 
-                  {/* ── Sortable: Name ── */}
                   <th
                     className="px-2 py-3 text-left whitespace-nowrap cursor-pointer hover:text-(--primary) transition-colors"
                     onClick={() => handleSort("name")}
@@ -124,7 +120,6 @@ const ManageServicesPage = () => {
                     Name <SortIcon field="name" />
                   </th>
 
-                  {/* ── Sortable: Slug ── */}
                   <th
                     className="px-2 py-3 text-left whitespace-nowrap cursor-pointer hover:text-(--primary) transition-colors"
                     onClick={() => handleSort("slug")}
@@ -179,9 +174,9 @@ const ManageServicesPage = () => {
                   services.map((s, index) => (
                     <tr
                       key={s._id}
-                      className="border-t hover:bg-gray-100 dark:hover:bg-[#1a2030]"
+                      className=" hover:bg-gray-100 dark:hover:bg-[#1a2030]"
                     >
-                      <td className="px-2 py-2 whitespace-nowrap">
+                      <td className="px-2 py-2 ">
                         {(page - 1) * limit + index + 1}
                       </td>
 
@@ -229,86 +224,87 @@ const ManageServicesPage = () => {
                         </button>
                       </td>
 
-                     <td className="px-4 py-2.5 text-right">
-  <div className="flex justify-end gap-4">
+                      <td className="px-4 py-2.5 text-right">
+                        <div className="flex justify-end gap-4">
+                          {/* EDIT */}
+                          <div className="relative group">
+                            <button
+                              onClick={() =>
+                                navigate(`/dashboard/service/edit/${s._id}`)
+                              }
+                              className="cursor-pointer p-1.5 text-gray-400 hover:text-(--primary) transition-colors"
+                            >
+                              <Edit3 size={14} />
+                            </button>
 
-    {/* EDIT */}
-    <div className="relative group">
-      <button
-        onClick={() => navigate(`/dashboard/service/edit/${s._id}`)}
-        className="cursor-pointer p-1.5 text-gray-400 hover:text-(--primary) transition-colors"
-      >
-        <Edit3 size={14} />
-      </button>
+                            <span className="absolute bottom-full right-0 mb-2 opacity-0 group-hover:opacity-100 transition bg-black text-blue-400 text-[10px] px-2 py-1 rounded whitespace-nowrap pointer-events-none z-50">
+                              Edit service
+                              <span className="absolute top-full right-2 border-4 border-transparent border-t-black"></span>
+                            </span>
+                          </div>
 
-      <span className="absolute bottom-full right-0 mb-2 opacity-0 group-hover:opacity-100 transition bg-black text-blue-400 text-[10px] px-2 py-1 rounded whitespace-nowrap pointer-events-none z-50">
-        Edit service
-        <span className="absolute top-full right-2 border-4 border-transparent border-t-black"></span>
-      </span>
-    </div>
+                          {/* DELETE */}
+                          <div className="relative group">
+                            <button
+                              onClick={() => handleDelete(s._id)}
+                              className="cursor-pointer p-1.5 text-gray-400 hover:text-red-500 transition-colors"
+                            >
+                              <Trash2 size={14} />
+                            </button>
 
-    {/* DELETE */}
-    <div className="relative group">
-      <button
-        onClick={() => handleDelete(s._id)}
-        className="cursor-pointer p-1.5 text-gray-400 hover:text-red-500 transition-colors"
-      >
-        <Trash2 size={14} />
-      </button>
-
-      <span className="absolute bottom-full right-0 mb-2 opacity-0 group-hover:opacity-100 transition bg-black text-red-400 text-[10px] px-2 py-1 rounded whitespace-nowrap pointer-events-none z-50">
-        Delete service
-        <span className="absolute top-full right-2 border-4 border-transparent border-t-black"></span>
-      </span>
-    </div>
-
-  </div>
-</td>
+                            <span className="absolute bottom-full right-0 mb-2 opacity-0 group-hover:opacity-100 transition bg-black text-red-400 text-[10px] px-2 py-1 rounded whitespace-nowrap pointer-events-none z-50">
+                              Delete service
+                              <span className="absolute top-full right-2 border-4 border-transparent border-t-black"></span>
+                            </span>
+                          </div>
+                        </div>
+                      </td>
                     </tr>
                   ))
                 )}
               </tbody>
             </table>
-          </div>
 
-          {/* Pagination */}
-          <div className={`flex items-center justify-between p-3 border-t ${theme.divider}`}>
-            <span className="text-[11px] opacity-60">
-              Showing {services.length} entries
-            </span>
-            <div className="flex items-center gap-1">
-              <button
-                disabled={page === 1 || loading}
-                onClick={() => setPage(page - 1)}
-                className="p-1.5 cursor-pointer border rounded-md disabled:opacity-30 hover:border-(--primary) hover:text-(--primary)"
-              >
-                <FiChevronLeft size={16} />
-              </button>
-
-              {[...Array(totalPages)].map((_, i) => (
+            {/* Pagination */}
+            <div
+              className={`flex items-center justify-between p-3 border-t ${theme.divider}`}
+            >
+              <span className="text-[11px] opacity-60">
+                Showing {services.length} entries
+              </span>
+              <div className="flex items-center gap-1">
                 <button
-                  key={i + 1}
-                  onClick={() => setPage(i + 1)}
-                  className={`w-7 h-7 cursor-pointer text-[11px] rounded-md border transition-all ${
-                    page === i + 1
-                      ? "bg-(--primary) text-white border-(--primary) shadow-sm"
-                      : "hover:border-(--primary) hover:text-(--primary) border-transparent"
-                  }`}
+                  disabled={page === 1 || loading}
+                  onClick={() => setPage(page - 1)}
+                  className="cursor-pointer p-1.5 border rounded-md disabled:opacity-30"
                 >
-                  {i + 1}
+                  <FiChevronLeft size={16} />
                 </button>
-              ))}
 
-              <button
-                disabled={page === totalPages || loading}
-                onClick={() => setPage(page + 1)}
-                className="p-1.5 border cursor-pointer rounded-md disabled:opacity-30 hover:border-(--primary) hover:text-(--primary)"
-              >
-                <FiChevronRight size={16} />
-              </button>
+                {[...Array(totalPages)].map((_, i) => (
+                  <button
+                    key={i + 1}
+                    onClick={() => setPage(i + 1)}
+                    className={`w-7 h-7 cursor-pointer text-[11px] rounded-md border transition-all ${
+                      page === i + 1
+                        ? "bg-(--primary) text-white border-(--primary) shadow-sm"
+                        : "hover:border-(--primary) hover:text-(--primary) border-transparent"
+                    }`}
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+
+                <button
+                  disabled={page === totalPages || loading}
+                  onClick={() => setPage(page + 1)}
+                  className="p-1.5 border cursor-pointer rounded-md disabled:opacity-30 hover:border-(--primary) hover:text-(--primary)"
+                >
+                  <FiChevronRight size={16} />
+                </button>
+              </div>
             </div>
           </div>
-
         </div>
       </main>
     </div>

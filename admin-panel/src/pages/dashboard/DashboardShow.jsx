@@ -39,7 +39,7 @@ const DashboardShow = () => {
     try {
       setLoading(true);
       const [roleRes, serviceRes, productRes] = await Promise.all([
-        getItems("role"),
+        getItems("user"),
         getItems("services"),
         getItems("product-item"),
       ]);

@@ -143,13 +143,12 @@ const CityLocation = () => {
   };
 
   console.log();
-  
 
-      // const filteredCities = citiesData.filter((city) =>{
-      //   console.log(city);
-        
-      //   return city.name.toLowerCase().includes(searchQuery.toLowerCase());
-      // });
+  // const filteredCities = citiesData.filter((city) =>{
+  //   console.log(city);
+
+  //   return city.name.toLowerCase().includes(searchQuery.toLowerCase());
+  // });
 
   const theme = {
     main: isDarkMode
@@ -170,11 +169,10 @@ const CityLocation = () => {
 
   return (
     <div className={`h-screen w-full flex flex-col ${theme.main}`}>
-      <main className="flex-1 overflow-y-auto p-4 md:p-6">
+      <main className="flex-1 overflow-y-auto ">
         <div className="max-w-5xl mx-auto">
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
-           
             <Searchbar onChange={(e) => setSearchQuery(e.target.value)} />
             <button
               onClick={openAddModal}
@@ -236,7 +234,6 @@ const CityLocation = () => {
                     </tr>
                   ) : (
                     citiesData.map((city, index) => (
-                      
                       <tr
                         key={city._id}
                         className="hover:bg-(--primary)/5 transition-colors"
