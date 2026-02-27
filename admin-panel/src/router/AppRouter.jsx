@@ -30,8 +30,12 @@ import DashboardShow from "../pages/dashboard/DashboardShow.jsx";
 import ManageFaqCategory from "../pages/dashboard/faq-category/ManageFaqCategory.jsx";
 import ManageFaq from "../pages/dashboard/faq-category/ManageFaq.jsx";
 import ManagePermissions from "../pages/dashboard/UserPage/ManagePermissions.jsx";
+import ManageNews from "../pages/dashboard/MangeNews/ManageNews.jsx";
+import NewsForm from "../pages/dashboard/MangeNews/NewsForm.jsx";
+import ManageBlogCategory from "../pages/dashboard/Blog/ManageBlogCategory.jsx";
+import ManageBlog from "../pages/dashboard/Blog/ManageBlog.jsx";
+import BlogAdd from "../pages/dashboard/Blog/BlogAdd.jsx";
 // import ProductManagement from "../pages/dashboard/product/ProductCategory";
-
 // import ThemeToggleButton from "./components/Button";
 
 function AppRouter() {
@@ -88,13 +92,32 @@ function AppRouter() {
               <Route path="/dashboard/edit-cms/:id" element={<AddCmsForm />} />
               <Route path="/dashboard/user" element={<UserPage />} />
               <Route path="/dashboard/managerole" element={<ManageRole />} />
-              <Route path="/dashboard/manage-permission" element={<ManagePermissions />} />
+              <Route
+                path="/dashboard/manage-permission"
+                element={<ManagePermissions />}
+              />
 
               <Route
                 path="/dashboard/faq-category"
                 element={<ManageFaqCategory />}
               />
               <Route path="/dashboard/manage-faq" element={<ManageFaq />} />
+              <Route path="/dashboard/manage-news" element={<ManageNews />} />
+              <Route path="/dashboard/manage-news/add" element={<NewsForm />} />
+              <Route
+                path="/dashboard/manage-news/edit/:id"
+                element={<NewsForm />}
+              />
+              <Route
+                path="/dashboard/Manage-Blog-Categor"
+                element={<ManageBlogCategory />}
+              />
+              <Route path="/dashboard/Manage-Blog" element={<ManageBlog />} />
+              <Route path="/dashboard/Manage-Blog/add" element={<BlogAdd />} />
+              <Route
+                path="/dashboard/Manage-Blog/edit/:id"
+                element={<BlogAdd />}
+              />
             </Route>
 
             <Route path="*" element={<NotFound />} />

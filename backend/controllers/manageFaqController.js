@@ -1,4 +1,5 @@
 const ManageFaq = require("../models/ManageFaqModel");
+const faqCategory = require("../models/faqCategoryModel");
 
 // CREATE FAQ
 exports.createManageFaq = async (req, res) => {
@@ -86,6 +87,21 @@ exports.deleteManageFaq = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
+  }
+};
+exports.getActiveManageFaq = async (req, res) => {
+  try {
+    const categories = await faqCategory
+      .find({ status: true })
+      .select("_id category")
+      .sort({ category: 1 });
+    res.status(200).json({
+      success: true,
+      data: categories,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
   }
 };
 exports.toggleFaqStatus = async (req, res) => {

@@ -23,6 +23,10 @@ const cmsRoute = require("./routes/cmsRoute");
 const roleRoutes = require("./routes/role");
 const faqCategoryRoutes = require("./routes/faqCategoryRoutes");
 const manageFaqRoutes = require("./routes/manageFaqRoutes");
+const newsRoutes = require("./routes/newsRoutes");
+const blogCategoryRoutes = require("./routes/blogCategoryRoutes");
+const blogRoutes = require("./routes/blogRoutes");
+
 connectDB();
 
 const app = express();
@@ -56,6 +60,9 @@ app.use("/api/cms", cmsRoute);
 app.use("/api/role", roleRoutes);
 app.use("/api/faq-category", faqCategoryRoutes);
 app.use("/api/manage-faq", manageFaqRoutes);
+app.use("/api/news", newsRoutes);
+app.use("/api/blog-category", blogCategoryRoutes);
+app.use("/api/blogs", blogRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

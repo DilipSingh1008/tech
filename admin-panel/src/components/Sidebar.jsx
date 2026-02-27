@@ -11,6 +11,14 @@ import {
   ImageIcon,
   Wrench,
   Shield,
+  Layers,
+  ListTree,
+  Newspaper,
+  HelpCircle,
+  Briefcase,
+  Layout,
+  Tags,
+  PenTool,
 } from "lucide-react";
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
@@ -51,22 +59,37 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     {
       path: "/dashboard/service",
       name: "Manage Services",
-      icon: <Wrench size={18} />,
+      icon: <Briefcase size={18} />,
     },
     {
       path: "/dashboard/cms",
       name: "Manage CMS",
-      icon: <Wrench size={18} />,
+      icon: <Layout size={18} />,
     },
     {
       path: "/dashboard/faq-category",
       name: "FAQ Category",
-      icon: <Wrench size={18} />,
+      icon: <Layers size={18} />,
     },
     {
       path: "/dashboard/manage-faq",
       name: "Manage FAQ",
-      icon: <Settings size={18} />,
+      icon: <HelpCircle size={18} />,
+    },
+    {
+      path: "/dashboard/manage-news",
+      name: "Manage News",
+      icon: <Newspaper size={18} />,
+    },
+    {
+      path: "/dashboard/Manage-Blog-Categor",
+      name: "Blog Category ",
+      icon: <Tags size={18} />,
+    },
+    {
+      path: "/dashboard/Manage-Blog",
+      name: "Manage Blog ",
+      icon: <PenTool size={18} />,
     },
     {
       path: "/dashboard/settings",
