@@ -47,8 +47,6 @@ const Login = () => {
 
     localStorage.setItem("roleId", user.roleId);
 
-    console.log()
-
     const permRes = await getItems(`role/${user.roleId}/permissions`);
 
     console.log("permRes", permRes)

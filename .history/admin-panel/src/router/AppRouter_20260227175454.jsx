@@ -92,10 +92,14 @@ function AppRouter() {
               <Route path="/dashboard/edit-cms/:id" element={<AddCmsForm />} />
               <Route path="/dashboard/user" element={<UserPage />} />
               <Route path="/dashboard/managerole" element={<ManageRole />} />
+<<<<<<< HEAD
               <Route
                 path="/dashboard/manage-permission"
                 element={<ManagePermissions />}
               />
+=======
+              <Route path="/dashboard/manage-permission/:id" element={<ManagePermissions />} />
+>>>>>>> 6fd545479e12b58cb33fc44a344d59274d4e0534
 
               <Route
                 path="/dashboard/faq-category"

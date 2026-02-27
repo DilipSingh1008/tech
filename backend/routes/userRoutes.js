@@ -2,6 +2,9 @@ const express = require("express");
 const router = express.Router();
 const upload = require("../middlewares/upload");
 
+const auth = require("../middlewares/auth");
+const checkPermission = require("../middlewares/permission");
+
 const {
   createUser,
   getUsers,
@@ -9,9 +12,38 @@ const {
   deleteUser,
 } = require("../controllers/userController");
 
-router.post("/", upload.single("image"), createUser);
-router.get("/", getUsers);
-router.put("/:id", upload.single("image"), updateUser);
-router.delete("/:id", deleteUser);
+// CREATE
+router.post(
+  "/",
+  auth,
+  checkPermission("users", "add"),
+  upload.single("image"),
+  createUser
+);
+
+// GET
+router.get(
+  "/",
+  auth(),
+  checkPermission("users", "view"),
+  getUsers
+);
+
+// UPDATE
+router.put(
+  "/:id",
+  auth,
+  checkPermission("users", "edit"),
+  upload.single("image"),
+  updateUser
+);
+
+// DELETE
+router.delete(
+  "/:id",
+  auth,
+  checkPermission("users", "delete"),
+  deleteUser
+);
 
 module.exports = router;

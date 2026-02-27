@@ -97,19 +97,14 @@ exports.updatePermissions = async (req, res) => {
     const role = await Role.findById(req.params.id);
     if (!role) return res.status(404).json({ message: "Role not found" });
 
-    // ⭐ all checkbox sync
-    const formattedPermissions = permissions.map((p) => {
-      if (p.all) {
-        return {
-          ...p,
-          view: true,
-          add: true,
-          edit: true,
-          delete: true,
-        };
-      }
-      return p;
-    });
+    const formattedPermissions = permissions.map((p) => ({
+      module: p.module, // ⭐ ObjectId aa raha
+      view: p.all ? true : p.view,
+      add: p.all ? true : p.add,
+      edit: p.all ? true : p.edit,
+      delete: p.all ? true : p.delete,
+      all: p.all,
+    }));
 
     role.permissions = formattedPermissions;
     await role.save();
@@ -126,20 +121,28 @@ exports.updatePermissions = async (req, res) => {
 
 exports.getPermissions = async (req, res) => {
   try {
-    const role = await Role.findById(req.params.id).select("permissions name");
+
+    // console.log("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz")
+    const role = await Role.findById(req.params.id)
+      .populate("permissions.module", "name label");
 
     if (!role) return res.status(404).json({ message: "Role not found" });
 
-    res.json(role);
+    res.json({
+      name: role.name,
+      permissions: role.permissions,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-
 exports.getModules = async (req, res) => {
   try {
-    const modules = await Module.find({ status: true }).sort({ order: 1 });
+    const modules = await Module.find();
+
+    console.log("=================",modules);
+    
 
     res.json(modules);
   } catch (error) {

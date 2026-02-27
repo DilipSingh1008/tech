@@ -31,6 +31,7 @@ const moduleSchema = new mongoose.Schema(
       default: 0,
     },
   },
+  {collection: "Module"},
   { timestamps: true }
 );
 

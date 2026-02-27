@@ -14,7 +14,7 @@ module.exports = (roles = []) => {
       
       const authHeader = req.headers.authorization;
 
-      // console.log(authHeader);
+      console.log(authHeader);
       
 
       if (!authHeader || !authHeader.startsWith("Bearer "))
@@ -22,7 +22,7 @@ module.exports = (roles = []) => {
 
       const token = authHeader.split(" ")[1];
 
-      // console.log(token);
+      console.log(token);
 
       console.log("VERIFY SECRET:", process.env.JWT_SECRET);
       

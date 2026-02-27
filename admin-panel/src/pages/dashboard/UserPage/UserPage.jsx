@@ -11,6 +11,7 @@ import {
 } from "../../../services/api";
 import { FiChevronRight, FiChevronLeft } from "react-icons/fi";
 import Searchbar from "../../../components/Searchbar";
+import { useSelector } from "react-redux";
 
 const UserPage = () => {
   const { isDarkMode } = useTheme();
@@ -27,7 +28,15 @@ const UserPage = () => {
   // ── Sorting states (same pattern as Location.jsx) ──
   const [sortBy, setSortBy] = useState("createdAt");
   const [order, setOrder] = useState("desc");
+  const permissions = useSelector(
+  state => state.permission.permissions
+);
 
+const usersPermission = permissions?.find(
+  p => p.module.name === "users"
+);
+// console.log(permissions)
+ console.log(usersPermission)
   const theme = {
     main: isDarkMode
       ? "bg-[#0b0e14] text-slate-300"
@@ -134,7 +143,9 @@ const UserPage = () => {
                 setPage(1);
               }}
             />
-            <button
+           {
+            usersPermission?.add ? (
+               <button
               onClick={() => {
                 setEditingUser(null);
                 setIsModalOpen(true);
@@ -143,6 +154,8 @@ const UserPage = () => {
             >
               <Plus size={14} /> Add User
             </button>
+            ) : ("")
+           }
           </div>
 
           <div
@@ -203,7 +216,7 @@ const UserPage = () => {
                       </div>
                     </th>
 
-                    <th className="px-4 py-3 text-right w-24">Action</th>
+                    {(usersPermission?.edit === true && usersPermission?.delete === true) ? (<th className="px-4 py-3 text-right w-24">Action</th>) : ("")}
                   </tr>
                 </thead>
 
@@ -277,7 +290,8 @@ const UserPage = () => {
 
                         <td className="px-4 py-2.5 text-right flex justify-end gap-2">
                           {/* EDIT */}
-                          <div className="relative group">
+                          {
+                            usersPermission?.edit ? (<div className="relative group">
                             <button
                               onClick={() => {
                                 setEditingUser(u);
@@ -291,10 +305,12 @@ const UserPage = () => {
                             <span className="absolute bottom-full right-0 mb-1 hidden group-hover:block bg-black text-blue-400 text-[10px] px-2 py-2 rounded whitespace-nowrap">
                               Edit user
                             </span>
-                          </div>
+                          </div>) : ("")
+                          }
 
                           {/* DELETE */}
-                          <div className="relative group">
+                         {
+                          usersPermission?.delete ? ( <div className="relative group">
                             <button
                               onClick={() => handleDelete(u._id)}
                               className="p-1.5 cursor-pointer hover:text-red-500"
@@ -305,7 +321,8 @@ const UserPage = () => {
                             <span className="absolute bottom-full right-0 mb-1 hidden group-hover:block bg-black text-red-400 text-[10px] px-2 py-2 rounded whitespace-nowrap">
                               Delete user
                             </span>
-                          </div>
+                          </div>) : ("")
+                         }
                         </td>
                       </tr>
                     ))

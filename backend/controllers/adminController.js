@@ -185,36 +185,34 @@ exports.login = async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res
-        .status(400)
-        .json({ message: "Email and password are required" });
+      return res.status(400).json({ message: "Email and password are required" });
     }
 
     let account = await Admin.findOne({ email: email.toLowerCase() });
     let roleType = "admin";
+    let roleId = null;
 
     if (!account) {
       account = await User.findOne({
         email: email.toLowerCase(),
         status: true,
-      }).populate("role", "name");
+      }).populate("role");
+
+      console.log("account", account);
+      
+
       roleType = account ? account.role.name : null;
+      roleId = account ? account.role._id : null;
+    } else {
+      roleId = account.role; // admin me role direct ho sakta
     }
 
     if (!account) {
       return res.status(400).json({ message: "Account not found" });
     }
 
-     // ⭐ last login update
-    account.lastLogin = new Date();
-    await account.save();
-
-    const allowedRoles = ["sub-admin", "admin", "super-admin"];
-    if (!allowedRoles.includes(roleType)) {
-      return res.status(403).json({ message: "Access denied for your role" });
-    }
-
-    let isMatch = account.comparePassword
+    // ⭐ password check
+    const isMatch = account.comparePassword
       ? await account.comparePassword(password)
       : await bcrypt.compare(password, account.password);
 
@@ -222,14 +220,25 @@ exports.login = async (req, res) => {
       return res.status(400).json({ message: "Invalid password" });
     }
 
+    // ⭐ last login
+    account.lastLogin = new Date();
+    await account.save();
+
+    const allowedRoles = ["sub-admin", "admin", "super-admin", "user"];
+    if (!allowedRoles.includes(roleType)) {
+      return res.status(403).json({ message: "Access denied for your role" });
+    }
+
+    // ⭐ JWT with roleId
     const token = jwt.sign(
       {
         id: account._id,
+        roleId: roleId, // ⭐ MOST IMPORTANT
         role: roleType,
         fullName: account.fullName || account.name,
       },
       process.env.JWT_SECRET,
-      { expiresIn: "1d" },
+      { expiresIn: "1d" }
     );
 
     res.json({
@@ -239,6 +248,7 @@ exports.login = async (req, res) => {
         fullName: account.fullName || account.name,
         email: account.email,
         role: roleType,
+        roleId, // ⭐ frontend ke liye
         image: account.image || "",
       },
     });
