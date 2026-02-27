@@ -46,8 +46,8 @@ const emptyPerms = (modulesList) =>
   }, {});
 
 // API response → local state
-const apiToState = (apiPermissions, modulesList) => {
- const state = apiToState(list, modules);
+const apiToState = (apiPermissions) => {
+  const state = emptyPerms(modules);
 
   console.log("state = ", state)
   console.log(Array.isArray(apiPermissions))
@@ -67,7 +67,7 @@ const apiToState = (apiPermissions, modulesList) => {
 // Local state → API payload
 const stateToApi = (perms) =>
   modules.map((mod) => ({
-    module: mod.name,
+    module: mod,
     all:    perms[mod].all,
     view:   perms[mod].view,
     add:    perms[mod].add,
@@ -327,7 +327,7 @@ useEffect(() => {
           </thead>
           <tbody>
             {modules.map((mod, idx) => (
-              <tr key={mod._id}
+              <tr key={mod}
                 className={`border-b border-gray-700/50 transition-colors duration-150
                             hover:bg-blue-900/10
                             ${idx % 2 === 0 ? "bg-gray-900" : "bg-gray-800/30"}`}
@@ -335,14 +335,14 @@ useEffect(() => {
                 <td className="pl-6 pr-4 py-3.5 text-sm font-medium text-gray-300">
                   <div className="flex items-center gap-2.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-gray-600 flex-shrink-0" />
-                    {mod.label}
+                    {mod.charAt(0).toUpperCase() + mod.slice(1)}
                   </div>
                 </td>
                 {PERMISSIONS.map((perm) => (
                   <td key={perm} className="py-3.5 px-4 text-center">
                     <div className="flex items-center justify-center">
                       <Checkbox
-                        checked={perms[mod.name]?.[perm] || false}
+                        checked={perms[mod][perm]}
                         onChange={(checked) => handleChange(mod, perm, checked)}
                         perm={perm}
                       />

@@ -8,7 +8,6 @@ const {
   deleteRole,
   updatePermissions,
   getPermissions,
-  getModules,
 } = require("../controllers/roleController");
 
 router.post("/", createRole);
@@ -27,7 +26,5 @@ router.get(
   
   getPermissions
 );
-
-router.get("/module", getModules);
 
 module.exports = router;

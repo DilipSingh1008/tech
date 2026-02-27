@@ -47,7 +47,7 @@ const ManageFaq = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        setLoadingCategories(true); ..
+        setLoadingCategories(true);
         const res = await getItems("manage-faq/active");
         console.log(res);
         setCategories(res.data || []);

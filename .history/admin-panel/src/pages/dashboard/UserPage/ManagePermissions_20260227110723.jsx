@@ -2,18 +2,18 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { updateItem, getItemById } from "../../../services/api.js";
 
-// const modules = [
-//   "dashboard",
-//   "users",
-//   "location",
-//   "categories",
-//   "banner",
-//   "products",
-//   "services",
-//   "cms",
-//   "faq",
-//   "settings",
-// ];
+const modules = [
+  "dashboard",
+  "users",
+  "location",
+  "categories",
+  "banner",
+  "products",
+  "services",
+  "cms",
+  "faq",
+  "settings",
+];
 
 const PERMISSIONS = ["all", "view", "add", "edit", "delete"];
 
@@ -33,24 +33,15 @@ const legendColors = {
   delete: "bg-red-500",
 };
 
-const emptyPerms = (modulesList) =>
-  modulesList.reduce((acc, mod) => {
-    acc[mod.name] = {
-      all: false,
-      view: false,
-      add: false,
-      edit: false,
-      delete: false,
-    };
+const emptyPerms = () =>
+  modules.reduce((acc, mod) => {
+    acc[mod] = { all: false, view: false, add: false, edit: false, delete: false };
     return acc;
   }, {});
 
 // API response → local state
-const apiToState = (apiPermissions, modulesList) => {
- const state = apiToState(list, modules);
-
-  console.log("state = ", state)
-  console.log(Array.isArray(apiPermissions))
+const apiToState = (apiPermissions) => {
+  const state = emptyPerms();
   if (!Array.isArray(apiPermissions)) return state;
   apiPermissions.forEach((p) => {
     const mod = p.module;
@@ -67,7 +58,7 @@ const apiToState = (apiPermissions, modulesList) => {
 // Local state → API payload
 const stateToApi = (perms) =>
   modules.map((mod) => ({
-    module: mod.name,
+    module: mod,
     all:    perms[mod].all,
     view:   perms[mod].view,
     add:    perms[mod].add,
@@ -120,7 +111,7 @@ const ManagePermissions = () => {
   const [roleName, setRoleName]           = useState("");
   const [perms, setPerms]                 = useState(emptyPerms());
   const [originalPerms, setOriginalPerms] = useState(emptyPerms());
-  const [modules, setModules] = useState([]);
+
   const [loadingPerms, setLoadingPerms]   = useState(false);
   const [saving, setSaving]               = useState(false);
   const [saveStatus, setSaveStatus]       = useState(null); // "success" | "error" | null
@@ -151,27 +142,6 @@ const ManagePermissions = () => {
     };
     fetchPerms();
   }, [roleId]);
-
-  useEffect(() => {
-  const fetchModules = async () => {
-    try {
-      const res = await getItemById("module"); // GET /module
-      setModules(res || []);
-    } catch (err) {
-      console.error("Failed to load modules", err);
-    }
-  };
-
-  fetchModules();
-}, []);
-
-useEffect(() => {
-  if (modules.length > 0) {
-    const initial = emptyPerms(modules);
-    setPerms(initial);
-    setOriginalPerms(initial);
-  }
-}, [modules]);
 
   // ── Checkbox handlers ─────────────────────────────────────────────────────
   const handleAll = (mod, checked) => {
@@ -327,7 +297,7 @@ useEffect(() => {
           </thead>
           <tbody>
             {modules.map((mod, idx) => (
-              <tr key={mod._id}
+              <tr key={mod}
                 className={`border-b border-gray-700/50 transition-colors duration-150
                             hover:bg-blue-900/10
                             ${idx % 2 === 0 ? "bg-gray-900" : "bg-gray-800/30"}`}
@@ -335,14 +305,14 @@ useEffect(() => {
                 <td className="pl-6 pr-4 py-3.5 text-sm font-medium text-gray-300">
                   <div className="flex items-center gap-2.5">
                     <span className="w-1.5 h-1.5 rounded-full bg-gray-600 flex-shrink-0" />
-                    {mod.label}
+                    {mod.charAt(0).toUpperCase() + mod.slice(1)}
                   </div>
                 </td>
                 {PERMISSIONS.map((perm) => (
                   <td key={perm} className="py-3.5 px-4 text-center">
                     <div className="flex items-center justify-center">
                       <Checkbox
-                        checked={perms[mod.name]?.[perm] || false}
+                        checked={perms[mod][perm]}
                         onChange={(checked) => handleChange(mod, perm, checked)}
                         perm={perm}
                       />
