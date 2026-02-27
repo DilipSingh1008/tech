@@ -9,7 +9,7 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("adminToken"); // ⭐ change
+  const token = localStorage.getItem("token"); // ⭐ change
 
   if (token) config.headers.Authorization = `Bearer ${token}`;
 
@@ -35,7 +35,7 @@ export const createItem = async (resource, data) => {
 
     const response = await api.post(`/${resource}`, data, { headers });
     console.log(response);
-     localStorage.setItem("adminToken", response.data.token);
+    //  localStorage.setItem("adminToken", response.data.token);
     return response.data;
   } catch (error) {
     throw error.response?.data || error.message;

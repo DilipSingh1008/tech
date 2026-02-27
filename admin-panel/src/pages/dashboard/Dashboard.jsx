@@ -1,10 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
 import { Outlet } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { fetchPermissions } from "../../redux/store/permissionSlice.js";
 
 const DashboardLayout = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(fetchPermissions());   // ⭐ refresh pe API call
+  }, []);
 
   return (
     <div className="flex min-h-screen bg-[var(--main-bg)]">

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { updateItem, getItemById } from "../../../services/api.js";
+import { updateItem, getItemById, getItems } from "../../../services/api.js";
 
 // const modules = [
 //   "dashboard",
@@ -35,7 +35,7 @@ const legendColors = {
 
 const emptyPerms = (modulesList) =>
   modulesList.reduce((acc, mod) => {
-    acc[mod.name] = {
+    acc[mod._id] = {
       all: false,
       view: false,
       add: false,
@@ -44,37 +44,30 @@ const emptyPerms = (modulesList) =>
     };
     return acc;
   }, {});
-
 // API response → local state
 const apiToState = (apiPermissions, modulesList) => {
- const state = apiToState(list, modules);
+  const state = emptyPerms(modulesList);
 
-  console.log("state = ", state)
-  console.log(Array.isArray(apiPermissions))
-  if (!Array.isArray(apiPermissions)) return state;
   apiPermissions.forEach((p) => {
-    const mod = p.module;
-    if (!state[mod]) return;
-    state[mod].view   = !!p.view;
-    state[mod].add    = !!p.add;
-    state[mod].edit   = !!p.edit;
-    state[mod].delete = !!p.delete;
-    state[mod].all    = !!p.all || (!!p.view && !!p.add && !!p.edit && !!p.delete);
+    const modId = p.module?._id || p.module;
+
+    if (!state[modId]) return;
+
+    state[modId].view = !!p.view;
+    state[modId].add = !!p.add;
+    state[modId].edit = !!p.edit;
+    state[modId].delete = !!p.delete;
+    state[modId].all = !!p.all;
   });
+
   return state;
 };
-
 // Local state → API payload
 const stateToApi = (perms) =>
-  modules.map((mod) => ({
-    module: mod.name,
-    all:    perms[mod].all,
-    view:   perms[mod].view,
-    add:    perms[mod].add,
-    edit:   perms[mod].edit,
-    delete: perms[mod].delete,
+  Object.keys(perms).map((moduleId) => ({
+    module: moduleId,
+    ...perms[moduleId],
   }));
-
 // ─── Checkbox ────────────────────────────────────────────────────────────────
 const Checkbox = ({ checked, onChange, perm }) => (
   <label className="inline-flex items-center justify-center cursor-pointer">
@@ -118,8 +111,8 @@ const ManagePermissions = () => {
   const { id: roleId } = useParams();
 
   const [roleName, setRoleName]           = useState("");
-  const [perms, setPerms]                 = useState(emptyPerms());
-  const [originalPerms, setOriginalPerms] = useState(emptyPerms());
+  const [perms, setPerms] = useState({});
+const [originalPerms, setOriginalPerms] = useState({});
   const [modules, setModules] = useState([]);
   const [loadingPerms, setLoadingPerms]   = useState(false);
   const [saving, setSaving]               = useState(false);
@@ -138,24 +131,25 @@ const ManagePermissions = () => {
         const res   = await getItemById("role", `${roleId}/permissions`);
         setRoleName(res?.name ?? "");
         const list  = res?.permissions ?? [];
-        const state = apiToState(list);
+        const state = apiToState(list, modules);
         setPerms(state);
         setOriginalPerms(state);
       } catch {
         setErrorMsg("Failed to load permissions for this role.");
-        setPerms(emptyPerms());
-        setOriginalPerms(emptyPerms());
+        setPerms(emptyPerms(modules));
+setOriginalPerms(emptyPerms(modules));
       } finally {
         setLoadingPerms(false);
       }
     };
     fetchPerms();
-  }, [roleId]);
+  }, [roleId, modules]);
 
   useEffect(() => {
   const fetchModules = async () => {
     try {
-      const res = await getItemById("module"); // GET /module
+      const res = await getItems("role/module"); // GET /module
+      console.log(res)
       setModules(res || []);
     } catch (err) {
       console.error("Failed to load modules", err);
@@ -204,7 +198,7 @@ useEffect(() => {
     setErrorMsg(null);
     try {
       await updateItem(`role/${roleId}/permissions`, {
-        permissions: stateToApi(perms),
+        permissions: stateToApi(perms, modules),
       });
       setOriginalPerms(perms);
       setSaveStatus("success");
@@ -342,8 +336,8 @@ useEffect(() => {
                   <td key={perm} className="py-3.5 px-4 text-center">
                     <div className="flex items-center justify-center">
                       <Checkbox
-                        checked={perms[mod.name]?.[perm] || false}
-                        onChange={(checked) => handleChange(mod, perm, checked)}
+                        checked={perms[mod._id]?.[perm] || false}
+                        onChange={(checked) => handleChange(mod._id, perm, checked)}
                         perm={perm}
                       />
                     </div>
