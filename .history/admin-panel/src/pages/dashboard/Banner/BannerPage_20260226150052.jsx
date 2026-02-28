@@ -11,7 +11,6 @@ import {
 } from "../../../services/api";
 import { FiChevronRight, FiChevronLeft } from "react-icons/fi";
 import Searchbar from "../../../components/Searchbar";
-import { useSelector } from "react-redux";
 
 const validateImageDimensions = (file) => {
   return new Promise((resolve, reject) => {
@@ -40,19 +39,9 @@ const BannerPage = () => {
   const [limit] = useState(5);
   const [totalPages, setTotalPages] = useState(1);
 
+  // ── Client-side sorting states ──
   const [sortBy, setSortBy] = useState("createdAt");
   const [order, setOrder] = useState("desc");
-
-  // ── Permission Logic ──
-  const permissions = useSelector((state) => state.permission.permissions);
-  const rawBannerPermission = permissions?.find(
-    (p) => p.module.name === "banner"
-  );
-  const localRole = localStorage.getItem("role");
-  const bannerPermission =
-    localRole === "admin"
-      ? { add: true, edit: true, delete: true, view: true }
-      : rawBannerPermission;
 
   const theme = {
     main: isDarkMode
@@ -84,29 +73,37 @@ const BannerPage = () => {
     }
   };
 
+  // ── Sort handler ──
   const handleSort = (field) => {
     const isAsc = sortBy === field && order === "asc";
     setOrder(isAsc ? "desc" : "asc");
     setSortBy(field);
   };
 
+  // ── Sort icon helper ──
   const SortIcon = ({ field }) => (
     <span className="opacity-50 text-[10px]">
       {sortBy === field ? (order === "asc" ? "▲" : "▼") : "↕"}
     </span>
   );
 
+  // ── Apply search + sort on the fetched data ──
   const processedBanners = [...banners]
     .filter((b) => b.title.toLowerCase().includes(searchQuery.toLowerCase()))
     .sort((a, b) => {
       let valA = a[sortBy];
       let valB = b[sortBy];
+
+      // Handle string fields
       if (typeof valA === "string") valA = valA.toLowerCase();
       if (typeof valB === "string") valB = valB.toLowerCase();
+
+      // Handle date fields
       if (sortBy === "createdAt" || sortBy === "updatedAt") {
         valA = new Date(valA);
         valB = new Date(valB);
       }
+
       if (valA < valB) return order === "asc" ? -1 : 1;
       if (valA > valB) return order === "asc" ? 1 : -1;
       return 0;
@@ -131,7 +128,7 @@ const BannerPage = () => {
       .test(
         "is-valid-url",
         "Enter a valid URL",
-        (value) => !value || /^https?:\/\/.+\..+/.test(value)
+        (value) => !value || /^https?:\/\/.+\..+/.test(value),
       ),
     image: Yup.mixed().when("isEdit", {
       is: false,
@@ -145,8 +142,8 @@ const BannerPage = () => {
       await updateItem(`banner/${id}`, { status: !currentStatus });
       setBanners((prev) =>
         prev.map((banner) =>
-          banner._id === id ? { ...banner, status: !currentStatus } : banner
-        )
+          banner._id === id ? { ...banner, status: !currentStatus } : banner,
+        ),
       );
     } catch (err) {
       console.error("Error toggling status:", err);
@@ -167,18 +164,15 @@ const BannerPage = () => {
         <div className="max-w-5xl mx-auto">
           <div className="flex cursor-pointer items-center justify-between mb-4">
             <Searchbar onChange={(e) => setSearchQuery(e.target.value)} />
-
-            {bannerPermission?.add ? (
-              <button
-                onClick={() => {
-                  setEditingBanner(null);
-                  setIsModalOpen(true);
-                }}
-                className="flex items-center cursor-pointer gap-1.5 px-3 py-1.5 bg-(--primary) text-white rounded-lg text-xs font-semibold hover:bg-(--primary) transition-all"
-              >
-                <Plus size={14} /> Add Banner
-              </button>
-            ) : null}
+            <button
+              onClick={() => {
+                setEditingBanner(null);
+                setIsModalOpen(true);
+              }}
+              className="flex items-center cursor-pointer gap-1.5 px-3 py-1.5 bg-(--primary) text-white rounded-lg text-xs font-semibold hover:bg-(--primary) transition-all"
+            >
+              <Plus size={14} /> Add Banner
+            </button>
           </div>
 
           <div
@@ -192,6 +186,7 @@ const BannerPage = () => {
                   <tr>
                     <th className="px-4 py-3 w-20">ID</th>
 
+                    {/* ── Sortable Title column ── */}
                     <th
                       className="px-4 py-3 cursor-pointer hover:text-(--primary) transition-colors"
                       onClick={() => handleSort("title")}
@@ -203,15 +198,17 @@ const BannerPage = () => {
 
                     <th className="px-4 py-3 w-24">Image</th>
 
-                    <th className="px-4 py-3 w-24 cursor-pointer hover:text-(--primary) transition-colors">
+                    {/* ── Sortable Status column ── */}
+                    <th
+                      className="px-4 py-3 w-24 cursor-pointer hover:text-(--primary) transition-colors"
+                      
+                    >
                       <div className="flex items-center gap-1">
                         Status <SortIcon field="status" />
                       </div>
                     </th>
 
-                    {(bannerPermission?.edit || bannerPermission?.delete) ? (
-                      <th className="px-4 py-3 text-right w-24">Action</th>
-                    ) : null}
+                    <th className="px-4 py-3 text-right w-24">Action</th>
                   </tr>
                 </thead>
 
@@ -252,59 +249,31 @@ const BannerPage = () => {
                         </td>
                         <td className="px-4 py-2.5">
                           <button
-                            onClick={() =>
-                              handleToggleStatus(b._id, b.status)
-                            }
-                            className={`cursor-pointer w-8 h-4 rounded-full relative transition-colors ${
-                              b.status ? "bg-(--primary)" : "bg-gray-400"
-                            }`}
+                            onClick={() => handleToggleStatus(b._id, b.status)}
+                            className={`cursor-pointer w-8 h-4 rounded-full relative transition-colors ${b.status ? "bg-(--primary)" : "bg-gray-400"}`}
                           >
                             <div
-                              className={`cursor-pointer absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${
-                                b.status ? "left-4.5" : "left-0.5"
-                              }`}
+                              className={`cursor-pointer absolute top-0.5 w-3 h-3 bg-white rounded-full transition-all ${b.status ? "left-4.5" : "left-0.5"}`}
                             />
                           </button>
                         </td>
-
-                        {(bannerPermission?.edit ||
-                          bannerPermission?.delete) ? (
-                          <td className="px-4 py-2.5 text-right flex justify-end gap-1">
-                            {/* EDIT */}
-                            {bannerPermission?.edit ? (
-                              <div className="relative group">
-                                <button
-                                  onClick={() => {
-                                    setEditingBanner(b);
-                                    setIsModalOpen(true);
-                                  }}
-                                  className="p-1.5 cursor-pointer hover:text-(--primary)"
-                                >
-                                  <Edit3 size={14} />
-                                </button>
-                                <span className="absolute bottom-full right-0 mb-2 opacity-0 group-hover:opacity-100 transition bg-black text-blue-400 text-[10px] px-2 py-2 rounded whitespace-nowrap pointer-events-none">
-                                  Edit banner
-                                </span>
-                              </div>
-                            ) : null}
-
-                            {/* DELETE */}
-                            {bannerPermission?.delete ? (
-                              <div className="relative group">
-                                <button
-                                  onClick={() => handleDelete(b._id)}
-                                  className="p-1.5 cursor-pointer hover:text-red-500"
-                                >
-                                  <Trash2 size={14} />
-                                </button>
-                                <span className="absolute bottom-full right-0 mb-2 opacity-0 group-hover:opacity-100 transition bg-black text-red-400 text-[10px] px-2 py-2 rounded whitespace-nowrap pointer-events-none">
-                                  Delete banner
-                                  <span className="absolute top-full right-2 border-4 border-transparent border-t-black"></span>
-                                </span>
-                              </div>
-                            ) : null}
-                          </td>
-                        ) : null}
+                        <td className="px-4 py-2.5 text-right flex justify-end gap-1">
+                          <button
+                            onClick={() => {
+                              setEditingBanner(b);
+                              setIsModalOpen(true);
+                            }}
+                            className="p-1.5 cursor-pointer hover:text-(--primary)"
+                          >
+                            <Edit3 size={14} />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(b._id)}
+                            className="p-1.5 cursor-pointer hover:text-red-500"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </td>
                       </tr>
                     ))
                   )}
@@ -355,9 +324,7 @@ const BannerPage = () => {
           {isModalOpen && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-4">
               <div
-                className={`${
-                  isDarkMode ? "bg-[#151b28] text-white" : "bg-white"
-                } p-5 rounded-xl w-full max-w-xs shadow-xl border border-gray-700/30`}
+                className={`${isDarkMode ? "bg-[#151b28] text-white" : "bg-white"} p-5 rounded-xl w-full max-w-xs shadow-xl border border-gray-700/30`}
               >
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-sm font-bold">
@@ -385,14 +352,10 @@ const BannerPage = () => {
                       formData.append("title", values.title);
                       formData.append("url", values.url);
                       formData.append("folder", "Banner");
-                      if (values.image)
-                        formData.append("image", values.image);
+                      if (values.image) formData.append("image", values.image);
 
                       if (editingBanner) {
-                        await updateItem(
-                          `banner/${editingBanner._id}`,
-                          formData
-                        );
+                        await updateItem(`banner/${editingBanner._id}`, formData);
                       } else {
                         await createItem("banner", formData);
                       }
@@ -409,8 +372,7 @@ const BannerPage = () => {
                     <Form className="space-y-3">
                       <div>
                         <label className="block text-[10px] font-bold opacity-50 uppercase mb-1">
-                          Title{" "}
-                          <span className="text-red-500 text-sm">*</span>
+                          Title <span className="text-red-500 text-sm">*</span>
                         </label>
                         <Field
                           type="text"

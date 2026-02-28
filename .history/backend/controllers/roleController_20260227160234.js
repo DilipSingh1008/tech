@@ -122,7 +122,7 @@ exports.updatePermissions = async (req, res) => {
 exports.getPermissions = async (req, res) => {
   try {
 
-    //  console.log("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz")
+    // console.log("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz")
     const role = await Role.findById(req.params.id)
       .populate("permissions.module", "name label");
 
@@ -133,7 +133,6 @@ exports.getPermissions = async (req, res) => {
       permissions: role.permissions,
     });
   } catch (error) {
-    console.log(error)
     res.status(500).json({ message: error.message });
   }
 };

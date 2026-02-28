@@ -13,14 +13,11 @@ const checkPermission = (moduleName, action) => {
       const roleId = req.user.roleId; // JWT se
 
       console.log("BBBBBBBBBB")
-      console.log(roleId)
 
       const role = await Role.findById(roleId).populate(
         "permissions.module",
         "name"
       );
-
-      console.log(role)
 
       if (!role) return res.status(403).json({ message: "Role not found" });
 

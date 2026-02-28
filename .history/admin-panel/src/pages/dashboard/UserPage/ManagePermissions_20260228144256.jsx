@@ -171,10 +171,22 @@ const ManagePermissions = () => {
   //  Rule 2 → add/edit/delete when view is OFF → disabled (greyed checkbox)
   //  Note: Rule 2 only fires after loading is done to avoid false-disabling on init
   //
-  // Only disable if backend explicitly sent false for this field
   const isDisabled = (mod, perm) => {
     if (perm === "all") return false;
-    return mod[perm] === false;
+
+    // Rule 1: field is N/A on this module → handled by N/A badge, but if somehow
+    // a Checkbox is rendered for it, disable it
+    if (!isFieldAllowed(mod, perm)) return true;
+
+    // Rule 2: add/edit/delete depend on view being ON
+    // Guard with !loadingPerms so we don't disable during initial empty state
+    if (perm !== "view" && !loadingPerms) {
+      // Use ?? so that undefined (not yet set) falls back to module config value
+      const viewOn = perms[mod._id]?.view ?? isFieldAllowed(mod, "view");
+      if (!viewOn) return true;
+    }
+
+    return false;
   };
 
   // ── Handlers ─────────────────────────────────────────────────────────────
@@ -382,18 +394,31 @@ const ManagePermissions = () => {
                   </td>
 
                   {/* Permission cells */}
-                  {PERMISSIONS.map((perm) => (
-                    <td key={perm} className="py-3.5 px-4 text-center">
-                      <div className="flex items-center justify-center">
-                        <Checkbox
-                          checked={perms[mod._id]?.[perm] || false}
-                          onChange={(checked) => handleChange(mod, perm, checked)}
-                          perm={perm}
-                          disabled={isDisabled(mod, perm)}
-                        />
-                      </div>
-                    </td>
-                  ))}
+                  {PERMISSIONS.map((perm) => {
+                    // N/A: field is explicitly false on this module (not "all")
+                    const isNA = perm !== "all" && mod[perm] === false;
+
+                    return (
+                      <td key={perm} className="py-3.5 px-4 text-center">
+                        <div className="flex items-center justify-center">
+                          {isNA ? (
+                            // Show N/A badge — this field can never be granted
+                            <span className="px-2 py-0.5 text-[10px] rounded-md
+                                             bg-gray-800 border border-gray-700 text-gray-600">
+                              N/A
+                            </span>
+                          ) : (
+                            <Checkbox
+                              checked={perms[mod._id]?.[perm] || false}
+                              onChange={(checked) => handleChange(mod, perm, checked)}
+                              perm={perm}
+                              disabled={isDisabled(mod, perm)}
+                            />
+                          )}
+                        </div>
+                      </td>
+                    );
+                  })}
                 </tr>
               );
             })}
@@ -410,8 +435,10 @@ const ManagePermissions = () => {
           </div>
         ))}
         <div className="flex items-center gap-1.5 ml-2 pl-2 border-l border-gray-700">
-          <span className="w-2.5 h-2.5 rounded-sm bg-gray-800 border border-gray-700 opacity-60" />
-          <span className="text-xs text-gray-600">Disabled / Restricted</span>
+          <span className="px-1.5 py-0.5 text-[10px] rounded-md bg-gray-800 border border-gray-700 text-gray-600">
+            N/A
+          </span>
+          <span className="text-xs text-gray-600">Not applicable for this module</span>
         </div>
       </div>
     </div>

@@ -5,22 +5,10 @@ import { useTheme } from "../../../context/ThemeContext";
 import { getItems, deleteItem, patchItem } from "../../../services/api";
 import Searchbar from "../../../components/Searchbar";
 import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
 
 const ProductCategory = () => {
   const { isDarkMode } = useTheme();
   const navigate = useNavigate();
-
-  // ── Permission Logic ──
-  const permissions = useSelector((state) => state.permission.permissions);
-  const rawProductPermission = permissions?.find(
-    (p) => p.module.name === "products"
-  );
-  const localRole = localStorage.getItem("role");
-  const productPermission =
-    localRole === "admin"
-      ? { add: true, edit: true, delete: true, view: true }
-      : rawProductPermission;
 
   const theme = {
     main: isDarkMode
@@ -53,7 +41,7 @@ const ProductCategory = () => {
     try {
       setLoading(true);
       const res = await getItems(
-        `product-category?page=${page}&limit=${limit}&sortBy=${sortBy}&order=${order}&search=${searchQuery}`
+        `product-category?page=${page}&limit=${limit}&sortBy=${sortBy}&order=${order}&search=${searchQuery}`,
       );
       setProducts(res.data || []);
       if (res.totalPages) setTotalPages(res.totalPages);
@@ -81,7 +69,7 @@ const ProductCategory = () => {
     try {
       await patchItem(`product-category/status/${id}`);
       setProducts((prev) =>
-        prev.map((p) => (p._id === id ? { ...p, status: !p.status } : p))
+        prev.map((p) => (p._id === id ? { ...p, status: !p.status } : p)),
       );
     } catch (err) {
       console.error(err);
@@ -104,6 +92,17 @@ const ProductCategory = () => {
 
   return (
     <div className={`h-screen w-full flex flex-col ${theme.main}`}>
+      {/* <header
+        className={`px-6 py-4 border-b ${
+          isDarkMode ? "border-gray-800" : "border-gray-200"
+        }`}
+      >
+        <h1 className="text-sm font-bold">Product Catalog Management</h1>
+        <p className="text-[10px] opacity-50">
+          Manage your categories and product details
+        </p>
+      </header> */}
+
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-5xl mx-auto">
           {/* Top Bar */}
@@ -114,15 +113,12 @@ const ProductCategory = () => {
                 setPage(1);
               }}
             />
-
-            {productPermission?.add ? (
-              <button
-                onClick={() => navigate("/dashboard/products/add")}
-                className="flex items-center gap-2 px-4 py-2 bg-(--primary) text-white rounded-lg text-xs font-bold hover:opacity-90 cursor-pointer"
-              >
-                <Plus size={16} /> Add New Product
-              </button>
-            ) : null}
+            <button
+              onClick={() => navigate("/dashboard/products/add")}
+              className="flex items-center gap-2 px-4 py-2 bg-(--primary) text-white rounded-lg text-xs font-bold hover:opacity-90 cursor-pointer"
+            >
+              <Plus size={16} /> Add New Product
+            </button>
           </div>
 
           {/* Table */}
@@ -160,9 +156,7 @@ const ProductCategory = () => {
                       </div>
                     </th>
                     <th className="px-4 py-3 w-24">Status</th>
-                    {(productPermission?.edit || productPermission?.delete) ? (
-                      <th className="px-4 py-3 text-right w-24">Action</th>
-                    ) : null}
+                    <th className="px-4 py-3 text-right w-24">Action</th>
                   </tr>
                 </thead>
 
@@ -218,49 +212,28 @@ const ProductCategory = () => {
                             />
                           </button>
                         </td>
-
-                        {(productPermission?.edit ||
-                          productPermission?.delete) ? (
-                          <td className="px-4 py-2.5 text-right">
-                            <div className="flex justify-end gap-2">
-                              {/* EDIT */}
-                              {productPermission?.edit ? (
-                                <div className="relative group">
-                                  <button
-                                    onClick={() =>
-                                      navigate(
-                                        `/dashboard/products/edit/${prod._id}`
-                                      )
-                                    }
-                                    className="p-1.5 cursor-pointer hover:text-(--primary) hover:bg-(--primary)/10 rounded-md transition-all"
-                                  >
-                                    <Edit3 size={14} />
-                                  </button>
-                                  <span className="absolute bottom-full right-0 mb-2 opacity-0 group-hover:opacity-100 transition bg-black text-blue-400 text-[10px] px-2 py-2 rounded whitespace-nowrap pointer-events-none z-50">
-                                    Edit product
-                                  </span>
-                                </div>
-                              ) : null}
-
-                              {/* DELETE */}
-                              {productPermission?.delete ? (
-                                <div className="relative group">
-                                  <button
-                                    onClick={() => handleDelete(prod._id)}
-                                    className="p-1.5 cursor-pointer hover:text-red-500 hover:bg-red-500/10 rounded-md transition-all disabled:opacity-30"
-                                    disabled={deleteLoading}
-                                  >
-                                    <Trash2 size={14} />
-                                  </button>
-                                  <span className="absolute bottom-full right-0 mb-2 opacity-0 group-hover:opacity-100 transition bg-black text-red-400 text-[10px] px-2 py-2 rounded whitespace-nowrap pointer-events-none z-50">
-                                    Delete product
-                                    <span className="absolute top-full right-2 border-4 border-transparent border-t-black"></span>
-                                  </span>
-                                </div>
-                              ) : null}
-                            </div>
-                          </td>
-                        ) : null}
+                        <td className="px-4 py-2.5 text-right">
+                          <div className="flex justify-end gap-2">
+                            {/* Edit → navigate to ProductForm with id */}
+                            <button
+                              onClick={() =>
+                                navigate(`/dashboard/products/edit/${prod._id}`)
+                              }
+                              className="p-1.5 cursor-pointer hover:text-(--primary) hover:bg-(--primary)/10 rounded-md transition-all"
+                              title="Edit"
+                            >
+                              <Edit3 size={14} />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(prod._id)}
+                              className="p-1.5 cursor-pointer hover:text-red-500 hover:bg-red-500/10 rounded-md transition-all disabled:opacity-30"
+                              title="Delete"
+                              disabled={deleteLoading}
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        </td>
                       </tr>
                     ))
                   )}

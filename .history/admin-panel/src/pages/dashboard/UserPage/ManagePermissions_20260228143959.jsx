@@ -3,13 +3,12 @@ import { useParams } from "react-router-dom";
 import { updateItem, getItemById, getItems } from "../../../services/api.js";
 
 const PERMISSIONS = ["all", "view", "add", "edit", "delete"];
-const FIELDS      = ["view", "add", "edit", "delete"];
 
 const permConfig = {
-  all:    { checked: "bg-blue-500 border-blue-500",     label: "All"    },
-  view:   { checked: "bg-green-600 border-green-600",   label: "View"   },
-  add:    { checked: "bg-purple-500 border-purple-500", label: "Add"    },
-  edit:   { checked: "bg-amber-600 border-amber-600",   label: "Edit"   },
+  all:    { checked: "bg-blue-500 border-blue-500",     label: "All" },
+  view:   { checked: "bg-green-600 border-green-600",   label: "View" },
+  add:    { checked: "bg-purple-500 border-purple-500", label: "Add" },
+  edit:   { checked: "bg-amber-600 border-amber-600",   label: "Edit" },
   delete: { checked: "bg-red-500 border-red-500",       label: "Delete" },
 };
 
@@ -21,10 +20,15 @@ const legendColors = {
   delete: "bg-red-500",
 };
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-// mod.add===false → add is permanently N/A (cannot be granted)
+// ─── Which fields are allowed on a module ────────────────────────────────────
+// If mod.add === false  → add checkbox is permanently disabled (cannot toggle)
+// If mod.edit === false → edit checkbox is permanently disabled
+// etc.
+// Rule: if the field is explicitly false in module config → locked
 const isFieldAllowed = (mod, field) => mod[field] !== false;
+
+// ─── State helpers ────────────────────────────────────────────────────────────
+const FIELDS = ["view", "add", "edit", "delete"];
 
 const emptyPerms = (modulesList) =>
   modulesList.reduce((acc, mod) => {
@@ -45,6 +49,10 @@ const apiToState = (apiPermissions, modulesList) => {
   });
   return state;
 };
+const isNotApplicable = (mod, perm) => {
+  if (perm === "all") return false;
+  return mod[perm] === false;
+};
 
 const stateToApi = (perms) =>
   Object.keys(perms).map((moduleId) => ({
@@ -52,10 +60,14 @@ const stateToApi = (perms) =>
     ...perms[moduleId],
   }));
 
-// "all" is true only when every ALLOWED field is checked
-// (fields with mod[field]===false are skipped from the check)
-const recalcAll = (mod, current) =>
-  FIELDS.every((f) => !isFieldAllowed(mod, f) || !!current[f]);
+// Recalculate "all": true only when every ALLOWED field is checked
+// Fields that are disabled (mod[field]===false) are skipped from the check
+const recalcAll = (mod, current) => {
+  return FIELDS.every((f) => {
+    if (!isFieldAllowed(mod, f)) return true; // skip disabled fields
+    return !!current[f];
+  });
+};
 
 // ─── Checkbox ─────────────────────────────────────────────────────────────────
 const Checkbox = ({ checked, onChange, perm, disabled }) => (
@@ -66,18 +78,19 @@ const Checkbox = ({ checked, onChange, perm, disabled }) => (
     <input
       type="checkbox"
       checked={checked}
-      disabled={disabled}
       onChange={(e) => !disabled && onChange(e.target.checked)}
+      disabled={disabled}
       className="sr-only"
     />
     <span
       className={`w-5 h-5 rounded-md border-2 flex items-center justify-center
         transition-all duration-150
-        ${disabled
-          ? "bg-gray-800 border-gray-700"
-          : checked
-          ? `${permConfig[perm].checked} shadow-md`
-          : "bg-gray-700 border-gray-600 hover:border-gray-400"
+        ${
+          disabled
+            ? "bg-gray-800 border-gray-700"
+            : checked
+            ? `${permConfig[perm].checked} shadow-md`
+            : "bg-gray-700 border-gray-600 hover:border-gray-400"
         }`}
     >
       {checked && (
@@ -115,7 +128,7 @@ const ManagePermissions = () => {
   const [modules, setModules]             = useState([]);
   const [loadingPerms, setLoadingPerms]   = useState(false);
   const [saving, setSaving]               = useState(false);
-  const [saveStatus, setSaveStatus]       = useState(null); // "success"|"error"|null
+  const [saveStatus, setSaveStatus]       = useState(null);
   const [errorMsg, setErrorMsg]           = useState(null);
 
   // ── Fetch modules ─────────────────────────────────────────────────────────
@@ -131,7 +144,6 @@ const ManagePermissions = () => {
     fetchModules();
   }, []);
 
-  // Init empty perms when modules load
   useEffect(() => {
     if (modules.length > 0) {
       const initial = emptyPerms(modules);
@@ -167,19 +179,37 @@ const ManagePermissions = () => {
 
   // ── Disabled logic ────────────────────────────────────────────────────────
   //
-  //  Rule 1 → mod[perm] === false : permanently N/A → show "N/A" badge, not checkbox
-  //  Rule 2 → add/edit/delete when view is OFF → disabled (greyed checkbox)
-  //  Note: Rule 2 only fires after loading is done to avoid false-disabling on init
+  //  Rule 1: if mod[perm] === false → PERMANENTLY disabled (cannot click at all)
+  //          e.g. dashboard.add=false, dashboard.delete=false
+  //               settings.add=false,  settings.delete=false
   //
-  // Only disable if backend explicitly sent false for this field
+  //  Rule 2: if perm is add/edit/delete AND view is currently OFF → disabled
+  //          (can't give actions without view access)
+  //
+  //  "all" is never disabled — it controls only the allowed fields
+  //
+
   const isDisabled = (mod, perm) => {
     if (perm === "all") return false;
-    return mod[perm] === false;
+
+    // Rule 1: mod config has this field=false → permanently disabled
+    // e.g. dashboard.add=false, dashboard.delete=false, settings.add=false
+    if (!isFieldAllowed(mod, perm)) return true;
+
+    // Rule 2: add/edit/delete need view to be ON
+    // Only apply after perms are loaded (loadingPerms=false)
+    // AND only if view is explicitly false in the current perms state
+    if (perm !== "view" && !loadingPerms) {
+      const viewState = perms[mod._id]?.view ?? isFieldAllowed(mod, "view");
+      if (!viewState) return true;
+    }
+
+    return false;
   };
 
-  // ── Handlers ─────────────────────────────────────────────────────────────
-
-  // "All" only sets fields that the module allows (mod[field] !== false)
+  // ── Handle "All" checkbox ─────────────────────────────────────────────────
+  // When checked: enable ONLY fields where mod[field] !== false
+  // When unchecked: turn off all fields (regardless of restrictions)
   const handleAll = (mod, checked) => {
     setSaveStatus(null);
     setPerms((prev) => ({
@@ -194,24 +224,25 @@ const ManagePermissions = () => {
     }));
   };
 
+  // ── Handle single checkbox ────────────────────────────────────────────────
   const handleSingle = (mod, perm, checked) => {
     setSaveStatus(null);
     setPerms((prev) => {
       const current = { ...prev[mod._id], [perm]: checked };
 
-      // Unchecking view → clear all dependent fields
+      // Unchecking view → clear add/edit/delete too
       if (perm === "view" && !checked) {
         current.add    = false;
         current.edit   = false;
         current.delete = false;
       }
 
-      // Checking add/edit/delete → auto-enable view
+      // Checking add/edit/delete → auto-enable view (if view is allowed)
       if (perm !== "view" && checked && !current.view && isFieldAllowed(mod, "view")) {
         current.view = true;
       }
 
-      // Recalculate "all"
+      // Recalculate "all" — skip disabled fields from the check
       current.all = recalcAll(mod, current);
 
       return { ...prev, [mod._id]: current };
@@ -320,7 +351,6 @@ const ManagePermissions = () => {
       {/* ── Table ── */}
       <div className="rounded-xl border border-gray-700 overflow-hidden shadow-xl bg-gray-900 relative">
 
-        {/* Loading overlay */}
         {loadingPerms && (
           <div className="absolute inset-0 bg-gray-900/70 flex items-center justify-center z-10 rounded-xl">
             <div className="flex items-center gap-3 text-gray-400 text-sm">
@@ -330,8 +360,6 @@ const ManagePermissions = () => {
         )}
 
         <table className="w-full border-collapse">
-
-          {/* ── thead ── */}
           <thead>
             <tr className="bg-gray-800">
               <th className="text-left pl-6 pr-4 py-3.5 text-xs font-semibold uppercase
@@ -343,21 +371,30 @@ const ManagePermissions = () => {
                   </span>
                 )}
               </th>
-              {PERMISSIONS.map((p) => (
-                <th
-                  key={p}
-                  className="py-3.5 px-4 text-center text-xs font-semibold uppercase
-                             tracking-widest text-gray-500 border-b border-gray-700"
-                >
-                  {permConfig[p].label}
-                </th>
-              ))}
+              {PERMISSIONS.map((perm) => (
+  <td key={perm} className="py-3.5 px-4 text-center">
+    <div className="flex items-center justify-center">
+
+      {isNotApplicable(mod, perm) ? (
+  <span className="text-xs text-gray-500">N/A</span>
+) : (
+  <Checkbox
+    checked={perms[mod._id]?.[perm] || false}
+    onChange={(checked) => handleChange(mod, perm, checked)}
+    perm={perm}
+    disabled={isDisabled(mod, perm)}
+  />
+)}
+
+    </div>
+  </td>
+))}
             </tr>
           </thead>
 
-          {/* ── tbody ── */}
           <tbody>
             {modules.map((mod, idx) => {
+              // Show "restricted" badge if any field is locked on this module
               const isRestricted = FIELDS.some((f) => !isFieldAllowed(mod, f));
 
               return (
@@ -381,7 +418,7 @@ const ManagePermissions = () => {
                     </div>
                   </td>
 
-                  {/* Permission cells */}
+                  {/* Permission checkboxes */}
                   {PERMISSIONS.map((perm) => (
                     <td key={perm} className="py-3.5 px-4 text-center">
                       <div className="flex items-center justify-center">

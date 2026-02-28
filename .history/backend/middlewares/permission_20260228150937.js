@@ -13,7 +13,6 @@ const checkPermission = (moduleName, action) => {
       const roleId = req.user.roleId; // JWT se
 
       console.log("BBBBBBBBBB")
-      console.log(roleId)
 
       const role = await Role.findById(roleId).populate(
         "permissions.module",
