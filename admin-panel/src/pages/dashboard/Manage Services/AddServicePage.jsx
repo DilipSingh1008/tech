@@ -43,9 +43,9 @@ const AddEditServicePage = () => {
     slug: "",
     shortDescription: "",
     galleryImages: [],
-    existingGallery: [], 
+    existingGallery: [],
     pdfFile: null,
-    existingPdf: null, 
+    existingPdf: null,
     status: true,
   });
 
@@ -66,22 +66,77 @@ const AddEditServicePage = () => {
   };
 
   // Load categories & service (edit mode)
-  useEffect(() => {
-    const loadCategories = async () => {
-      try {
-        const res = await getItems("categories");
-        console.log("Service data from backend:", res.data);
-        setCategories(res.data.filter((cat) => cat.catid === null));
-      } catch (err) {
-        console.error("Error loading categories:", err);
-      }
-    };
+  // useEffect(() => {
+  //   const loadCategories = async () => {
+  //     try {
+  //       const res = await getItems("services/active");
+  //       console.log("Service data from backend:", res);
+  //       setCategories(res.data);
+  //     } catch (err) {
+  //       console.error("Error loading categories:", err);
+  //     }
+  //   };
 
-    const loadService = async () => {
-      if (isEdit) {
-        try {
-          const res = await getItems(`services/${id}`);
-          const s = res.data;
+  //   const loadService = async () => {
+  //     if (isEdit) {
+  //       try {
+  //         const res = await getItems(`services/${id}`);
+  //         const s = res.data;
+
+  //         setInitialValues({
+  //           category: s.category?._id || "",
+  //           subCategory: s.subCategory?._id || "",
+  //           name: s.name || "",
+  //           slug: s.slug || "",
+  //           shortDescription: s.shortDescription || "",
+  //           galleryImages: [],
+  //           existingGallery: s.galleryImages || [],
+  //           pdfFile: null,
+  //           existingPdf: s.pdfFile || null,
+  //           status: s.status,
+  //         });
+
+  //         if (quill) quill.root.innerHTML = s.description || "";
+
+  //         // if (s.category?._id) {
+  //         //   const allCats = await getItems("categories");
+  //         //   setSubCategories(
+  //         //     allCats.data.filter((c) => c.catid === s.category._id),
+  //         //   );
+  //         // }
+  //         if (s.category?._id) {
+  //           const allCats = await getItems("categories");
+
+  //           setSubCategories(
+  //             allCats.data.filter(
+  //               (c) => c.catid === s.category._id && c.status === "active",
+  //             ),
+  //           );
+  //         }
+  //       } catch (err) {
+  //         console.error("Error loading service:", err);
+  //       } finally {
+  //         setLoading(false);
+  //       }
+  //     } else {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   loadCategories();
+  //   loadService();
+  // }, [id, isEdit, quill]);
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        // 1️⃣ Load only active categories + active subcategories
+        const catRes = await getItems("services/active");
+        setCategories(catRes.data);
+
+        if (isEdit) {
+          // 2️⃣ Load service
+          const serviceRes = await getItems(`services/${id}`);
+          const s = serviceRes.data;
 
           setInitialValues({
             category: s.category?._id || "",
@@ -98,36 +153,34 @@ const AddEditServicePage = () => {
 
           if (quill) quill.root.innerHTML = s.description || "";
 
+          // 3️⃣ Get subcategories from already loaded active categories
           if (s.category?._id) {
-            const allCats = await getItems("categories");
-            setSubCategories(
-              allCats.data.filter((c) => c.catid === s.category._id),
+            const selectedCat = catRes.data.find(
+              (cat) => cat._id === s.category._id,
             );
+
+            setSubCategories(selectedCat?.subCategories || []);
           }
-        } catch (err) {
-          console.error("Error loading service:", err);
-        } finally {
-          setLoading(false);
         }
-      } else {
+      } catch (err) {
+        console.error(err);
+      } finally {
         setLoading(false);
       }
     };
 
-    loadCategories();
-    loadService();
+    loadData();
   }, [id, isEdit, quill]);
 
-  const handleCategoryChange = async (categoryId, setFieldValue) => {
+  const handleCategoryChange = (categoryId, setFieldValue) => {
     setFieldValue("category", categoryId);
     setFieldValue("subCategory", "");
-    try {
-      const res = await getItems("categories");
-      setSubCategories(res.data.filter((c) => c.catid === categoryId));
-    } catch (err) {
-      console.error(err);
-      setSubCategories([]);
-    }
+
+    const cat = categories.find((c) => c._id === categoryId);
+
+    const activeSubs = cat?.subCategories?.filter((sub) => sub.status) || [];
+
+    setSubCategories(activeSubs);
   };
 
   const ServiceSchema = Yup.object().shape({

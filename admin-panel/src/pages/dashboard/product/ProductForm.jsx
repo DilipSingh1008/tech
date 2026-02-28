@@ -32,20 +32,20 @@ const ProductForm = () => {
     },
   });
 
-  const [categories, setCategories]       = useState([]);
+  const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
-  const [loading, setLoading]             = useState(true);
+  const [loading, setLoading] = useState(true);
 
   const [initialValues, setInitialValues] = useState({
-    category:         "",
-    subCategory:      "",
-    name:             "",
-    slug:             "",
-    mrp:              "",
-    price:            "",
+    category: "",
+    subCategory: "",
+    name: "",
+    slug: "",
+    mrp: "",
+    price: "",
     shortDescription: "",
-    images:           [],
-    existingImages:   [],
+    images: [],
+    existingImages: [],
   });
 
   const theme = {
@@ -64,84 +64,139 @@ const ProductForm = () => {
     section: "p-4 md:p-6 rounded-xl border shadow-sm",
   };
 
+  // useEffect(() => {
+  //   const loadCategories = async () => {
+  //     try {
+  //       const res = await getItems("services/active");
+  //       console.log(res);
+  //       setCategories(res.data);
+  //     } catch (err) {
+  //       console.error("Error loading categories:", err);
+  //     }
+  //   };
+
+  //   const loadProduct = async () => {
+  //     if (isEdit) {
+  //       try {
+  //         const res = await getItems(`product-category/${id}`);
+
+  //         // ── DEBUG: poora response dekho console mein ──────────────────────
+  //         console.log("Full API response:", res);
+  //         console.log("res.data:", res.data);
+
+  //         // Backend alag alag structure mein data bhejta hai
+  //         // res.data ya res.data.data ya res.data.product — sab handle karo
+  //         const prod = res;
+
+  //         console.log("Extracted prod object:", prod);
+  //         console.log(
+  //           "Fields check → name:",
+  //           prod?.name,
+  //           "| mrp:",
+  //           prod?.mrp,
+  //           "| price:",
+  //           prod?.price,
+  //           "| salePrice:",
+  //           prod?.salePrice,
+  //         );
+
+  //         setInitialValues({
+  //           category: prod.category?._id || "",
+  //           subCategory: prod.subCategory?._id || "",
+  //           name: prod.name || "",
+  //           slug: prod.slug || "",
+  //           mrp: prod.mrp || prod.price || "",
+  //           price: prod.salePrice || prod.price || "",
+  //           shortDescription: prod.shortDescription || "",
+  //           images: [],
+  //           existingImages: prod.images || [],
+  //         });
+
+  //         if (quill) quill.root.innerHTML = prod.mainDescription || "";
+
+  //         if (prod.category?._id) {
+  //           const allCats = await getItems("categories");
+  //           setSubCategories(
+  //             allCats.data.filter((c) => c.catid === prod.category._id),
+  //           );
+  //         }
+  //       } catch (err) {
+  //         console.error("Error loading product:", err);
+  //       } finally {
+  //         setLoading(false);
+  //       }
+  //     } else {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   loadCategories();
+  //   loadProduct();
+  // }, [id, isEdit, quill]);
+
   useEffect(() => {
-    const loadCategories = async () => {
+    const loadData = async () => {
       try {
-        const res = await getItems("categories");
-        setCategories(res.data.filter((cat) => cat.catid === null));
-      } catch (err) {
-        console.error("Error loading categories:", err);
-      }
-    };
+        // 1️⃣ Load only active categories + subcategories
+        const catRes = await getItems("services/active");
+        setCategories(catRes.data);
 
-    const loadProduct = async () => {
-      if (isEdit) {
-        try {
+        if (isEdit) {
+          // 2️⃣ Load product
           const res = await getItems(`product-category/${id}`);
-
-          // ── DEBUG: poora response dekho console mein ──────────────────────
-          console.log("Full API response:", res);
-          console.log("res.data:", res.data);
-
-          // Backend alag alag structure mein data bhejta hai
-          // res.data ya res.data.data ya res.data.product — sab handle karo
-          const prod = res
-
-          console.log("Extracted prod object:", prod);
-          console.log("Fields check → name:", prod?.name, "| mrp:", prod?.mrp, "| price:", prod?.price, "| salePrice:", prod?.salePrice);
+          const prod = res;
 
           setInitialValues({
-            category:         prod.category?._id    || "",
-            subCategory:      prod.subCategory?._id || "",
-            name:             prod.name             || "",
-            slug:             prod.slug             || "",
-            mrp:              prod.mrp   || prod.price     || "",
-            price:            prod.salePrice || prod.price || "",
+            category: prod.category?._id || "",
+            subCategory: prod.subCategory?._id || "",
+            name: prod.name || "",
+            slug: prod.slug || "",
+            mrp: prod.mrp || prod.price || "",
+            price: prod.salePrice || prod.price || "",
             shortDescription: prod.shortDescription || "",
-            images:           [],
-            existingImages:   prod.images || [],
+            images: [],
+            existingImages: prod.images || [],
           });
 
-          if (quill) quill.root.innerHTML = prod.mainDescription || "";
-
-          if (prod.category?._id) {
-            const allCats = await getItems("categories");
-            setSubCategories(
-              allCats.data.filter((c) => c.catid === prod.category._id)
-            );
+          if (quill) {
+            quill.root.innerHTML = prod.mainDescription || "";
           }
-        } catch (err) {
-          console.error("Error loading product:", err);
-        } finally {
-          setLoading(false);
+
+          // 3️⃣ Subcategories set from already loaded active categories
+          if (prod.category?._id) {
+            const selectedCat = catRes.data.find(
+              (cat) => cat._id === prod.category._id,
+            );
+
+            setSubCategories(selectedCat?.subCategories || []);
+          }
         }
-      } else {
+      } catch (err) {
+        console.error("Error loading data:", err);
+      } finally {
         setLoading(false);
       }
     };
 
-    loadCategories();
-    loadProduct();
+    loadData();
   }, [id, isEdit, quill]);
-
-  const handleCategoryChange = async (categoryId, setFieldValue) => {
+  const handleCategoryChange = (categoryId, setFieldValue) => {
     setFieldValue("category", categoryId);
     setFieldValue("subCategory", "");
-    try {
-      const res = await getItems("categories");
-      setSubCategories(res.data.filter((c) => c.catid === categoryId));
-    } catch (err) {
-      console.error(err);
-      setSubCategories([]);
-    }
+
+    const cat = categories.find((c) => c._id === categoryId);
+
+    const activeSubs = cat?.subCategories?.filter((sub) => sub.status) || [];
+
+    setSubCategories(activeSubs);
   };
 
   const ProductSchema = Yup.object().shape({
-    category:         Yup.string().required("Category is required"),
-    subCategory:      Yup.string().required("Sub-Category is required"),
-    name:             Yup.string().required("Product Name is required"),
-    mrp:              Yup.string().required("MRP is required"),
-    price:            Yup.string().required("Sale Price is required"),
+    category: Yup.string().required("Category is required"),
+    subCategory: Yup.string().required("Sub-Category is required"),
+    name: Yup.string().required("Product Name is required"),
+    mrp: Yup.string().required("MRP is required"),
+    price: Yup.string().required("Sale Price is required"),
     shortDescription: Yup.string().required("Short description is required"),
   });
 
@@ -162,7 +217,9 @@ const ProductForm = () => {
         <h1 className="text-sm font-bold">
           {isEdit ? "Edit Product" : "Add New Product"}
         </h1>
-        <p className="text-[10px] opacity-50">Fill in all required details below</p>
+        <p className="text-[10px] opacity-50">
+          Fill in all required details below
+        </p>
       </header>
 
       <main className="flex-1 overflow-y-auto p-4 md:p-8">
@@ -173,15 +230,18 @@ const ProductForm = () => {
           onSubmit={async (values, { setSubmitting }) => {
             try {
               const data = new FormData();
-              data.append("category",         values.category);
-              data.append("subCategory",      values.subCategory);
-              data.append("name",             values.name);
-              data.append("slug",             generateSlug(values.name));
-              data.append("mrp",              values.mrp);
-              data.append("price",            values.price);
+              data.append("category", values.category);
+              data.append("subCategory", values.subCategory);
+              data.append("name", values.name);
+              data.append("slug", generateSlug(values.name));
+              data.append("mrp", values.mrp);
+              data.append("price", values.price);
               data.append("shortDescription", values.shortDescription);
-              data.append("mainDescription",  quill?.root.innerHTML || "");
-              data.append("existingImages",   JSON.stringify(values.existingImages));
+              data.append("mainDescription", quill?.root.innerHTML || "");
+              data.append(
+                "existingImages",
+                JSON.stringify(values.existingImages),
+              );
 
               if (values.images?.length > 0) {
                 values.images.forEach((file) => data.append("images", file));
@@ -206,12 +266,12 @@ const ProductForm = () => {
         >
           {({ setFieldValue, values, isSubmitting }) => (
             <Form className="max-w-4xl mx-auto space-y-6">
-
               {/* Categorization & Pricing */}
               <div className={`${theme.section} ${theme.card}`}>
-                <h2 className="text-xs font-bold mb-4">Categorization & Pricing</h2>
+                <h2 className="text-xs font-bold mb-4">
+                  Categorization & Pricing
+                </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-
                   <div>
                     <label className={theme.label}>
                       Category <span className="text-red-500">*</span>
@@ -220,14 +280,22 @@ const ProductForm = () => {
                       name="category"
                       as="select"
                       className={theme.input}
-                      onChange={(e) => handleCategoryChange(e.target.value, setFieldValue)}
+                      onChange={(e) =>
+                        handleCategoryChange(e.target.value, setFieldValue)
+                      }
                     >
                       <option value="">Select Category</option>
                       {categories.map((c) => (
-                        <option key={c._id} value={c._id}>{c.name}</option>
+                        <option key={c._id} value={c._id}>
+                          {c.name}
+                        </option>
                       ))}
                     </Field>
-                    <ErrorMessage name="category" component="div" className={theme.error} />
+                    <ErrorMessage
+                      name="category"
+                      component="div"
+                      className={theme.error}
+                    />
                   </div>
 
                   <div>
@@ -242,10 +310,16 @@ const ProductForm = () => {
                     >
                       <option value="">Select Sub-Category</option>
                       {subCategories.map((s) => (
-                        <option key={s._id} value={s._id}>{s.name}</option>
+                        <option key={s._id} value={s._id}>
+                          {s.name}
+                        </option>
                       ))}
                     </Field>
-                    <ErrorMessage name="subCategory" component="div" className={theme.error} />
+                    <ErrorMessage
+                      name="subCategory"
+                      component="div"
+                      className={theme.error}
+                    />
                   </div>
 
                   <div>
@@ -261,7 +335,11 @@ const ProductForm = () => {
                         setFieldValue("slug", generateSlug(e.target.value));
                       }}
                     />
-                    <ErrorMessage name="name" component="div" className={theme.error} />
+                    <ErrorMessage
+                      name="name"
+                      component="div"
+                      className={theme.error}
+                    />
                   </div>
 
                   <div>
@@ -279,7 +357,11 @@ const ProductForm = () => {
                       MRP <span className="text-red-500">*</span>
                     </label>
                     <Field name="mrp" type="number" className={theme.input} />
-                    <ErrorMessage name="mrp" component="div" className={theme.error} />
+                    <ErrorMessage
+                      name="mrp"
+                      component="div"
+                      className={theme.error}
+                    />
                   </div>
 
                   <div>
@@ -287,9 +369,12 @@ const ProductForm = () => {
                       Price (Sale) <span className="text-red-500">*</span>
                     </label>
                     <Field name="price" type="number" className={theme.input} />
-                    <ErrorMessage name="price" component="div" className={theme.error} />
+                    <ErrorMessage
+                      name="price"
+                      component="div"
+                      className={theme.error}
+                    />
                   </div>
-
                 </div>
 
                 <div className="mb-4">
@@ -302,12 +387,18 @@ const ProductForm = () => {
                     rows="3"
                     className={theme.input}
                   />
-                  <ErrorMessage name="shortDescription" component="div" className={theme.error} />
+                  <ErrorMessage
+                    name="shortDescription"
+                    component="div"
+                    className={theme.error}
+                  />
                 </div>
 
                 <div>
                   <label className={theme.label}>Main Description</label>
-                  <div className={`rounded-xl border p-2 bg-white dark:bg-[#151b28] dark:border-gray-800`}>
+                  <div
+                    className={`rounded-xl border p-2 bg-white dark:bg-[#151b28] dark:border-gray-800`}
+                  >
                     <div ref={quillRef} className="min-h-[200px]" />
                   </div>
                 </div>
@@ -343,7 +434,7 @@ const ProductForm = () => {
                         onClick={() =>
                           setFieldValue(
                             "existingImages",
-                            values.existingImages.filter((_, i) => i !== idx)
+                            values.existingImages.filter((_, i) => i !== idx),
                           )
                         }
                         className="absolute top-0 right-0 bg-red-500 p-0.5 cursor-pointer"
@@ -371,7 +462,7 @@ const ProductForm = () => {
                         onClick={() =>
                           setFieldValue(
                             "images",
-                            values.images.filter((_, i) => i !== idx)
+                            values.images.filter((_, i) => i !== idx),
                           )
                         }
                         className="absolute top-0 right-0 bg-red-500 p-0.5 cursor-pointer"
@@ -389,10 +480,13 @@ const ProductForm = () => {
                 className="w-full py-3 cursor-pointer bg-(--primary) text-white rounded-lg text-sm font-semibold hover:opacity-90 transition-all"
               >
                 {isSubmitting
-                  ? isEdit ? "Updating..." : "Adding..."
-                  : isEdit ? "Update Product" : "Publish Product"}
+                  ? isEdit
+                    ? "Updating..."
+                    : "Adding..."
+                  : isEdit
+                    ? "Update Product"
+                    : "Publish Product"}
               </button>
-
             </Form>
           )}
         </Formik>
