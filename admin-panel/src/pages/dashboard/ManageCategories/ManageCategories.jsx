@@ -1,11 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  Plus,
-  Trash2,
-  Edit3,
-  Image as ImageIcon,
-  X,
-} from "lucide-react";
+import { Plus, Trash2, Edit3, Image as ImageIcon, X } from "lucide-react";
 import { useTheme } from "../../../context/ThemeContext";
 import {
   getItems,
@@ -35,7 +29,7 @@ const ManageCategories = () => {
   // ── Permission Logic ──
   const permissions = useSelector((state) => state.permission.permissions);
   const rawCategoryPermission = permissions?.find(
-    (p) => p.module.name === "categories"
+    (p) => p.module.name === "categories",
   );
   const localRole = localStorage.getItem("role");
   const categoryPermission =
@@ -45,7 +39,7 @@ const ManageCategories = () => {
 
   useEffect(() => {
     fetchData("top");
-  }, [page, sortBy, order]);
+  }, [searchQuery, page, sortBy, order]);
 
   const fetchData = async (parentCatId = null) => {
     try {
@@ -78,8 +72,8 @@ const ManageCategories = () => {
       await updateItem(`categories/${id}`, { status: !currentStatus });
       setCategories((prev) =>
         prev.map((cat) =>
-          cat._id === id ? { ...cat, status: !currentStatus } : cat
-        )
+          cat._id === id ? { ...cat, status: !currentStatus } : cat,
+        ),
       );
     } catch (err) {
       console.error("Error toggling status:", err);
@@ -194,7 +188,7 @@ const ManageCategories = () => {
                     </th>
                     <th className="px-4 py-3 w-16">Icon</th>
                     <th className="px-4 py-3 w-24">Status</th>
-                    {(categoryPermission?.edit || categoryPermission?.delete) ? (
+                    {categoryPermission?.edit || categoryPermission?.delete ? (
                       <th className="px-4 py-3 text-right w-24">Action</th>
                     ) : null}
                   </tr>
@@ -247,8 +241,8 @@ const ManageCategories = () => {
                         </button>
                       </td>
 
-                      {(categoryPermission?.edit ||
-                        categoryPermission?.delete) ? (
+                      {categoryPermission?.edit ||
+                      categoryPermission?.delete ? (
                         <td className="px-4 py-2.5 text-right">
                           <div className="flex justify-end gap-2">
                             {/* EDIT */}
