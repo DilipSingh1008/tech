@@ -7,7 +7,6 @@ import "quill/dist/quill.snow.css";
 import { X } from "lucide-react";
 import { createItem, getItems, updateItem } from "../../../services/api";
 import { useNavigate, useParams } from "react-router-dom";
-import { useSelector } from "react-redux";
 
 const generateSlug = (text) =>
   text
@@ -20,27 +19,6 @@ const AddCmsForm = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const isEdit = !!id;
-
-  // ── Permission Logic ──
-  const permissions = useSelector((state) => state.permission.permissions);
-  const rawCmsPermission = permissions?.find(
-    (p) => p.module.name === "cms"
-  );
-  const localRole = localStorage.getItem("role");
-  const cmsPermission =
-    localRole === "admin"
-      ? { add: true, edit: true, delete: true, view: true }
-      : rawCmsPermission;
-
-  // ── Redirect if no permission ──
-  useEffect(() => {
-    if (isEdit && !cmsPermission?.edit) {
-      navigate("/dashboard/cms");
-    }
-    if (!isEdit && !cmsPermission?.add) {
-      navigate("/dashboard/cms");
-    }
-  }, [cmsPermission]);
 
   const { quill, quillRef } = useQuill({
     theme: "snow",
@@ -57,14 +35,14 @@ const AddCmsForm = () => {
   const [loading, setLoading] = useState(true);
 
   const [initialValues, setInitialValues] = useState({
-    title: "",
-    slug: "",
-    meta: "",
-    metaDescription: "",
+    title:            "",
+    slug:             "",
+    meta:             "",
+    metaDescription:  "",
     shortDescription: "",
-    status: true,
-    images: [],
-    existingImages: [],
+    status:           true,
+    images:           [],
+    existingImages:   [],
   });
 
   const theme = {
@@ -91,15 +69,16 @@ const AddCmsForm = () => {
           const page = res.data || res;
 
           setInitialValues({
-            title: page.title || "",
-            slug: page.slug || "",
-            meta: page.meta || "",
-            metaDescription: page.metaDescription || "",
+            title:            page.title            || "",
+            slug:             page.slug             || "",
+            meta:             page.meta             || "",
+            metaDescription:  page.metaDescription  || "",
             shortDescription: page.shortDescription || "",
-            status: page.status !== undefined ? page.status : true,
-            images: [],
-            existingImages: page.images || [],
+            status:           page.status !== undefined ? page.status : true,
+            images:           [],
+            existingImages:   page.images || [],
           });
+          
 
           if (quill) quill.root.innerHTML = page.mainDescription || "";
         } catch (err) {
@@ -115,12 +94,15 @@ const AddCmsForm = () => {
     loadPage();
   }, [id, isEdit, quill]);
 
+  console.log(initialValues);
+  
+
   const CmsSchema = Yup.object().shape({
-    title: Yup.string().required("Title is required"),
-    meta: Yup.string().required("Meta is required"),
-    metaDescription: Yup.string().required("Meta description is required"),
-    shortDescription: Yup.string().required("Short description is required"),
-    status: Yup.boolean().required("Status is required"),
+    title:            Yup.string().required("Title is required"),
+    meta:             Yup.string().required("Meta is required"),
+    metaDescription:  Yup.string().required("Meta is required"),
+    shortDescription: Yup.string().required("Meta is required"),
+    status:           Yup.boolean().required("Meta is required"),
   });
 
   if (loading)
@@ -129,23 +111,6 @@ const AddCmsForm = () => {
         Loading...
       </div>
     );
-
-  // ── No permission fallback UI ──
-  if (isEdit && !cmsPermission?.edit) {
-    return (
-      <div className="flex h-screen items-center justify-center text-xs opacity-50">
-        You don't have permission to edit CMS pages.
-      </div>
-    );
-  }
-
-  if (!isEdit && !cmsPermission?.add) {
-    return (
-      <div className="flex h-screen items-center justify-center text-xs opacity-50">
-        You don't have permission to add CMS pages.
-      </div>
-    );
-  }
 
   return (
     <div className={`h-screen w-full flex flex-col ${theme.main}`}>
@@ -157,9 +122,7 @@ const AddCmsForm = () => {
         <h1 className="text-sm font-bold">
           {isEdit ? "Edit CMS Page" : "Add New CMS Page"}
         </h1>
-        <p className="text-[10px] opacity-50">
-          Fill in all required details below
-        </p>
+        <p className="text-[10px] opacity-50">Fill in all required details below</p>
       </header>
 
       <main className="flex-1 overflow-y-auto p-4 md:p-8">
@@ -170,17 +133,14 @@ const AddCmsForm = () => {
           onSubmit={async (values, { setSubmitting }) => {
             try {
               const data = new FormData();
-              data.append("title", values.title);
-              data.append("slug", generateSlug(values.title));
-              data.append("meta", values.meta);
-              data.append("metaDescription", values.metaDescription);
+              data.append("title",            values.title);
+              data.append("slug",             generateSlug(values.title));
+              data.append("meta",             values.meta);
+              data.append("metaDescription",  values.metaDescription);
               data.append("shortDescription", values.shortDescription);
-              data.append("mainDescription", quill?.root.innerHTML || "");
-              data.append("status", values.status);
-              data.append(
-                "existingImages",
-                JSON.stringify(values.existingImages)
-              );
+              data.append("mainDescription",  quill?.root.innerHTML || "");
+              data.append("status",           values.status);
+              data.append("existingImages",   JSON.stringify(values.existingImages));
 
               if (values.images?.length > 0) {
                 values.images.forEach((file) => data.append("images", file));
@@ -205,10 +165,12 @@ const AddCmsForm = () => {
         >
           {({ setFieldValue, values, isSubmitting }) => (
             <Form className="max-w-4xl mx-auto space-y-6">
+
               {/* Basic Info */}
               <div className={`${theme.section} ${theme.card}`}>
                 <h2 className="text-xs font-bold mb-4">Page Details</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+
                   <div>
                     <label className={theme.label}>
                       Title <span className="text-red-500">*</span>
@@ -222,11 +184,7 @@ const AddCmsForm = () => {
                         setFieldValue("slug", generateSlug(e.target.value));
                       }}
                     />
-                    <ErrorMessage
-                      name="title"
-                      component="div"
-                      className={theme.error}
-                    />
+                    <ErrorMessage name="title" component="div" className={theme.error} />
                   </div>
 
                   <div>
@@ -242,11 +200,7 @@ const AddCmsForm = () => {
                   <div>
                     <label className={theme.label}>Meta Title</label>
                     <Field name="meta" type="text" className={theme.input} />
-                    <ErrorMessage
-                      name="meta"
-                      component="div"
-                      className={theme.error}
-                    />
+                    <ErrorMessage name="meta" component="div" className={theme.error} />
                   </div>
 
                   <div>
@@ -263,6 +217,7 @@ const AddCmsForm = () => {
                       <option value="false">Inactive</option>
                     </Field>
                   </div>
+
                 </div>
 
                 <div className="mb-4">
@@ -274,11 +229,7 @@ const AddCmsForm = () => {
                     className={theme.input}
                     placeholder="SEO meta description..."
                   />
-                  <ErrorMessage
-                    name="metaDescription"
-                    component="div"
-                    className={theme.error}
-                  />
+                  <ErrorMessage name="metaDescription" component="div" className={theme.error} />
                 </div>
 
                 <div className="mb-4">
@@ -290,11 +241,7 @@ const AddCmsForm = () => {
                     className={theme.input}
                     placeholder="Brief summary of the page..."
                   />
-                  <ErrorMessage
-                    name="shortDescription"
-                    component="div"
-                    className={theme.error}
-                  />
+                  <ErrorMessage name="shortDescription" component="div" className={theme.error} />
                 </div>
 
                 <div>
@@ -381,13 +328,10 @@ const AddCmsForm = () => {
                 className="w-full py-3 cursor-pointer bg-(--primary) text-white rounded-lg text-sm font-semibold hover:opacity-90 transition-all"
               >
                 {isSubmitting
-                  ? isEdit
-                    ? "Updating..."
-                    : "Saving..."
-                  : isEdit
-                  ? "Update Page"
-                  : "Publish Page"}
+                  ? isEdit ? "Updating..." : "Saving..."
+                  : isEdit ? "Update Page" : "Publish Page"}
               </button>
+
             </Form>
           )}
         </Formik>

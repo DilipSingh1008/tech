@@ -12,22 +12,9 @@ import {
 } from "../../../services/api";
 import { FiChevronRight, FiChevronLeft } from "react-icons/fi";
 import Searchbar from "../../../components/Searchbar";
-import { useSelector } from "react-redux";
 
 const ManageFaqCategory = () => {
   const { isDarkMode } = useTheme();
-
-  // ── Permission Logic ──
-  const permissions = useSelector((state) => state.permission.permissions);
-  const rawFaqCatPermission = permissions?.find(
-    (p) => p.module.name === "faq-category"
-  );
-  const localRole = localStorage.getItem("role");
-  const faqCatPermission =
-    localRole === "admin"
-      ? { add: true, edit: true, delete: true, view: true }
-      : rawFaqCatPermission;
-
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -38,7 +25,6 @@ const ManageFaqCategory = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [sortField, setSortField] = useState("category");
   const [sortOrder, setSortOrder] = useState("asc");
-
   const theme = {
     main: isDarkMode
       ? "bg-[#0b0e14] text-slate-300"
@@ -60,7 +46,7 @@ const ManageFaqCategory = () => {
     setLoading(true);
     try {
       const res = await getItems(
-        `faq-category?page=${page}&limit=${limit}&search=${searchQuery}&sortField=${sortField}&sortOrder=${sortOrder}`
+        `faq-category?page=${page}&limit=${limit}&search=${searchQuery}&sortField=${sortField}&sortOrder=${sortOrder}`,
       );
       setCategories(res.data || []);
       setTotalPages(res.pagination?.totalPages || 1);
@@ -82,7 +68,6 @@ const ManageFaqCategory = () => {
     category: Yup.string().required("Category name is required"),
     description: Yup.string().required("Description is required"),
   });
-
   const handleSort = (field) => {
     if (sortField === field) {
       setSortOrder(sortOrder === "asc" ? "desc" : "asc");
@@ -92,20 +77,18 @@ const ManageFaqCategory = () => {
     }
     setPage(1);
   };
-
   const handleToggleStatus = async (id, currentStatus) => {
     try {
       await patchItem(`faq-category/toggle-status/${id}`, {});
       setCategories((prev) =>
         prev.map((faq) =>
-          faq._id === id ? { ...faq, status: !currentStatus } : faq
-        )
+          faq._id === id ? { ...faq, status: !currentStatus } : faq,
+        ),
       );
     } catch (err) {
       console.error("Failed to toggle FAQ status", err);
     }
   };
-
   return (
     <div className={`h-screen w-full flex flex-col ${theme.main}`}>
       <main className="flex-1 overflow-y-auto">
@@ -117,18 +100,15 @@ const ManageFaqCategory = () => {
                 setPage(1);
               }}
             />
-
-            {faqCatPermission?.add ? (
-              <button
-                onClick={() => {
-                  setEditingItem(null);
-                  setIsModalOpen(true);
-                }}
-                className="flex items-center cursor-pointer gap-1.5 px-3 py-1.5 bg-(--primary) text-white rounded-lg text-xs font-semibold"
-              >
-                <Plus size={14} /> Add Category
-              </button>
-            ) : null}
+            <button
+              onClick={() => {
+                setEditingItem(null);
+                setIsModalOpen(true);
+              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-(--primary) text-white rounded-lg text-xs font-semibold"
+            >
+              <Plus size={14} /> Add Category
+            </button>
           </div>
 
           <div
@@ -143,7 +123,7 @@ const ManageFaqCategory = () => {
                     <th className="px-4 py-3 w-16">ID</th>
                     <th
                       onClick={() => handleSort("category")}
-                      className="px-4 py-3 cursor-pointer hover:text-(--primary) transition-colors"
+                      className="px-4 py-3  cursor-pointer"
                     >
                       Category
                       <span className="opacity-50 text-[10px]">
@@ -156,7 +136,7 @@ const ManageFaqCategory = () => {
                     </th>
                     <th
                       onClick={() => handleSort("description")}
-                      className="cursor-pointer px-4 py-3 hover:text-(--primary) transition-colors"
+                      className=" cursor-pointer px-4 py-3 "
                     >
                       Description
                       <span className="opacity-50 text-[10px]">
@@ -168,26 +148,15 @@ const ManageFaqCategory = () => {
                       </span>
                     </th>
                     <th className="px-4 py-3 w-24">Status</th>
-                    {(faqCatPermission?.edit || faqCatPermission?.delete) ? (
-                      <th className="px-4 py-3 text-right w-24">Action</th>
-                    ) : null}
+                    <th className="px-4 py-3 text-right w-24">Action</th>
                   </tr>
                 </thead>
 
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                   {loading ? (
                     <tr>
-                      <td
-                        colSpan="5"
-                        className="text-center py-6 opacity-40 italic"
-                      >
+                      <td colSpan="4" className="text-center py-6">
                         Loading...
-                      </td>
-                    </tr>
-                  ) : categories.length === 0 ? (
-                    <tr>
-                      <td colSpan="5" className="text-center py-6 opacity-40">
-                        No categories found.
                       </td>
                     </tr>
                   ) : (
@@ -199,9 +168,11 @@ const ManageFaqCategory = () => {
                         <td className="px-4 py-2.5 font-semibold">
                           {(page - 1) * limit + index + 1}
                         </td>
+
                         <td className="px-4 py-2.5 font-semibold text-sm capitalize">
                           {item.category}
                         </td>
+
                         <td className="px-4 py-2.5 text-xs opacity-80 max-w-xs truncate">
                           {item.description}
                         </td>
@@ -222,46 +193,24 @@ const ManageFaqCategory = () => {
                           </button>
                         </td>
 
-                        {(faqCatPermission?.edit ||
-                          faqCatPermission?.delete) ? (
-                          <td className="px-4 py-2.5 text-right">
-                            <div className="flex justify-end gap-1">
-                              {/* EDIT */}
-                              {faqCatPermission?.edit ? (
-                                <div className="relative group">
-                                  <button
-                                    onClick={() => {
-                                      setEditingItem(item);
-                                      setIsModalOpen(true);
-                                    }}
-                                    className="cursor-pointer p-1.5 hover:text-(--primary)"
-                                  >
-                                    <Edit3 size={14} />
-                                  </button>
-                                  <span className="absolute bottom-full right-0 mb-2 opacity-0 group-hover:opacity-100 transition bg-black text-blue-400 text-[10px] px-2 py-1 rounded whitespace-nowrap pointer-events-none z-50">
-                                    Edit category
-                                  </span>
-                                </div>
-                              ) : null}
+                        <td className="px-4 py-2.5 text-right flex justify-end gap-1">
+                          <button
+                            onClick={() => {
+                              setEditingItem(item);
+                              setIsModalOpen(true);
+                            }}
+                            className=" cursor-pointer p-1.5 hover:text-(--primary)"
+                          >
+                            <Edit3 size={14} />
+                          </button>
 
-                              {/* DELETE */}
-                              {faqCatPermission?.delete ? (
-                                <div className="relative group">
-                                  <button
-                                    onClick={() => handleDelete(item._id)}
-                                    className="cursor-pointer p-1.5 hover:text-red-500"
-                                  >
-                                    <Trash2 size={14} />
-                                  </button>
-                                  <span className="absolute bottom-full right-0 mb-2 opacity-0 group-hover:opacity-100 transition bg-black text-red-400 text-[10px] px-2 py-1 rounded whitespace-nowrap pointer-events-none z-50">
-                                    Delete category
-                                    <span className="absolute top-full right-2 border-4 border-transparent border-t-black"></span>
-                                  </span>
-                                </div>
-                              ) : null}
-                            </div>
-                          </td>
-                        ) : null}
+                          <button
+                            onClick={() => handleDelete(item._id)}
+                            className=" cursor-pointer p-1.5 hover:text-red-500"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </td>
                       </tr>
                     ))
                   )}
@@ -269,38 +218,40 @@ const ManageFaqCategory = () => {
               </table>
             </div>
 
-            {/* Pagination */}
             <div
               className={`flex items-center justify-between p-3 border-t ${theme.divider}`}
             >
               <span className="text-[11px] opacity-60">
                 Showing {categories.length} entries
               </span>
+
               <div className="flex items-center gap-1">
                 <button
                   disabled={page === 1}
                   onClick={() => setPage(page - 1)}
-                  className="cursor-pointer p-1.5 border rounded-md disabled:opacity-30 hover:border-(--primary) hover:text-(--primary)"
+                  className=" cursor-pointer p-1.5 border rounded-md disabled:opacity-30"
                 >
                   <FiChevronLeft size={16} />
                 </button>
+
                 {[...Array(totalPages)].map((_, i) => (
                   <button
                     key={i + 1}
                     onClick={() => setPage(i + 1)}
-                    className={`cursor-pointer w-7 h-7 text-[11px] rounded-md border transition-all ${
+                    className={` cursor-pointer w-7 h-7 text-[11px] rounded-md border ${
                       page === i + 1
                         ? "bg-(--primary) text-white border-(--primary)"
-                        : "border-transparent hover:border-(--primary) hover:text-(--primary)"
+                        : "border-transparent"
                     }`}
                   >
                     {i + 1}
                   </button>
                 ))}
+
                 <button
                   disabled={page === totalPages}
                   onClick={() => setPage(page + 1)}
-                  className="cursor-pointer p-1.5 border rounded-md disabled:opacity-30 hover:border-(--primary) hover:text-(--primary)"
+                  className=" cursor-pointer p-1.5 border rounded-md disabled:opacity-30"
                 >
                   <FiChevronRight size={16} />
                 </button>
@@ -308,7 +259,6 @@ const ManageFaqCategory = () => {
             </div>
           </div>
 
-          {/* Modal */}
           {isModalOpen && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
               <div
@@ -339,7 +289,7 @@ const ManageFaqCategory = () => {
                     if (editingItem) {
                       await updateItem(
                         `faq-category/${editingItem._id}`,
-                        values
+                        values,
                       );
                     } else {
                       await createItem("faq-category", values);
@@ -383,7 +333,7 @@ const ManageFaqCategory = () => {
 
                     <button
                       type="submit"
-                      className="cursor-pointer w-full py-2 mt-2 bg-(--primary) text-white rounded-lg text-xs font-bold"
+                      className=" cursor-pointer w-full py-2 mt-2 bg-(--primary) text-white rounded-lg text-xs font-bold"
                     >
                       {editingItem ? "Update Category" : "Create Category"}
                     </button>

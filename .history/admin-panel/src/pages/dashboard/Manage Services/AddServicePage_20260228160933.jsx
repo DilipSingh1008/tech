@@ -25,8 +25,6 @@ const AddEditServicePage = () => {
   const rawServicePermission = permissions?.find(
     (p) => p.module.name === "services"
   );
-
-  console.log(rawServicePermission)
   const localRole = localStorage.getItem("role");
   const servicePermission =
     localRole === "admin"

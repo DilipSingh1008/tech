@@ -12,22 +12,11 @@ import {
 } from "../../../services/api";
 import { FiChevronRight, FiChevronLeft } from "react-icons/fi";
 import Searchbar from "../../../components/Searchbar";
-import { useSelector } from "react-redux";
 
 const ManageFaq = () => {
   const { isDarkMode } = useTheme();
 
-  // ── Permission Logic ──
-  const permissions = useSelector((state) => state.permission.permissions);
-  const rawFaqPermission = permissions?.find(
-    (p) => p.module.name === "faq"
-  );
-  const localRole = localStorage.getItem("role");
-  const faqPermission =
-    localRole === "admin"
-      ? { add: true, edit: true, delete: true, view: true }
-      : rawFaqPermission;
-
+  // State
   const [faqs, setFaqs] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -54,11 +43,13 @@ const ManageFaq = () => {
     divider: isDarkMode ? "divide-gray-800" : "divide-gray-100",
   };
 
+  // Fetch categories for dropdown
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         setLoadingCategories(true);
         const res = await getItems("manage-faq/active");
+        console.log(res);
         setCategories(res.data || []);
       } catch (err) {
         console.error(err);
@@ -69,6 +60,7 @@ const ManageFaq = () => {
     fetchCategories();
   }, []);
 
+  // Fetch FAQs
   useEffect(() => {
     fetchFaqs();
   }, [page, searchQuery, sortField, sortOrder]);
@@ -77,8 +69,9 @@ const ManageFaq = () => {
     setLoading(true);
     try {
       const res = await getItems(
-        `manage-faq?page=${page}&limit=${limit}&search=${searchQuery}&sortField=${sortField}&sortOrder=${sortOrder}`
+        `manage-faq?page=${page}&limit=${limit}&search=${searchQuery}&sortField=${sortField}&sortOrder=${sortOrder}`,
       );
+
       setFaqs(res.data || []);
       setTotalPages(res.pagination?.totalPages || 1);
     } catch (err) {
@@ -110,20 +103,18 @@ const ManageFaq = () => {
     }
     setPage(1);
   };
-
   const handleToggleStatus = async (id, currentStatus) => {
     try {
       await patchItem(`manage-faq/toggle-status/${id}`, {});
       setFaqs((prev) =>
         prev.map((faq) =>
-          faq._id === id ? { ...faq, status: !currentStatus } : faq
-        )
+          faq._id === id ? { ...faq, status: !currentStatus } : faq,
+        ),
       );
     } catch (err) {
       console.error("Failed to toggle FAQ status", err);
     }
   };
-
   return (
     <div className={`h-screen w-full flex flex-col ${theme.main}`}>
       <main className="flex-1 overflow-y-auto">
@@ -135,18 +126,15 @@ const ManageFaq = () => {
                 setPage(1);
               }}
             />
-
-            {faqPermission?.add ? (
-              <button
-                onClick={() => {
-                  setEditingItem(null);
-                  setIsModalOpen(true);
-                }}
-                className="flex cursor-pointer items-center gap-1.5 px-3 py-1.5 bg-(--primary) text-white rounded-lg text-xs font-semibold"
-              >
-                <Plus size={14} /> Add FAQ
-              </button>
-            ) : null}
+            <button
+              onClick={() => {
+                setEditingItem(null);
+                setIsModalOpen(true);
+              }}
+              className="flex cursor-pointer items-center gap-1.5 px-3 py-1.5 bg-(--primary) text-white rounded-lg text-xs font-semibold"
+            >
+              <Plus size={14} /> Add FAQ
+            </button>
           </div>
 
           {/* FAQ Table */}
@@ -161,7 +149,7 @@ const ManageFaq = () => {
                   <tr>
                     <th className="px-4 py-3 w-16">ID</th>
                     <th
-                      className="px-4 py-3 cursor-pointer hover:text-(--primary) transition-colors"
+                      className="px-4 py-3 cursor-pointer"
                       onClick={() => handleSort("category")}
                     >
                       Category
@@ -173,8 +161,9 @@ const ManageFaq = () => {
                           : "↕"}
                       </span>
                     </th>
+
                     <th
-                      className="px-4 py-3 cursor-pointer hover:text-(--primary) transition-colors"
+                      className="px-4 py-3 cursor-pointer"
                       onClick={() => handleSort("question")}
                     >
                       Question
@@ -186,8 +175,9 @@ const ManageFaq = () => {
                           : "↕"}
                       </span>
                     </th>
+
                     <th
-                      className="px-4 py-3 cursor-pointer hover:text-(--primary) transition-colors"
+                      className="px-4 py-3 cursor-pointer"
                       onClick={() => handleSort("answer")}
                     >
                       Answer
@@ -200,23 +190,15 @@ const ManageFaq = () => {
                       </span>
                     </th>
                     <th className="px-4 py-3 w-24">Status</th>
-                    {(faqPermission?.edit || faqPermission?.delete) ? (
-                      <th className="px-4 py-3 text-right w-24">Action</th>
-                    ) : null}
+                    <th className="px-4 py-3 text-right w-24">Action</th>
                   </tr>
                 </thead>
 
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                   {loading ? (
                     <tr>
-                      <td colSpan="6" className="text-center py-6 opacity-40 italic">
+                      <td colSpan="5" className="text-center py-6">
                         Loading...
-                      </td>
-                    </tr>
-                  ) : faqs.length === 0 ? (
-                    <tr>
-                      <td colSpan="6" className="text-center py-6 opacity-40">
-                        No FAQs found.
                       </td>
                     </tr>
                   ) : (
@@ -251,46 +233,23 @@ const ManageFaq = () => {
                             />
                           </button>
                         </td>
-
-                        {(faqPermission?.edit || faqPermission?.delete) ? (
-                          <td className="px-4 py-2.5 text-right">
-                            <div className="flex justify-end gap-1">
-                              {/* EDIT */}
-                              {faqPermission?.edit ? (
-                                <div className="relative group">
-                                  <button
-                                    onClick={() => {
-                                      setEditingItem(item);
-                                      setIsModalOpen(true);
-                                    }}
-                                    className="cursor-pointer p-1.5 hover:text-(--primary)"
-                                  >
-                                    <Edit3 size={14} />
-                                  </button>
-                                  <span className="absolute bottom-full right-0 mb-2 opacity-0 group-hover:opacity-100 transition bg-black text-blue-400 text-[10px] px-2 py-1 rounded whitespace-nowrap pointer-events-none z-50">
-                                    Edit FAQ
-                                  </span>
-                                </div>
-                              ) : null}
-
-                              {/* DELETE */}
-                              {faqPermission?.delete ? (
-                                <div className="relative group">
-                                  <button
-                                    onClick={() => handleDelete(item._id)}
-                                    className="cursor-pointer p-1.5 hover:text-red-500"
-                                  >
-                                    <Trash2 size={14} />
-                                  </button>
-                                  <span className="absolute bottom-full right-0 mb-2 opacity-0 group-hover:opacity-100 transition bg-black text-red-400 text-[10px] px-2 py-1 rounded whitespace-nowrap pointer-events-none z-50">
-                                    Delete FAQ
-                                    <span className="absolute top-full right-2 border-4 border-transparent border-t-black"></span>
-                                  </span>
-                                </div>
-                              ) : null}
-                            </div>
-                          </td>
-                        ) : null}
+                        <td className="px-4 py-2.5 text-right flex justify-end gap-1">
+                          <button
+                            onClick={() => {
+                              setEditingItem(item);
+                              setIsModalOpen(true);
+                            }}
+                            className=" cursor-pointer p-1.5 hover:text-(--primary)"
+                          >
+                            <Edit3 size={14} />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(item._id)}
+                            className=" cursor-pointer p-1.5 hover:text-red-500"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </td>
                       </tr>
                     ))
                   )}
@@ -309,7 +268,7 @@ const ManageFaq = () => {
                 <button
                   disabled={page === 1}
                   onClick={() => setPage(page - 1)}
-                  className="cursor-pointer p-1.5 border rounded-md disabled:opacity-30 hover:border-(--primary) hover:text-(--primary)"
+                  className="cursor-pointer p-1.5 border rounded-md disabled:opacity-30"
                 >
                   <FiChevronLeft size={16} />
                 </button>
@@ -317,10 +276,10 @@ const ManageFaq = () => {
                   <button
                     key={i + 1}
                     onClick={() => setPage(i + 1)}
-                    className={`cursor-pointer w-7 h-7 text-[11px] rounded-md border transition-all ${
+                    className={`cursor-pointer w-7 h-7 text-[11px] rounded-md border ${
                       page === i + 1
                         ? "bg-(--primary) text-white border-(--primary)"
-                        : "border-transparent hover:border-(--primary) hover:text-(--primary)"
+                        : "border-transparent"
                     }`}
                   >
                     {i + 1}
@@ -329,7 +288,7 @@ const ManageFaq = () => {
                 <button
                   disabled={page === totalPages}
                   onClick={() => setPage(page + 1)}
-                  className="cursor-pointer p-1.5 border rounded-md disabled:opacity-30 hover:border-(--primary) hover:text-(--primary)"
+                  className="cursor-pointer p-1.5 border rounded-md disabled:opacity-30"
                 >
                   <FiChevronRight size={16} />
                 </button>
@@ -341,9 +300,7 @@ const ManageFaq = () => {
           {isModalOpen && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
               <div
-                className={`${
-                  isDarkMode ? "bg-[#151b28] text-white" : "bg-white"
-                } p-5 rounded-xl w-full max-w-sm shadow-xl`}
+                className={`${isDarkMode ? "bg-[#151b28] text-white" : "bg-white"} p-5 rounded-xl w-full max-w-sm shadow-xl`}
               >
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-sm font-bold">
@@ -383,7 +340,7 @@ const ManageFaq = () => {
                         className="cursor-pointer w-full p-2 text-sm rounded-lg border border-gray-300"
                         disabled={loadingCategories}
                       >
-                        <option value="">
+                        <option value="" className="cursor-pointer">
                           {loadingCategories
                             ? "Loading categories..."
                             : "-- Select Category --"}
@@ -403,7 +360,7 @@ const ManageFaq = () => {
                     </div>
 
                     <div>
-                      <label className="cursor-pointer block text-[10px] font-bold opacity-50 uppercase mb-1">
+                      <label className=" cursor-pointer block text-[10px] font-bold opacity-50 uppercase mb-1">
                         Question *
                       </label>
                       <Field
@@ -418,7 +375,7 @@ const ManageFaq = () => {
                     </div>
 
                     <div>
-                      <label className="cursor-pointer block text-[10px] font-bold opacity-50 uppercase mb-1">
+                      <label className=" cursor-pointer block text-[10px] font-bold opacity-50 uppercase mb-1">
                         Answer *
                       </label>
                       <Field
@@ -436,7 +393,7 @@ const ManageFaq = () => {
 
                     <button
                       type="submit"
-                      className="cursor-pointer w-full py-2 mt-2 bg-(--primary) text-white rounded-lg text-xs font-bold"
+                      className=" cursor-pointer w-full py-2 mt-2 bg-(--primary) text-white rounded-lg text-xs font-bold"
                     >
                       {editingItem ? "Update FAQ" : "Create FAQ"}
                     </button>

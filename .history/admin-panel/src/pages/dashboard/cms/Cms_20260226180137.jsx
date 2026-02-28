@@ -10,22 +10,10 @@ import {
 import { useTheme } from "../../../context/ThemeContext";
 import { getItems, deleteItem, patchItem } from "../../../services/api";
 import Searchbar from "../../../components/Searchbar";
-import { useSelector } from "react-redux";
 
 const Cms = () => {
   const navigate = useNavigate();
   const { isDarkMode } = useTheme();
-
-  // ── Permission Logic ──
-  const permissions = useSelector((state) => state.permission.permissions);
-  const rawCmsPermission = permissions?.find(
-    (p) => p.module.name === "cms"
-  );
-  const localRole = localStorage.getItem("role");
-  const cmsPermission =
-    localRole === "admin"
-      ? { add: true, edit: true, delete: true, view: true }
-      : rawCmsPermission;
 
   const [cmsData, setCmsData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -46,7 +34,7 @@ const Cms = () => {
     try {
       setIsLoading(true);
       const res = await getItems(
-        `cms?page=${page}&limit=${limit}&sortBy=${sortBy}&order=${order}&search=${searchQuery}`
+        `cms?page=${page}&limit=${limit}&sortBy=${sortBy}&order=${order}&search=${searchQuery}`,
       );
       setCmsData(res.data || []);
       setTotalPages(res.pagination?.totalPages || 1);
@@ -111,15 +99,12 @@ const Cms = () => {
                 setPage(1);
               }}
             />
-
-            {cmsPermission?.add ? (
-              <button
-                onClick={() => navigate("/dashboard/add-cms")}
-                className="flex items-center cursor-pointer gap-1.5 px-3 py-1.5 bg-(--primary) hover:opacity-90 text-white rounded-lg text-xs font-semibold transition-all shadow-sm"
-              >
-                <FiPlusCircle size={14} /> Add CMS
-              </button>
-            ) : null}
+            <button
+              onClick={() => navigate("/dashboard/add-cms")}
+              className="flex items-center cursor-pointer gap-1.5 px-3 py-1.5 bg-(--primary) hover:opacity-90 text-white rounded-lg text-xs font-semibold transition-all shadow-sm"
+            >
+              <FiPlusCircle size={14} /> Add CMS
+            </button>
           </div>
 
           {/* Table */}
@@ -164,9 +149,7 @@ const Cms = () => {
                       </div>
                     </th>
                     <th className="px-4 py-3 w-24">Status</th>
-                    {(cmsPermission?.edit || cmsPermission?.delete) ? (
-                      <th className="px-4 py-3 text-right w-24">Action</th>
-                    ) : null}
+                    <th className="px-4 py-3 text-right w-24">Action</th>
                   </tr>
                 </thead>
 
@@ -215,56 +198,47 @@ const Cms = () => {
                           >
                             <span
                               className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${
-                                page_.status
-                                  ? "translate-x-5"
-                                  : "translate-x-1"
+                                page_.status ? "translate-x-5" : "translate-x-1"
                               }`}
                             />
                           </button>
                         </td>
+                        <td className="px-4 py-2 text-right">
+                          <div className="flex justify-end gap-2">
+                            {/* EDIT */}
+                            <div className="relative group">
+                              <button
+                                onClick={() =>
+                                  navigate(`/dashboard/edit-cms/${page_._id}`)
+                                }
+                                className="p-1.5 text-gray-400 cursor-pointer hover:text-(--primary) hover:bg-(--primary)/10 rounded-md transition-all"
+                              >
+                                <FiEdit2 size={14} />
+                              </button>
 
-                        {(cmsPermission?.edit || cmsPermission?.delete) ? (
-                          <td className="px-4 py-2 text-right">
-                            <div className="flex justify-end gap-2">
-                              {/* EDIT */}
-                              {cmsPermission?.edit ? (
-                                <div className="relative group">
-                                  <button
-                                    onClick={() =>
-                                      navigate(
-                                        `/dashboard/edit-cms/${page_._id}`
-                                      )
-                                    }
-                                    className="p-1.5 text-gray-400 cursor-pointer hover:text-(--primary) hover:bg-(--primary)/10 rounded-md transition-all"
-                                  >
-                                    <FiEdit2 size={14} />
-                                  </button>
-                                  <span className="absolute bottom-full right-0 mb-2 opacity-0 group-hover:opacity-100 transition bg-black text-blue-400 text-[10px] px-2 py-1 rounded whitespace-nowrap pointer-events-none z-50">
-                                    Edit page
-                                    <span className="absolute top-full right-2 border-4 border-transparent border-t-black"></span>
-                                  </span>
-                                </div>
-                              ) : null}
-
-                              {/* DELETE */}
-                              {cmsPermission?.delete ? (
-                                <div className="relative group">
-                                  <button
-                                    onClick={() => handleDelete(page_._id)}
-                                    disabled={deleteLoading}
-                                    className="p-1.5 text-gray-400 cursor-pointer hover:text-red-500 hover:bg-red-500/10 rounded-md transition-all disabled:opacity-30"
-                                  >
-                                    <FiTrash2 size={14} />
-                                  </button>
-                                  <span className="absolute bottom-full right-0 mb-2 opacity-0 group-hover:opacity-100 transition bg-black text-red-400 text-[10px] px-2 py-1 rounded whitespace-nowrap pointer-events-none z-50">
-                                    {deleteLoading ? "Deleting..." : "Delete page"}
-                                    <span className="absolute top-full right-2 border-4 border-transparent border-t-black"></span>
-                                  </span>
-                                </div>
-                              ) : null}
+                              <span className="absolute bottom-full right-0 mb-2 opacity-0 group-hover:opacity-100 transition bg-black text-blue-400 text-[10px] px-2 py-1 rounded whitespace-nowrap pointer-events-none z-50">
+                                Edit page
+                                <span className="absolute top-full right-2 border-4 border-transparent border-t-black"></span>
+                              </span>
                             </div>
-                          </td>
-                        ) : null}
+
+                            {/* DELETE */}
+                            <div className="relative group">
+                              <button
+                                onClick={() => handleDelete(page_._id)}
+                                disabled={deleteLoading}
+                                className="p-1.5 text-gray-400 cursor-pointer hover:text-red-500 hover:bg-red-500/10 rounded-md transition-all disabled:opacity-30"
+                              >
+                                <FiTrash2 size={14} />
+                              </button>
+
+                              <span className="absolute bottom-full right-0 mb-2 opacity-0 group-hover:opacity-100 transition bg-black text-red-400 text-[10px] px-2 py-1 rounded whitespace-nowrap pointer-events-none z-50">
+                                {deleteLoading ? "Deleting..." : "Delete page"}
+                                <span className="absolute top-full right-2 border-4 border-transparent border-t-black"></span>
+                              </span>
+                            </div>
+                          </div>
+                        </td>
                       </tr>
                     ))
                   )}

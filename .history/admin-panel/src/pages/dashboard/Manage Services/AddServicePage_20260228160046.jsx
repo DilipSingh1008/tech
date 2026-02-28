@@ -6,8 +6,8 @@ import { useQuill } from "react-quilljs";
 import "quill/dist/quill.snow.css";
 import { createItem, getItems, updateItem } from "../../../services/api";
 import { useNavigate, useParams } from "react-router-dom";
-import { useSelector } from "react-redux";
 
+// Utility to generate slug
 const generateSlug = (text) =>
   text
     ?.toLowerCase()
@@ -19,29 +19,6 @@ const AddEditServicePage = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const isEdit = !!id;
-
-  // ── Permission Logic ──
-  const permissions = useSelector((state) => state.permission.permissions);
-  const rawServicePermission = permissions?.find(
-    (p) => p.module.name === "services"
-  );
-
-  console.log(rawServicePermission)
-  const localRole = localStorage.getItem("role");
-  const servicePermission =
-    localRole === "admin"
-      ? { add: true, edit: true, delete: true, view: true }
-      : rawServicePermission;
-
-  // ── Redirect if no permission ──
-  useEffect(() => {
-    if (isEdit && !servicePermission?.edit) {
-      navigate("/dashboard/service");
-    }
-    if (!isEdit && !servicePermission?.add) {
-      navigate("/dashboard/service");
-    }
-  }, [servicePermission]);
 
   const { quill, quillRef } = useQuill({
     theme: "snow",
@@ -88,13 +65,76 @@ const AddEditServicePage = () => {
     section: "p-4 md:p-6 rounded-xl border shadow-sm",
   };
 
+  // Load categories & service (edit mode)
+  // useEffect(() => {
+  //   const loadCategories = async () => {
+  //     try {
+  //       const res = await getItems("services/active");
+  //       console.log("Service data from backend:", res);
+  //       setCategories(res.data);
+  //     } catch (err) {
+  //       console.error("Error loading categories:", err);
+  //     }
+  //   };
+
+  //   const loadService = async () => {
+  //     if (isEdit) {
+  //       try {
+  //         const res = await getItems(`services/${id}`);
+  //         const s = res.data;
+
+  //         setInitialValues({
+  //           category: s.category?._id || "",
+  //           subCategory: s.subCategory?._id || "",
+  //           name: s.name || "",
+  //           slug: s.slug || "",
+  //           shortDescription: s.shortDescription || "",
+  //           galleryImages: [],
+  //           existingGallery: s.galleryImages || [],
+  //           pdfFile: null,
+  //           existingPdf: s.pdfFile || null,
+  //           status: s.status,
+  //         });
+
+  //         if (quill) quill.root.innerHTML = s.description || "";
+
+  //         // if (s.category?._id) {
+  //         //   const allCats = await getItems("categories");
+  //         //   setSubCategories(
+  //         //     allCats.data.filter((c) => c.catid === s.category._id),
+  //         //   );
+  //         // }
+  //         if (s.category?._id) {
+  //           const allCats = await getItems("categories");
+
+  //           setSubCategories(
+  //             allCats.data.filter(
+  //               (c) => c.catid === s.category._id && c.status === "active",
+  //             ),
+  //           );
+  //         }
+  //       } catch (err) {
+  //         console.error("Error loading service:", err);
+  //       } finally {
+  //         setLoading(false);
+  //       }
+  //     } else {
+  //       setLoading(false);
+  //     }
+  //   };
+
+  //   loadCategories();
+  //   loadService();
+  // }, [id, isEdit, quill]);
   useEffect(() => {
     const loadData = async () => {
       try {
+        // 1️⃣ Load only active categories + active subcategories
         const catRes = await getItems("services/active");
         setCategories(catRes.data);
 
         if (isEdit) {
+          // 2️⃣ Load service
           const serviceRes = await getItems(`services/${id}`);
           const s = serviceRes.data;
 
@@ -113,10 +153,12 @@ const AddEditServicePage = () => {
 
           if (quill) quill.root.innerHTML = s.description || "";
 
+          // 3️⃣ Get subcategories from already loaded active categories
           if (s.category?._id) {
             const selectedCat = catRes.data.find(
-              (cat) => cat._id === s.category._id
+              (cat) => cat._id === s.category._id,
             );
+
             setSubCategories(selectedCat?.subCategories || []);
           }
         }
@@ -133,8 +175,11 @@ const AddEditServicePage = () => {
   const handleCategoryChange = (categoryId, setFieldValue) => {
     setFieldValue("category", categoryId);
     setFieldValue("subCategory", "");
+
     const cat = categories.find((c) => c._id === categoryId);
+
     const activeSubs = cat?.subCategories?.filter((sub) => sub.status) || [];
+
     setSubCategories(activeSubs);
   };
 
@@ -151,23 +196,6 @@ const AddEditServicePage = () => {
         Loading...
       </div>
     );
-
-  // ── No permission fallback UI ──
-  if (isEdit && !servicePermission?.edit) {
-    return (
-      <div className="flex h-screen items-center justify-center text-xs opacity-50">
-        You don't have permission to edit services.
-      </div>
-    );
-  }
-
-  if (!isEdit && !servicePermission?.add) {
-    return (
-      <div className="flex h-screen items-center justify-center text-xs opacity-50">
-        You don't have permission to add services.
-      </div>
-    );
-  }
 
   return (
     <div className={`h-screen w-full flex flex-col ${theme.main}`}>
@@ -200,9 +228,10 @@ const AddEditServicePage = () => {
               formData.append("description", quill?.root.innerHTML || "");
               formData.append("status", values.status);
 
+              // Gallery
               if (values.galleryImages?.length > 0) {
                 values.galleryImages.forEach((file) =>
-                  formData.append("galleryImages", file)
+                  formData.append("galleryImages", file),
                 );
               }
 
@@ -333,7 +362,9 @@ const AddEditServicePage = () => {
 
                 <div>
                   <label className={theme.label}>Description</label>
-                  <div className="rounded-xl border p-2 bg-white dark:bg-[#151b28] dark:border-gray-800">
+                  <div
+                    className={`rounded-xl border p-2 bg-white dark:bg-[#151b28] dark:border-gray-800`}
+                  >
                     <div ref={quillRef} className="min-h-[200px]" />
                   </div>
                 </div>
@@ -343,6 +374,7 @@ const AddEditServicePage = () => {
               <div className={`${theme.section} ${theme.card}`}>
                 <h2 className="text-xs font-bold mb-4">Media Upload</h2>
 
+                {/* Gallery */}
                 <div className="mb-4">
                   <label className={theme.label}>Gallery Images</label>
                   <input
@@ -355,6 +387,7 @@ const AddEditServicePage = () => {
                     }
                   />
                   <div className="mt-3 flex flex-wrap gap-2">
+                    {/* Existing images */}
                     {values.existingGallery?.map((img, idx) => (
                       <img
                         key={idx}
@@ -363,6 +396,7 @@ const AddEditServicePage = () => {
                         className="h-16 w-16 object-cover rounded border border-gray-500"
                       />
                     ))}
+                    {/* New previews */}
                     {values.galleryImages?.map((file, idx) => (
                       <img
                         key={idx}
@@ -374,6 +408,7 @@ const AddEditServicePage = () => {
                   </div>
                 </div>
 
+                {/* PDF */}
                 <div className="mb-4">
                   <label className={theme.label}>Upload PDF</label>
                   <input
@@ -407,8 +442,8 @@ const AddEditServicePage = () => {
                     ? "Updating..."
                     : "Adding..."
                   : isEdit
-                  ? "Update Service"
-                  : "Add Service"}
+                    ? "Update Service"
+                    : "Add Service"}
               </button>
             </Form>
           )}
