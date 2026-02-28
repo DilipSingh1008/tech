@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const Service = require("../models/Service.js");
+const Category = require("../models/Category.js");
 
 exports.createService = async (req, res) => {
   try {
@@ -65,18 +66,18 @@ exports.getServices = async (req, res) => {
     const limit = parseInt(req.query.limit) || 5;
     const skip = (page - 1) * limit;
     const search = req.query.search || "";
-    const sortBy = req.query.sortBy || "createdAt";      // ← add
-    const order = req.query.order || "desc";              // ← add
+    const sortBy = req.query.sortBy || "createdAt"; // ← add
+    const order = req.query.order || "desc"; // ← add
 
     const query = search ? { name: { $regex: search, $options: "i" } } : {};
 
-    const totalItems = await Service.countDocuments(query);  // ← pass query (was missing!)
+    const totalItems = await Service.countDocuments(query); // ← pass query (was missing!)
     const totalPages = Math.ceil(totalItems / limit);
 
     const services = await Service.find(query)
       .populate("category", "name")
       .populate("subCategory", "name")
-      .sort({ [sortBy]: order === "asc" ? 1 : -1 })       // ← dynamic sort
+      .sort({ [sortBy]: order === "asc" ? 1 : -1 }) // ← dynamic sort
       .skip(skip)
       .limit(limit);
 
@@ -238,6 +239,32 @@ exports.toggleServiceStatus = async (req, res) => {
     });
   } catch (err) {
     console.error("Error in toggleServiceStatus:", err);
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+
+exports.getActiveCategories = async (req, res) => {
+  try {
+    const allCategories = await Category.find({ status: true });
+
+    const mainCategories = allCategories
+      .filter((c) => !c.catid)
+      .map((main) => ({
+        _id: main._id,
+        name: main.name,
+        icon: main.icon,
+        status: main.status,
+        createdAt: main.createdAt,
+        subCategories: allCategories.filter(
+          (sub) =>
+            sub.catid?.toString() === main._id.toString() &&
+            sub.status === true,
+        ),
+      }));
+
+    res.status(200).json({ data: mainCategories });
+  } catch (err) {
+    console.error("Error in getActiveCategories:", err);
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };

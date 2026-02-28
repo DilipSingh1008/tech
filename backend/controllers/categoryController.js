@@ -122,27 +122,70 @@ exports.updateCategory = async (req, res) => {
 };
 
 // Delete category
+// exports.deleteCategory = async (req, res) => {
+//   try {
+//     const category = await Category.findByIdAndDelete(req.params.id);
+
+//     if (!category) {
+//       return res.status(404).json({ error: "Category not found" });
+//     }
+
+//     if (category.icon) {
+//       const imagePath = path.join(__dirname, "..", category.icon);
+//       fs.unlink(imagePath, (err) => {
+//         if (err) console.error("Failed to delete image file:", err);
+//         else console.log("Image deleted:", imagePath);
+//       });
+//     }
+
+//     res.json({ message: "Category and image deleted" });
+//   } catch (error) {
+//     console.error("Error deleting category:", error.message);
+//     res
+//       .status(500)
+//       .json({ error: "Failed to delete category", details: error.message });
+//   }
+// };
+const deleteImageFile = (filePath) => {
+  if (!filePath) return;
+  const fullPath = path.join(__dirname, "..", filePath);
+  fs.unlink(fullPath, (err) => {
+    if (err) console.error("Failed to delete image file:", err);
+    else console.log("Image deleted:", fullPath);
+  });
+};
+
+const deleteCategoryRecursive = async (categoryId) => {
+  const subcategories = await Category.find({ catid: categoryId });
+
+  for (const sub of subcategories) {
+    await deleteCategoryRecursive(sub._id); // Recursive delete
+  }
+
+  const category = await Category.findByIdAndDelete(categoryId);
+  if (category && category.icon) deleteImageFile(category.icon);
+};
+
+// Delete category
 exports.deleteCategory = async (req, res) => {
   try {
-    const category = await Category.findByIdAndDelete(req.params.id);
+    const categoryId = req.params.id;
 
-    if (!category) {
+    const categoryExists = await Category.findById(categoryId);
+    if (!categoryExists) {
       return res.status(404).json({ error: "Category not found" });
     }
 
-    if (category.icon) {
-      const imagePath = path.join(__dirname, "..", category.icon);
-      fs.unlink(imagePath, (err) => {
-        if (err) console.error("Failed to delete image file:", err);
-        else console.log("Image deleted:", imagePath);
-      });
-    }
+    await deleteCategoryRecursive(categoryId);
 
-    res.json({ message: "Category and image deleted" });
+    res.json({
+      message: "Category, its subcategories, and all images deleted",
+    });
   } catch (error) {
     console.error("Error deleting category:", error.message);
-    res
-      .status(500)
-      .json({ error: "Failed to delete category", details: error.message });
+    res.status(500).json({
+      error: "Failed to delete category",
+      details: error.message,
+    });
   }
 };
