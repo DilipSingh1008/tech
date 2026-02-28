@@ -25,18 +25,24 @@ const UserPage = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [roles, setRoles] = useState([]);
 
-  // ── Sorting states (same pattern as Location.jsx) ──
   const [sortBy, setSortBy] = useState("createdAt");
   const [order, setOrder] = useState("desc");
-  const permissions = useSelector(
-  state => state.permission.permissions
-);
 
-const usersPermission = permissions?.find(
-  p => p.module.name === "users"
-);
-// console.log(permissions)
- console.log(usersPermission)
+  const permissions = useSelector(state => state.permission.permissions);
+  const roleType = useSelector(state => state.permission.roleName);
+
+  console.log("===", roleType)
+
+  // console.log("---", permissions)
+  const rawUsersPermission = permissions?.find(p => p.module.name === "users");
+
+  const localRole = localStorage.getItem("role");
+
+  const usersPermission =
+    localRole === "admin"
+      ? { add: true, edit: true, delete: true, view: true }
+      : rawUsersPermission;
+
   const theme = {
     main: isDarkMode
       ? "bg-[#0b0e14] text-slate-300"
@@ -63,7 +69,6 @@ const usersPermission = permissions?.find(
     }
   };
 
-  // Re-fetch whenever page, search, sort, or order changes
   useEffect(() => {
     fetchUsers();
   }, [page, searchQuery, sortBy, order]);
@@ -72,7 +77,7 @@ const usersPermission = permissions?.find(
     setLoading(true);
     try {
       const res = await getItems(
-        `user?page=${page}&limit=${limit}&search=${searchQuery}&sortBy=${sortBy}&order=${order}`,
+        `user?page=${page}&limit=${limit}&search=${searchQuery}&sortBy=${sortBy}&order=${order}`
       );
       setUsers(res.data || []);
       setTotalPages(res.pagination?.totalPages || 1);
@@ -83,7 +88,6 @@ const usersPermission = permissions?.find(
     }
   };
 
-  // ── Sort handler (same pattern as Location.jsx) ──
   const handleSort = (field) => {
     const isAsc = sortBy === field && order === "asc";
     setOrder(isAsc ? "desc" : "asc");
@@ -91,7 +95,6 @@ const usersPermission = permissions?.find(
     setPage(1);
   };
 
-  // ── Sort indicator helper ──
   const SortIcon = ({ field }) => (
     <span className="opacity-50 text-[10px]">
       {sortBy === field ? (order === "asc" ? "▲" : "▼") : "↕"}
@@ -109,8 +112,8 @@ const usersPermission = permissions?.find(
     await updateItem(`user/${id}`, { status: !currentStatus });
     setUsers((prev) =>
       prev.map((user) =>
-        user._id === id ? { ...user, status: !currentStatus } : user,
-      ),
+        user._id === id ? { ...user, status: !currentStatus } : user
+      )
     );
   };
 
@@ -143,19 +146,18 @@ const usersPermission = permissions?.find(
                 setPage(1);
               }}
             />
-           {
-            usersPermission?.add ? (
-               <button
-              onClick={() => {
-                setEditingUser(null);
-                setIsModalOpen(true);
-              }}
-              className="flex items-center cursor-pointer gap-1.5 px-3 py-1.5 bg-(--primary) text-white rounded-lg text-xs font-semibold hover:bg-(--primary) transition-all"
-            >
-              <Plus size={14} /> Add User
-            </button>
-            ) : ("")
-           }
+
+            {usersPermission?.add ? (
+              <button
+                onClick={() => {
+                  setEditingUser(null);
+                  setIsModalOpen(true);
+                }}
+                className="flex items-center cursor-pointer gap-1.5 px-3 py-1.5 bg-(--primary) text-white rounded-lg text-xs font-semibold hover:bg-(--primary) transition-all"
+              >
+                <Plus size={14} /> Add User
+              </button>
+            ) : null}
           </div>
 
           <div
@@ -163,7 +165,6 @@ const usersPermission = permissions?.find(
           >
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
-                {/* ── Thead with sortable columns ── */}
                 <thead
                   className={`uppercase tracking-wider font-bold ${theme.header}`}
                 >
@@ -178,13 +179,9 @@ const usersPermission = permissions?.find(
                         Name <SortIcon field="name" />
                       </div>
                     </th>
-                    <th
-                      className="px-4 py-3 cursor-pointer hover:text-(--primary) transition-colors"
-                      
-                    >
-                      <div className="flex items-center gap-1">
-                        Last-Login
-                      </div>
+
+                    <th className="px-4 py-3 cursor-pointer hover:text-(--primary) transition-colors">
+                      <div className="flex items-center gap-1">Last-Login</div>
                     </th>
 
                     <th
@@ -207,16 +204,14 @@ const usersPermission = permissions?.find(
 
                     <th className="px-4 py-3 w-24">Photo</th>
 
-                    <th
-                      className="px-4 py-3 w-24 cursor-pointer hover:text-(--primary) transition-colors"
-                     
-                    >
-                      <div className="flex items-center gap-1">
-                        Status 
-                      </div>
+                    <th className="px-4 py-3 w-24 cursor-pointer hover:text-(--primary) transition-colors">
+                      <div className="flex items-center gap-1">Status</div>
                     </th>
 
-                    {(usersPermission?.edit === true && usersPermission?.delete === true) ? (<th className="px-4 py-3 text-right w-24">Action</th>) : ("")}
+                    {(usersPermission?.edit === true ||
+                      usersPermission?.delete === true) ? (
+                      <th className="px-4 py-3 text-right w-24">Action</th>
+                    ) : null}
                   </tr>
                 </thead>
 
@@ -224,7 +219,7 @@ const usersPermission = permissions?.find(
                   {loading ? (
                     <tr>
                       <td
-                        colSpan={7}
+                        colSpan={8}
                         className="px-4 py-10 text-center opacity-40 italic"
                       >
                         Loading...
@@ -233,7 +228,7 @@ const usersPermission = permissions?.find(
                   ) : users.length === 0 ? (
                     <tr>
                       <td
-                        colSpan={7}
+                        colSpan={8}
                         className="px-4 py-10 text-center opacity-40"
                       >
                         No users found.
@@ -248,13 +243,19 @@ const usersPermission = permissions?.find(
                         <td className="px-4 py-2.5 font-semibold">
                           {(page - 1) * limit + index + 1}
                         </td>
+
                         <td className="px-4 py-2.5 font-semibold text-sm">
                           {u.name}
                         </td>
-                          <td className="px-4 py-2.5 font-semibold text-sm">
-                          {u.lastLogin ? new Date(u.lastLogin).toLocaleString() : "N/A"}
+
+                        <td className="px-4 py-2.5 font-semibold text-sm">
+                          {u.lastLogin
+                            ? new Date(u.lastLogin).toLocaleString()
+                            : "N/A"}
                         </td>
+
                         <td className="px-4 py-2.5 text-sm">{u.email}</td>
+
                         <td className="px-4 py-2.5 text-sm capitalize">
                           {u.role?.name || u.role}
                         </td>
@@ -275,7 +276,9 @@ const usersPermission = permissions?.find(
 
                         <td className="px-4 py-2.5">
                           <button
-                            onClick={() => handleToggleStatus(u._id, u.status)}
+                            onClick={() =>
+                              handleToggleStatus(u._id, u.status)
+                            }
                             className={`cursor-pointer w-8 h-4 rounded-full relative transition-colors ${
                               u.status ? "bg-(--primary)" : "bg-gray-400"
                             }`}
@@ -289,40 +292,36 @@ const usersPermission = permissions?.find(
                         </td>
 
                         <td className="px-4 py-2.5 text-right flex justify-end gap-2">
-                          {/* EDIT */}
-                          {
-                            usersPermission?.edit ? (<div className="relative group">
-                            <button
-                              onClick={() => {
-                                setEditingUser(u);
-                                setIsModalOpen(true);
-                              }}
-                              className="p-1.5 cursor-pointer hover:text-(--primary)"
-                            >
-                              <Edit3 size={14} />
-                            </button>
+                          {usersPermission?.edit ? (
+                            <div className="relative group">
+                              <button
+                                onClick={() => {
+                                  setEditingUser(u);
+                                  setIsModalOpen(true);
+                                }}
+                                className="p-1.5 cursor-pointer hover:text-(--primary)"
+                              >
+                                <Edit3 size={14} />
+                              </button>
+                              <span className="absolute bottom-full right-0 mb-1 hidden group-hover:block bg-black text-blue-400 text-[10px] px-2 py-2 rounded whitespace-nowrap">
+                                Edit user
+                              </span>
+                            </div>
+                          ) : null}
 
-                            <span className="absolute bottom-full right-0 mb-1 hidden group-hover:block bg-black text-blue-400 text-[10px] px-2 py-2 rounded whitespace-nowrap">
-                              Edit user
-                            </span>
-                          </div>) : ("")
-                          }
-
-                          {/* DELETE */}
-                         {
-                          usersPermission?.delete ? ( <div className="relative group">
-                            <button
-                              onClick={() => handleDelete(u._id)}
-                              className="p-1.5 cursor-pointer hover:text-red-500"
-                            >
-                              <Trash2 size={14} />
-                            </button>
-
-                            <span className="absolute bottom-full right-0 mb-1 hidden group-hover:block bg-black text-red-400 text-[10px] px-2 py-2 rounded whitespace-nowrap">
-                              Delete user
-                            </span>
-                          </div>) : ("")
-                         }
+                          {usersPermission?.delete ? (
+                            <div className="relative group">
+                              <button
+                                onClick={() => handleDelete(u._id)}
+                                className="p-1.5 cursor-pointer hover:text-red-500"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                              <span className="absolute bottom-full right-0 mb-1 hidden group-hover:block bg-black text-red-400 text-[10px] px-2 py-2 rounded whitespace-nowrap">
+                                Delete user
+                              </span>
+                            </div>
+                          ) : null}
                         </td>
                       </tr>
                     ))
@@ -495,13 +494,7 @@ const usersPermission = permissions?.find(
                         <Field
                           as="select"
                           name="role"
-                          className="w-full p-2 text-sm rounded-lg 
-bg-[var(--card-bg)] 
-text-[var(--text-main)]
-border border-[var(--border-color)]
-outline-none 
-focus:border-[var(--primary)]
-appearance-none"
+                          className="w-full p-2 text-sm rounded-lg bg-[var(--card-bg)] text-[var(--text-main)] border border-[var(--border-color)] outline-none focus:border-[var(--primary)] appearance-none"
                         >
                           <option value="">Select Role</option>
                           {roles

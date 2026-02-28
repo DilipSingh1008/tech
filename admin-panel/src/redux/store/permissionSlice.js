@@ -28,22 +28,39 @@ export default permissionSlice.reducer;
 export const fetchPermissions = () => async (dispatch) => {
   try {
     const roleId = localStorage.getItem("roleId");   // ⭐ yaha se
+    let role = localStorage.getItem("role"); 
 
     console.log("xxxxxxxxxxx", roleId)
 
     if (!roleId) return;
+      let permRes;
+console.log("kooo")
 
-    const permRes = await getItems(`role/${roleId}/permissions`);
 
-    console.log("yyyyyyyyyyyy", permRes)
+    if(role !== "admin"){
+      console.log("jii")
+       permRes = await getItems(`role/${roleId}/permissions`);
+    }
 
-    dispatch(
+    console.log("permRes", permRes)
+
+    if(role !== "admin"){
+      console.log("00000000000")
+      dispatch(
       setPermissions({
-        roleId,
+        roleId: roleId,
         roleName: permRes.name,
-        permissions: permRes.permissions,
+        permissions: permRes.permissions || [],
       })
     );
+    }else{
+      dispatch(
+      setPermissions({
+        roleId: roleId,
+        roleName: role,
+        
+      }))
+    }
   } catch (err) {
     console.log(err);
   }

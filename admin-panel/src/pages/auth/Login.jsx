@@ -46,20 +46,32 @@ const Login = () => {
     console.log("==========",user)
 
     localStorage.setItem("roleId", user.roleId);
+    localStorage.setItem("role", user.role);
 
     console.log()
 
-    const permRes = await getItems(`role/${user.roleId}/permissions`);
+    let permRes;
+
+    if(user.role !== "admin") permRes = await getItems(`role/${user.roleId}/permissions`);
 
     console.log("permRes", permRes)
 
-    dispatch(
+    if(user.role !== "admin"){
+      dispatch(
       setPermissions({
         roleId: user.roleId,
         roleName: user.role,
         permissions: permRes.permissions || [],
       })
     );
+    }else{
+      dispatch(
+      setPermissions({
+        roleId: user.roleId,
+        roleName: user.role,
+        
+      }))
+    }
 
     navigate("/dashboard");
 

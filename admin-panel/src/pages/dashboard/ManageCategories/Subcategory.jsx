@@ -17,36 +17,42 @@ import {
 import { useParams } from "react-router-dom";
 import Searchbar from "../../../components/Searchbar";
 import { FiChevronRight, FiChevronLeft } from "react-icons/fi";
+import { useSelector } from "react-redux";
 
 const Subcategory = () => {
   const { isDarkMode } = useTheme();
-  const { id: parentId } = useParams(); // parent category id from URL
+  const { id: parentId } = useParams();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({ name: "", icon: null, id: null });
   const [searchQuery, setSearchQuery] = useState("");
 
-  // pagination
   const [page, setPage] = useState(1);
   const [limit] = useState(5);
   const [totalPages, setTotalPages] = useState(1);
 
+  // ── Permission Logic ──
+  const permissions = useSelector((state) => state.permission.permissions);
+  const rawSubcategoryPermission = permissions?.find(
+    (p) => p.module.name === "categories"
+  );
+  const localRole = localStorage.getItem("role");
+  const subcategoryPermission =
+    localRole === "admin"
+      ? { add: true, edit: true, delete: true, view: true }
+      : rawSubcategoryPermission;
+
   useEffect(() => {
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [parentId, page]);
 
   const fetchData = async () => {
     setLoading(true);
     try {
       const res = await getItems(
-        `categories?catid=${parentId}&page=${page}&limit=${limit}`,
+        `categories?catid=${parentId}&page=${page}&limit=${limit}`
       );
-      // console.log(res);
-      // const filtered = res.filter(
-      //   (cat) => String(cat.catid) === String(parentId),
-      // );
       setCategories(res.data || []);
       setTotalPages(res.pagination?.totalPages || 1);
     } catch (err) {
@@ -61,8 +67,8 @@ const Subcategory = () => {
       await updateItem(`categories/${id}`, { status: !currentStatus });
       setCategories((prev) =>
         prev.map((cat) =>
-          cat._id === id ? { ...cat, status: !currentStatus } : cat,
-        ),
+          cat._id === id ? { ...cat, status: !currentStatus } : cat
+        )
       );
     } catch (err) {
       console.error("Error toggling status:", err);
@@ -72,12 +78,10 @@ const Subcategory = () => {
 
   const handleSave = async (e) => {
     e.preventDefault();
-
     if (!formData.name.trim()) {
       alert("Name is required");
       return;
     }
-
     const data = new FormData();
     data.append("name", formData.name);
     data.append("catid", parentId);
@@ -85,14 +89,12 @@ const Subcategory = () => {
     if (!formData.id || formData.icon instanceof File) {
       data.append("icon", formData.icon);
     }
-
     try {
       if (formData.id) {
         await updateItem(`categories/${formData.id}`, data);
       } else {
         await createItem("categories", data);
       }
-
       setIsModalOpen(false);
       setFormData({ name: "", icon: null, id: null });
       fetchData();
@@ -113,9 +115,11 @@ const Subcategory = () => {
       }
     }
   };
+
   const filteredCategories = categories.filter((cat) =>
-    cat.name.toLowerCase().includes(searchQuery.toLowerCase()),
+    cat.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
   const theme = {
     main: isDarkMode
       ? "bg-[#0b0e14] text-slate-300"
@@ -126,6 +130,7 @@ const Subcategory = () => {
     header: isDarkMode
       ? "bg-[#1f2637] text-gray-400"
       : "bg-gray-100 text-gray-500",
+    divider: isDarkMode ? "divide-gray-800" : "divide-gray-100",
   };
 
   if (loading)
@@ -140,14 +145,16 @@ const Subcategory = () => {
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-5xl mx-auto p-4">
           <div className="flex items-center justify-between mb-4">
-            {/* <h2 className="text-lg font-bold">Sub-Categories</h2> */}
             <Searchbar onChange={(e) => setSearchQuery(e.target.value)} />
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="flex  items-center cursor-pointer gap-1.5 px-3 py-1.5 bg-(--primary) text-white rounded-lg text-xs font-semibold hover:bg-(--primary) transition-all"
-            >
-              <Plus size={14} /> Add SubCategory
-            </button>
+
+            {subcategoryPermission?.add ? (
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="flex items-center cursor-pointer gap-1.5 px-3 py-1.5 bg-(--primary) text-white rounded-lg text-xs font-semibold hover:bg-(--primary) transition-all"
+              >
+                <Plus size={14} /> Add SubCategory
+              </button>
+            ) : null}
           </div>
 
           <div
@@ -163,9 +170,13 @@ const Subcategory = () => {
                     <th className="px-4 py-3">Name</th>
                     <th className="px-4 py-3 w-16">Icon</th>
                     <th className="px-4 py-3 w-24">Status</th>
-                    <th className="px-4 py-3 text-right w-24">Action</th>
+                    {(subcategoryPermission?.edit ||
+                      subcategoryPermission?.delete) ? (
+                      <th className="px-4 py-3 text-right w-24">Action</th>
+                    ) : null}
                   </tr>
                 </thead>
+
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                   {filteredCategories.map((cat, index) => (
                     <tr
@@ -173,7 +184,6 @@ const Subcategory = () => {
                       className="hover:bg-indigo-500/5 transition-colors"
                     >
                       <td className="px-4 py-2.5 font-semibold">
-                        {" "}
                         {(page - 1) * limit + (index + 1)}
                       </td>
                       <td className="px-4 py-2.5 font-semibold text-sm hover:text-(--primary)">
@@ -197,7 +207,7 @@ const Subcategory = () => {
                           onClick={() =>
                             handleToggleStatus(cat._id, cat.status)
                           }
-                          className={`cursor-pointer cursor-pointer  w-8 h-4 rounded-full relative transition-colors ${
+                          className={`cursor-pointer w-8 h-4 rounded-full relative transition-colors ${
                             cat.status ? "bg-(--primary)" : "bg-gray-400"
                           }`}
                         >
@@ -208,37 +218,62 @@ const Subcategory = () => {
                           />
                         </button>
                       </td>
-                      <td className="px-4 py-2.5 text-right">
-                        <div className="flex justify-end gap-1">
-                          <button className="p-1.5 cursor-pointer hover:text-(--primary) transition-colors">
-                            <RefreshCcw size={14} />
-                          </button>
-                          <button
-                            onClick={() => {
-                              setFormData({
-                                name: cat.name,
-                                icon: `http://localhost:5000${cat.icon}`,
-                                id: cat._id,
-                              });
-                              setIsModalOpen(true);
-                            }}
-                            className="p-1.5 cursor-pointer hover:text-(--primary) transition-colors"
-                          >
-                            <Edit3 size={14} />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(cat._id)}
-                            className="p-1.5 cursor-pointer hover:text-red-500 transition-colors"
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        </div>
-                      </td>
+
+                      {(subcategoryPermission?.edit ||
+                        subcategoryPermission?.delete) ? (
+                        <td className="px-4 py-2.5 text-right">
+                          <div className="flex justify-end gap-1">
+                            {/* REFRESH - always visible */}
+                            <button className="p-1.5 cursor-pointer hover:text-(--primary) transition-colors">
+                              <RefreshCcw size={14} />
+                            </button>
+
+                            {/* EDIT */}
+                            {subcategoryPermission?.edit ? (
+                              <div className="relative group">
+                                <button
+                                  onClick={() => {
+                                    setFormData({
+                                      name: cat.name,
+                                      icon: `http://localhost:5000${cat.icon}`,
+                                      id: cat._id,
+                                    });
+                                    setIsModalOpen(true);
+                                  }}
+                                  className="p-1.5 cursor-pointer hover:text-(--primary) transition-colors"
+                                >
+                                  <Edit3 size={14} />
+                                </button>
+                                <span className="absolute bottom-full right-0 mb-2 opacity-0 group-hover:opacity-100 transition bg-black text-blue-400 text-[10px] px-2 py-2 rounded whitespace-nowrap pointer-events-none">
+                                  Edit subcategory
+                                </span>
+                              </div>
+                            ) : null}
+
+                            {/* DELETE */}
+                            {subcategoryPermission?.delete ? (
+                              <div className="relative group">
+                                <button
+                                  onClick={() => handleDelete(cat._id)}
+                                  className="p-1.5 cursor-pointer hover:text-red-500 transition-colors"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                                <span className="absolute bottom-full right-0 mb-2 opacity-0 group-hover:opacity-100 transition bg-black text-red-400 text-[10px] px-2 py-2 rounded whitespace-nowrap pointer-events-none">
+                                  Delete subcategory
+                                  <span className="absolute top-full right-2 border-4 border-transparent border-t-black"></span>
+                                </span>
+                              </div>
+                            ) : null}
+                          </div>
+                        </td>
+                      ) : null}
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
+
             {/* Pagination */}
             <div
               className={`flex items-center justify-between p-3 border-t ${theme.divider}`}
@@ -246,7 +281,6 @@ const Subcategory = () => {
               <span className="text-[11px] opacity-60">
                 Showing {filteredCategories.length} entries
               </span>
-
               <div className="flex items-center gap-1">
                 <button
                   disabled={page === 1}
@@ -281,10 +315,13 @@ const Subcategory = () => {
             </div>
           </div>
 
+          {/* Modal */}
           {isModalOpen && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-4">
               <div
-                className={`${isDarkMode ? "bg-[#151b28] text-white" : "bg-white"} p-5 rounded-xl w-full max-w-xs shadow-xl border border-gray-700/30`}
+                className={`${
+                  isDarkMode ? "bg-[#151b28] text-white" : "bg-white"
+                } p-5 rounded-xl w-full max-w-xs shadow-xl border border-gray-700/30`}
               >
                 <div className="flex justify-between items-center mb-4">
                   <h3 className="text-sm font-bold">

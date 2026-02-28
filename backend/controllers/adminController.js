@@ -189,6 +189,7 @@ exports.login = async (req, res) => {
     }
 
     let account = await Admin.findOne({ email: email.toLowerCase() });
+    console.log(account)
     let roleType = "admin";
     let roleId = null;
 

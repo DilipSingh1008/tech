@@ -63,7 +63,9 @@ adminSchema.pre("save", async function () {
 
 // 🔥 compare password
 adminSchema.methods.comparePassword = async function (password) {
-  return bcrypt.compare(password, this.password);
+  const isMatch = await bcrypt.compare(password, this.password);
+  console.log("Password Match:", password, " ", this.password);
+  return isMatch;
 };
 
 module.exports = mongoose.model("Admin", adminSchema);

@@ -15,7 +15,7 @@ const {
 // CREATE
 router.post(
   "/",
-  auth,
+  auth(),
   checkPermission("users", "add"),
   upload.single("image"),
   createUser
@@ -32,7 +32,7 @@ router.get(
 // UPDATE
 router.put(
   "/:id",
-  auth,
+  auth(),
   checkPermission("users", "edit"),
   upload.single("image"),
   updateUser
@@ -41,7 +41,7 @@ router.put(
 // DELETE
 router.delete(
   "/:id",
-  auth,
+  auth(),
   checkPermission("users", "delete"),
   deleteUser
 );

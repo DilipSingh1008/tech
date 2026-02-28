@@ -19,6 +19,7 @@ import {
   patchItem,
 } from "../../../services/api";
 import Searchbar from "../../../components/Searchbar";
+import { useSelector } from "react-redux";
 
 const Location = () => {
   const navigate = useNavigate();
@@ -31,7 +32,6 @@ const Location = () => {
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Pagination + Sorting states
   const [page, setPage] = useState(1);
   const [limit] = useState(5);
   const [totalPages, setTotalPages] = useState(1);
@@ -41,6 +41,17 @@ const Location = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCountry, setEditingCountry] = useState(null);
 
+  // ── Permission Logic ──
+  const permissions = useSelector((state) => state.permission.permissions);
+  const rawLocationPermission = permissions?.find(
+    (p) => p.module.name === "location"
+  );
+  const localRole = localStorage.getItem("role");
+  const locationPermission =
+    localRole === "admin"
+      ? { add: true, edit: true, delete: true, view: true }
+      : rawLocationPermission;
+
   useEffect(() => {
     fetchData();
   }, [page, sortBy, order, searchQuery]);
@@ -48,11 +59,9 @@ const Location = () => {
   const fetchData = async () => {
     try {
       setIsLoading(true);
-
       const res = await getItems(
-        `countrylocation?page=${page}&limit=${limit}&sortBy=${sortBy}&order=${order}&search=${searchQuery}`,
+        `countrylocation?page=${page}&limit=${limit}&sortBy=${sortBy}&order=${order}&search=${searchQuery}`
       );
-
       setCountriesData(res.data || []);
       setTotalPages(res.pagination?.totalPages || 1);
     } catch (err) {
@@ -106,18 +115,16 @@ const Location = () => {
 
   const submitCountryFunction = async (
     values,
-    { resetForm, setSubmitting },
+    { resetForm, setSubmitting }
   ) => {
     try {
-      const payload = {
-        country: values.countryName.trim(),
-      };
+      const payload = { country: values.countryName.trim() };
 
       if (editingCountry) {
         setUpdateLoading(true);
         await updateItem(
           `countrylocation/${editingCountry._id}/edit-country`,
-          payload,
+          payload
         );
       } else {
         setCreateLoading(true);
@@ -141,24 +148,17 @@ const Location = () => {
       await patchItem(`countrylocation/${countryId}/toggle-status`, {
         isActive: !currentStatus,
       });
-
-      // ⭐ local state update
       setCountriesData((prev) =>
         prev.map((country) =>
           country._id === countryId
             ? { ...country, status: !currentStatus }
-            : country,
-        ),
+            : country
+        )
       );
     } catch (err) {
       console.error(err);
     }
   };
-  //  const filteredCountries = countriesData.filter((country) =>{
-  //       console.log(country);
-
-  //       return country.name.toLowerCase().includes(searchQuery.toLowerCase());
-  //     });
 
   const theme = {
     main: isDarkMode
@@ -189,12 +189,15 @@ const Location = () => {
                 setPage(1);
               }}
             />
-            <button
-              onClick={openAddModal}
-              className="flex items-center cursor-pointer gap-1.5 px-3 py-1.5 bg-(--primary) hover:opacity-90 text-white rounded-lg text-xs font-semibold transition-all shadow-sm"
-            >
-              <FiPlusCircle size={14} /> Add Country
-            </button>
+
+            {locationPermission?.add ? (
+              <button
+                onClick={openAddModal}
+                className="flex items-center cursor-pointer gap-1.5 px-3 py-1.5 bg-(--primary) hover:opacity-90 text-white rounded-lg text-xs font-semibold transition-all shadow-sm"
+              >
+                <FiPlusCircle size={14} /> Add Country
+              </button>
+            ) : null}
           </div>
 
           {/* Table */}
@@ -224,7 +227,9 @@ const Location = () => {
                       </div>
                     </th>
                     <th className="px-4 py-3 w-24">Status</th>
-                    <th className="px-4 py-3 text-right w-24">Action</th>
+                    {(locationPermission?.edit || locationPermission?.delete) ? (
+                      <th className="px-4 py-3 text-right w-24">Action</th>
+                    ) : null}
                   </tr>
                 </thead>
 
@@ -280,40 +285,46 @@ const Location = () => {
                             />
                           </button>
                         </td>
-                        <td className="px-4 py-2.5 text-right">
-                          <div className="flex justify-end gap-2">
-                            {/* EDIT */}
-                            <div className="relative group">
-                              <button
-                                onClick={() => openEditModal(country)}
-                                className="p-1.5 cursor-pointer hover:text-(--primary) hover:bg-(--primary)/10 rounded-md transition-all"
-                              >
-                                <FiEdit2 size={14} />
-                              </button>
 
-                              <span className="absolute bottom-full right-0 mb-2 opacity-0 group-hover:opacity-100 transition bg-black text-blue-400 text-[10px] px-2 py-2 rounded whitespace-nowrap pointer-events-none z-50">
-                                Edit country
-                                <span className="absolute top-full right-2 border-4 border-transparent border-t-black"></span>
-                              </span>
+                        {(locationPermission?.edit ||
+                          locationPermission?.delete) ? (
+                          <td className="px-4 py-2.5 text-right">
+                            <div className="flex justify-end gap-2">
+                              {/* EDIT */}
+                              {locationPermission?.edit ? (
+                                <div className="relative group">
+                                  <button
+                                    onClick={() => openEditModal(country)}
+                                    className="p-1.5 cursor-pointer hover:text-(--primary) hover:bg-(--primary)/10 rounded-md transition-all"
+                                  >
+                                    <FiEdit2 size={14} />
+                                  </button>
+                                  <span className="absolute bottom-full right-0 mb-2 opacity-0 group-hover:opacity-100 transition bg-black text-blue-400 text-[10px] px-2 py-2 rounded whitespace-nowrap pointer-events-none z-50">
+                                    Edit country
+                                    <span className="absolute top-full right-2 border-4 border-transparent border-t-black"></span>
+                                  </span>
+                                </div>
+                              ) : null}
+
+                              {/* DELETE */}
+                              {locationPermission?.delete ? (
+                                <div className="relative group">
+                                  <button
+                                    onClick={() => handleDelete(country._id)}
+                                    className="p-1.5 cursor-pointer hover:text-red-500 hover:bg-red-500/10 rounded-md transition-all disabled:opacity-30"
+                                    disabled={deleteLoading}
+                                  >
+                                    <FiTrash2 size={14} />
+                                  </button>
+                                  <span className="absolute bottom-full right-0 mb-2 opacity-0 group-hover:opacity-100 transition bg-black text-red-400 text-[10px] px-2 py-2 rounded whitespace-nowrap pointer-events-none z-50">
+                                    Delete country
+                                    <span className="absolute top-full right-2 border-4 border-transparent border-t-black"></span>
+                                  </span>
+                                </div>
+                              ) : null}
                             </div>
-
-                            {/* DELETE */}
-                            <div className="relative group">
-                              <button
-                                onClick={() => handleDelete(country._id)}
-                                className="p-1.5 cursor-pointer hover:text-red-500 hover:bg-red-500/10 rounded-md transition-all disabled:opacity-30"
-                                disabled={deleteLoading}
-                              >
-                                <FiTrash2 size={14} />
-                              </button>
-
-                              <span className="absolute bottom-full right-0 mb-2 opacity-0 group-hover:opacity-100 transition bg-black text-red-400 text-[10px] px-2 py-2 rounded whitespace-nowrap pointer-events-none z-50">
-                                Delete country
-                                <span className="absolute top-full right-2 border-4 border-transparent border-t-black"></span>
-                              </span>
-                            </div>
-                          </div>
-                        </td>
+                          </td>
+                        ) : null}
                       </tr>
                     ))
                   )}
@@ -402,7 +413,11 @@ const Location = () => {
                       placeholder="Enter country name"
                       className={`w-full p-2 text-sm rounded-lg border outline-none focus:border-(--primary) transition-all ${
                         theme.input
-                      } ${errors.countryName && touched.countryName ? "border-red-500" : ""}`}
+                      } ${
+                        errors.countryName && touched.countryName
+                          ? "border-red-500"
+                          : ""
+                      }`}
                     />
                     <ErrorMessage
                       name="countryName"
@@ -420,8 +435,8 @@ const Location = () => {
                         ? "Updating..."
                         : "Update"
                       : createLoading
-                        ? "Creating..."
-                        : "Create"}
+                      ? "Creating..."
+                      : "Create"}
                   </button>
                 </Form>
               )}

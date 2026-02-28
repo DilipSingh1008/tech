@@ -3,6 +3,13 @@ const Role = require("../models/Role");
 const checkPermission = (moduleName, action) => {
   return async (req, res, next) => {
     try {
+
+      console.log("AAAAAAAAA")
+
+      console.log(req.user.role )
+
+      if(req.user.role === "admin") return next()
+
       const roleId = req.user.roleId; // JWT se
 
       const role = await Role.findById(roleId).populate(
@@ -21,8 +28,10 @@ const checkPermission = (moduleName, action) => {
 
       if (permission.all || permission[action]) return next();
 
+
       return res.status(403).json({ message: "Access denied" });
     } catch (error) {
+      console.log(error)
       res.status(500).json({ message: error.message });
     }
   };

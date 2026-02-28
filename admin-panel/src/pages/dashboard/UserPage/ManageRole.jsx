@@ -12,8 +12,10 @@ import {
 import { FiChevronRight, FiChevronLeft } from "react-icons/fi";
 import Searchbar from "../../../components/Searchbar";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const ManageRole = () => {
+   const roleType = useSelector(state => state.permission.roleName);
   const navigate = useNavigate()
   const { isDarkMode } = useTheme();
   const [roles, setRoles] = useState([]);
@@ -97,7 +99,13 @@ const ManageRole = () => {
   });
 
   return (
-    <div className={`h-screen w-full flex flex-col ${theme.main}`}>
+  
+    roleType == "user" ? (
+      <>
+      <p>You have no acess</p>
+      </>
+    ) : (
+        <div className={`h-screen w-full flex flex-col ${theme.main}`}>
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-5xl mx-auto">
 
@@ -318,6 +326,8 @@ const ManageRole = () => {
         </div>
       </main>
     </div>
+    )
+  
   );
 };
 
