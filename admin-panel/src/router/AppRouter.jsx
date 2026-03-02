@@ -35,6 +35,7 @@ import NewsForm from "../pages/dashboard/MangeNews/NewsForm.jsx";
 import ManageBlogCategory from "../pages/dashboard/Blog/ManageBlogCategory.jsx";
 import ManageBlog from "../pages/dashboard/Blog/ManageBlog.jsx";
 import BlogAdd from "../pages/dashboard/Blog/BlogAdd.jsx";
+import ClientPage from "../pages/dashboard/client/ClientPage.jsx";
 // import ProductManagement from "../pages/dashboard/product/ProductCategory";
 // import ThemeToggleButton from "./components/Button";
 
@@ -118,6 +119,7 @@ function AppRouter() {
                 path="/dashboard/Manage-Blog/edit/:id"
                 element={<BlogAdd />}
               />
+              <Route path="/dashboard/Client" element={<ClientPage />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />

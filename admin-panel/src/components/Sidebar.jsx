@@ -22,26 +22,30 @@ import {
 } from "lucide-react";
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
-  const allow = localStorage.getItem("role")  === "admin" ? true : localStorage.getItem("role") === "sub-admin" ? true : false
+  const allow =
+    localStorage.getItem("role") === "admin"
+      ? true
+      : localStorage.getItem("role") === "sub-admin"
+        ? true
+        : false;
 
-  console.log("allow", allow)
+  console.log("allow", allow);
   const menuItems = [
     {
       path: "/dashboard",
       name: "Dashboard",
       icon: <LayoutDashboard size={18} />,
     },
-     // conditionally push
-  ...(allow
-    ? [
-        {
-          path: "/dashboard/managerole",
-          name: "ManageRole",
-          icon: <Shield size={18} />,
-        },
-      ]
-    : []),
-
+    // conditionally push
+    ...(allow
+      ? [
+          {
+            path: "/dashboard/managerole",
+            name: "ManageRole",
+            icon: <Shield size={18} />,
+          },
+        ]
+      : []),
 
     { path: "/dashboard/user", name: "Users", icon: <Users size={18} /> },
     {
@@ -100,6 +104,13 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       name: "Manage Blog ",
       icon: <PenTool size={18} />,
     },
+
+    {
+      path: "/dashboard/Client",
+      name: "Client ",
+      icon: <PenTool size={18} />,
+    },
+
     {
       path: "/dashboard/settings",
       name: "Settings",
