@@ -4,6 +4,7 @@ const clientController = require("../controllers/clientcontroller");
 
 router.post("/", clientController.addClient);
 router.get("/", clientController.getClients);
+router.patch("/toggle-status/:id", clientController.toggleClientStatus);
 router.put("/:id", clientController.updateClient);
 router.delete("/:id", clientController.deleteClient);
 

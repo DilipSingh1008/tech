@@ -2,13 +2,10 @@ const Client = require("../models/client");
 const { Country, State, City } = require("../models/location");
 const mongoose = require("mongoose");
 
-// ================= ADD CLIENT =================
-
 exports.addClient = async (req, res) => {
   try {
     const { name, email, mobile, country, state, city } = req.body;
 
-    // ✅ Basic validation
     if (!name || !email || !mobile || !country || !state || !city) {
       return res.status(400).json({
         success: false,
@@ -16,7 +13,6 @@ exports.addClient = async (req, res) => {
       });
     }
 
-    // ✅ ObjectId validation
     if (
       !mongoose.Types.ObjectId.isValid(country) ||
       !mongoose.Types.ObjectId.isValid(state) ||
@@ -28,7 +24,6 @@ exports.addClient = async (req, res) => {
       });
     }
 
-    // ✅ Check country exists
     const countryExists = await Country.findOne({ _id: country, status: true });
     if (!countryExists) {
       return res.status(404).json({
@@ -37,7 +32,6 @@ exports.addClient = async (req, res) => {
       });
     }
 
-    // ✅ Check state belongs to country
     const stateExists = await State.findOne({
       _id: state,
       country: country,
@@ -51,7 +45,6 @@ exports.addClient = async (req, res) => {
       });
     }
 
-    // ✅ Check city belongs to state
     const cityExists = await City.findOne({
       _id: city,
       state: state,
@@ -65,7 +58,6 @@ exports.addClient = async (req, res) => {
       });
     }
 
-    // ✅ Duplicate email check
     const existingEmail = await Client.findOne({ email: email.toLowerCase() });
     if (existingEmail) {
       return res.status(400).json({
@@ -74,7 +66,6 @@ exports.addClient = async (req, res) => {
       });
     }
 
-    // ✅ Mobile validation (10 digit)
     if (!/^[0-9]{10}$/.test(mobile)) {
       return res.status(400).json({
         success: false,
@@ -105,19 +96,48 @@ exports.addClient = async (req, res) => {
   }
 };
 
-// ================= GET ALL CLIENTS =================
-
 exports.getClients = async (req, res) => {
   try {
-    const clients = await Client.find({ status: true })
+    let {
+      page = 1,
+      limit = 10,
+      search = "",
+      sortField = "name",
+      sortOrder = "asc",
+    } = req.query;
+    page = parseInt(page);
+    limit = parseInt(limit);
+
+    const query = { status: true };
+    if (search) {
+      // Search by name, email or mobile
+      query.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { email: { $regex: search, $options: "i" } },
+        { mobile: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    const total = await Client.countDocuments(query);
+    const totalPages = Math.ceil(total / limit);
+
+    const clients = await Client.find(query)
       .populate("country", "name")
       .populate("state", "name")
       .populate("city", "name")
-      .sort({ createdAt: -1 });
+      .sort({ [sortField]: sortOrder === "asc" ? 1 : -1 })
+      .skip((page - 1) * limit)
+      .limit(limit);
 
     return res.status(200).json({
       success: true,
       data: clients,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages,
+      },
     });
   } catch (error) {
     return res.status(500).json({
@@ -127,8 +147,6 @@ exports.getClients = async (req, res) => {
     });
   }
 };
-
-// ================= UPDATE CLIENT =================
 
 exports.updateClient = async (req, res) => {
   try {
@@ -157,8 +175,6 @@ exports.updateClient = async (req, res) => {
   }
 };
 
-// ================= DELETE CLIENT (SOFT DELETE) =================
-
 exports.deleteClient = async (req, res) => {
   try {
     const { id } = req.params;
@@ -179,6 +195,34 @@ exports.deleteClient = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Client deleted successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
+  }
+};
+
+exports.toggleClientStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const client = await Client.findById(id);
+    if (!client) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Client not found" });
+    }
+
+    client.status = !client.status;
+    await client.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Client status updated",
+      data: client,
     });
   } catch (error) {
     return res.status(500).json({
