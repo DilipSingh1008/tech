@@ -172,7 +172,7 @@ const ClientPage = () => {
                   setEditingClient(null);
                   setIsModalOpen(true);
                 }}
-                className="flex items-center cursor-pointer gap-1.5 px-3 py-1.5 bg-(--primary) text-white rounded-lg text-xs font-semibold"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-(--primary) text-white rounded-lg text-xs font-semibold"
               >
                 <Plus size={14} /> Add Client
               </button>
@@ -275,7 +275,7 @@ const ClientPage = () => {
                                   setEditingClient(c);
                                   setIsModalOpen(true);
                                 }}
-                                className="hover:text-(--primary) cursor-pointer"
+                                className="hover:text-(--primary)"
                               >
                                 <Edit3 size={14} />
                               </button>
@@ -283,7 +283,7 @@ const ClientPage = () => {
                             {clientPermission?.delete && (
                               <button
                                 onClick={() => handleDelete(c._id)}
-                                className="hover:text-red-500 cursor-pointer"
+                                className="hover:text-red-500"
                               >
                                 <Trash2 size={14} />
                               </button>

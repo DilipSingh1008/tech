@@ -13,31 +13,29 @@ const clientSchema = new mongoose.Schema(
       required: true,
       lowercase: true,
       trim: true,
-      unique: true
     },
 
     mobile: {
       type: String,
       required: true,
-      unique: true
     },
 
     country: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Country",
-     
+      required: true,
     },
 
     state: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "State",
-     
+      required: true,
     },
 
     city: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "City",
-     
+      required: true,
     },
 
     status: {

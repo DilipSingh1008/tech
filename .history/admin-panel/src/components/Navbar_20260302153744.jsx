@@ -28,10 +28,6 @@ const getPageTitle = () => {
   if (path.startsWith("/dashboard/manage-news")) return "Manage News";
   if (path.startsWith("/dashboard/Manage-Blog-Categor")) return "Blog Categorie";
   if (path.startsWith("/dashboard/Manage-Blog")) return "Manage Blog";
-  if (path.startsWith("/dashboard/Client")) return "Clients";
-  if (path.startsWith("/dashboard/enquiry")) return "Enquiry";
-
-
 
   
   

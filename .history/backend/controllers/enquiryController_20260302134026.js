@@ -1,0 +1,45 @@
+const client = require("../models/client");
+const { default: Enquiry } = require("../models/enquiry");
+
+exports.createEnquiry = async (req, res) => {
+  try {
+    const { name, email, phone, message } = req.body;
+
+    
+    let existingClient = await client.findOne({
+      email: email,
+      mobile: phone
+    });
+
+    let clientData;
+
+    
+    if (!existingClient) {
+      clientData = await client.create({
+        name,
+        email,
+        mobile: phone
+      });
+    } else {
+      clientData = existingClient;
+    }
+
+    const enquiry = await Enquiry.create({
+      client: clientData._id,
+      message,
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Enquiry submitted successfully",
+      data: enquiry,
+    });
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

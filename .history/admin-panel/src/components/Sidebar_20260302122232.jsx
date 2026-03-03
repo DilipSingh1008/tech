@@ -19,7 +19,6 @@ import {
   Layout,
   Tags,
   PenTool,
-  MessageCircle,
 } from "lucide-react";
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
@@ -110,11 +109,6 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       path: "/dashboard/Client",
       name: "Client ",
       icon: <PenTool size={18} />,
-    },
-    {
-      path: "/dashboard/enquiry",
-      name: "Enquiry",
-      icon: <MessageCircle size={18}/>
     },
 
     {

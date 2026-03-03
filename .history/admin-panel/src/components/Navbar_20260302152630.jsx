@@ -10,35 +10,16 @@ const getPageTitle = () => {
   if (path === "/dashboard") return "Dashboard";
   if (path === "/dashboard/users") return "Users";
   if (path === "/dashboard/settings") return "Settings";
-  if (path === "/dashboard/categories") return "Manage Categories";
+  if (path === "/dashboard/categories") return "Categories";
   if (path === "/dashboard/location") return "Location";
   if (path === "/dashboard/profile") return "Account Settings";
   if (path === "/dashboard/user") return "Users";
-  if (path === "/dashboard/service") return "Manage Services";
+  if (path === "/dashboard/service") return "Services";
   if (path.startsWith("/dashboard/service/")) return "Add Services";
   if (path.startsWith("/dashboard/category/")) return "Sub - Categories";
   if (path.startsWith("/dashboard/location/")) return "Stattes";
   if (path.startsWith("/dashboard/citylocation/")) return "Cities";
-  if (path.startsWith("/dashboard/managerole")) return "Manage Role";
-  if (path.startsWith("/dashboard/banner")) return "Banner";
-  if (path.startsWith("/dashboard/products")) return "Products";
-  if (path.startsWith("/dashboard/cms")) return "Manage CMS";
-  if (path.startsWith("/dashboard/faq-category")) return "FAQ";
-  if (path.startsWith("/dashboard/manage-faq")) return "Manage FAQ";
-  if (path.startsWith("/dashboard/manage-news")) return "Manage News";
-  if (path.startsWith("/dashboard/Manage-Blog-Categor")) return "Blog Categorie";
-  if (path.startsWith("/dashboard/Manage-Blog")) return "Manage Blog";
-  if (path.startsWith("/dashboard/Client")) return "Clients";
-  if (path.startsWith("/dashboard/enquiry")) return "Enquiry";
-
-
-
-  
-  
-
-
-
-
+  if (path.startsWith("/dashboard/managerole/")) return "Manage Role";
 
 
   return "Dashboard"; // default

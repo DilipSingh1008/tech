@@ -1,0 +1,353 @@
+import React, { useState, useEffect } from "react";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
+import {
+  FiMessageSquare,
+  FiChevronLeft,
+  FiChevronRight,
+  FiXCircle,
+  FiUser,
+  FiTag,
+  FiSettings,
+  FiCalendar,
+  FiPlusCircle,
+  FiMail,
+  FiPhone,
+} from "react-icons/fi";
+import { useTheme } from "../../context/ThemeContext";
+import { getItems, createItem } from "../../services/api";
+import Searchbar from "../../components/Searchbar";
+
+const TYPE_COLORS = {
+  Support: "text-blue-400 bg-blue-400/10 border-blue-400/20",
+  Sales: "text-green-400 bg-green-400/10 border-green-400/20",
+  Billing: "text-yellow-400 bg-yellow-400/10 border-yellow-400/20",
+  General: "text-purple-400 bg-purple-400/10 border-purple-400/20",
+};
+
+const LIMIT = 5;
+
+// ── Yup Validation Schema ─────────────────────────────────────────────────────
+const enquirySchema = Yup.object({
+  name: Yup.string().trim().min(2, "Name too short").max(50, "Name too long").required("Name is required"),
+  email: Yup.string().trim().email("Invalid email address").required("Email is required"),
+  mobile: Yup.string()
+    .trim()
+    .matches(/^[0-9]{10}$/, "Mobile must be exactly 10 digits")
+    .required("Mobile number is required"),
+  message: Yup.string().trim().min(10, "Message too short (min 10 chars)").max(500, "Message too long").required("Message is required"),
+});
+
+const Enquires = () => {
+  const { isDarkMode } = useTheme();
+
+  const [enquiriesData, setEnquiriesData] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [sortBy, setSortBy] = useState("date");
+  const [order, setOrder] = useState("desc");
+
+  const [selectedEnquiry, setSelectedEnquiry] = useState(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+  useEffect(() => {
+    fetchData();
+  }, [page, sortBy, order, searchQuery]);
+
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      const res = await getItems(`enquiry?page=${page}&limit=${LIMIT}&sortBy=${sortBy}&order=${order}&search=${searchQuery}`);
+      setEnquiriesData(res.data || []);
+      setTotalPages(res.pagination?.totalPages || 1);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSort = (field) => {
+    const isAsc = sortBy === field && order === "asc";
+    setOrder(isAsc ? "desc" : "asc");
+    setSortBy(field);
+    setPage(1);
+  };
+
+  const SortIcon = ({ field }) => (
+    <span className="opacity-50 text-[10px]">
+      {sortBy === field ? (order === "asc" ? "▲" : "▼") : "↕"}
+    </span>
+  );
+
+  const theme = {
+    main: isDarkMode ? "bg-[#0b0e14] text-slate-300" : "bg-gray-50 text-gray-700",
+    card: isDarkMode ? "bg-[#151b28] border-gray-800" : "bg-white border-gray-200",
+    header: isDarkMode ? "bg-[#1f2637] text-gray-400" : "bg-gray-100 text-gray-500",
+    input: isDarkMode ? "bg-gray-500/5 border-gray-500/20 text-white" : "bg-gray-50 border-gray-300 text-gray-900",
+    modal: isDarkMode ? "bg-[#151b28] text-white" : "bg-white text-gray-800",
+    divider: isDarkMode ? "divide-gray-800" : "divide-gray-100",
+    borderT: isDarkMode ? "border-gray-800" : "border-gray-100",
+  };
+
+  const handleSubmitEnquiry = async (values, { resetForm, setSubmitting }) => {
+    try {
+      await createItem("enquiry", values);
+      resetForm();
+      setIsAddModalOpen(false);
+      fetchData();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  console.log(selectedEnquiry)
+
+  const closeAddModal = () => setIsAddModalOpen(false);
+
+  return (
+    <div className={`h-screen w-full flex flex-col ${theme.main}`}>
+      <main className="flex-1 overflow-y-auto">
+        <div className="max-w-5xl mx-auto">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-4">
+            <Searchbar
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setPage(1);
+              }}
+            />
+            <button
+              onClick={() => setIsAddModalOpen(true)}
+              className="flex items-center cursor-pointer gap-1.5 px-3 py-1.5 bg-(--primary) hover:opacity-90 text-white rounded-lg text-xs font-semibold transition-all shadow-sm"
+            >
+              <FiPlusCircle size={14} /> Add Enquiry
+            </button>
+          </div>
+
+          {/* Table */}
+          <div className={`rounded-xl border shadow-sm overflow-hidden ${theme.card}`}>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead className={`uppercase tracking-wider font-bold ${theme.header}`}>
+                  <tr>
+                    <th className="px-4 py-3 w-14">ID</th>
+                    <th className="px-4 py-3 cursor-pointer hover:text-(--primary) transition-colors" onClick={() => handleSort("client_id")}>
+                      <div className="flex items-center gap-1">Client ID <SortIcon field="client_id" /></div>
+                    </th>
+                    <th className="px-4 py-3 cursor-pointer hover:text-(--primary) transition-colors" onClick={() => handleSort("service_id")}>
+                      <div className="flex items-center gap-1">Service ID <SortIcon field="service_id" /></div>
+                    </th>
+                    <th className="px-4 py-3 cursor-pointer hover:text-(--primary) transition-colors" onClick={() => handleSort("type")}>
+                      <div className="flex items-center gap-1">Type <SortIcon field="type" /></div>
+                    </th>
+                    <th className="px-4 py-3 cursor-pointer hover:text-(--primary) transition-colors" onClick={() => handleSort("date")}>
+                      <div className="flex items-center gap-1">Date <SortIcon field="date" /></div>
+                    </th>
+                    <th className="px-4 py-3">Message</th>
+                  </tr>
+                </thead>
+
+                <tbody className={`divide-y ${theme.divider}`}>
+                  {isLoading ? (
+                    <tr>
+                      <td colSpan={6} className="px-4 py-10 text-center opacity-40 italic">Loading...</td>
+                    </tr>
+                  ) : enquiriesData.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="px-4 py-10 text-center opacity-40">No enquiries found.</td>
+                    </tr>
+                  ) : (
+                    enquiriesData.map((enquiry, index) => (
+                      <tr key={enquiry._id} className="hover:bg-(--primary)/5 transition-colors">
+                        <td className="px-4 py-2.5 font-mono opacity-50 text-[10px]">{(page - 1) * LIMIT + (index + 1)}</td>
+                        <td className="px-4 py-2.5">
+                          <div className="flex items-center gap-1.5">
+                            <FiUser size={11} className="opacity-40" />
+                            <span className="font-semibold">{enquiry.client._id}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-2.5">
+                          <div className="flex items-center gap-1.5">
+                            <FiSettings size={11} className="opacity-40" />
+                            <span className="font-mono text-[11px]">{enquiry.service_id || "N/A"}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-2.5">
+                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-semibold ${TYPE_COLORS[enquiry.type] || "text-gray-400 bg-gray-400/10 border-gray-400/20"}`}>
+                            <FiTag size={9} />{enquiry.type || "N/A"}
+                          </span>
+                        </td>
+                        <td className="px-4 py-2.5">
+                          <div className="flex items-center gap-1.5 opacity-70">
+                            <FiCalendar size={11} />
+                            <span>{new Date(enquiry.enquiryDate).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-2.5">
+                          <button
+                            onClick={() => setSelectedEnquiry(enquiry)}
+                            className="flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-(--primary)/40 text-(--primary) hover:bg-(--primary)/10 transition-all cursor-pointer text-[11px] font-semibold"
+                          >
+                            <FiMessageSquare size={11} />View
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination */}
+            <div className={`flex items-center justify-between p-3 border-t ${theme.borderT}`}>
+              <span className="text-[11px] opacity-60">Showing {enquiriesData.length} entries</span>
+              <div className="flex items-center gap-1">
+                <button disabled={page === 1 || isLoading} onClick={() => setPage(page - 1)} className="p-1.5 border rounded-md disabled:opacity-30 hover:border-(--primary) hover:text-(--primary) transition-colors">
+                  <FiChevronLeft size={16} />
+                </button>
+                {[...Array(totalPages)].map((_, i) => (
+                  <button key={i + 1} onClick={() => setPage(i + 1)} className={`w-7 h-7 text-[11px] rounded-md border transition-all ${page === i + 1 ? "bg-(--primary) text-white border-(--primary) shadow-sm" : "hover:border-(--primary) hover:text-(--primary) border-transparent"}`}>
+                    {i + 1}
+                  </button>
+                ))}
+                <button disabled={page === totalPages || isLoading} onClick={() => setPage(page + 1)} className="p-1.5 border rounded-md disabled:opacity-30 hover:border-(--primary) hover:text-(--primary) transition-colors">
+                  <FiChevronRight size={16} />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      {/* Message Popup Modal */}
+      {selectedEnquiry && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-4" onClick={() => setSelectedEnquiry(null)}>
+          <div className={`${theme.modal} p-5 rounded-xl w-full max-w-sm shadow-xl border border-gray-700/30`} onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-4">
+              <div className="flex items-center gap-2">
+                <FiMessageSquare size={15} className="text-(--primary)" />
+                <h3 className="text-sm font-bold">Enquiry Message</h3>
+              </div>
+              <button onClick={() => setSelectedEnquiry(null)} className="opacity-50 cursor-pointer hover:text-(--primary) hover:opacity-100 transition-all">
+                <FiXCircle size={16} />
+              </button>
+            </div>
+            <div className={`flex flex-wrap gap-2 mb-4 pb-4 border-b ${theme.borderT}`}>
+              <span className="flex items-center gap-1 text-[10px] opacity-60"><FiUser size={10} /> {selectedEnquiry.client.client_id}</span>
+              <span className="flex items-center gap-1 text-[10px] opacity-60"><FiSettings size={10} /> {selectedEnquiry.service_id || "N/A"}</span>
+              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-semibold ${TYPE_COLORS[selectedEnquiry.type ] || "text-gray-400 bg-gray-400/10 border-gray-400/20"}`}>
+                <FiTag size={9} /> {selectedEnquiry.type || "N/A"}
+              </span>
+              <span className="flex items-center gap-1 text-[10px] opacity-60">
+                <FiCalendar size={10} />
+                {new Date(selectedEnquiry.date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
+              </span>
+            </div>
+            <p className="text-sm leading-relaxed opacity-80">{selectedEnquiry.message}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Add Enquiry Modal */}
+      {isAddModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-4" onClick={closeAddModal}>
+          <div className={`${theme.modal} p-5 rounded-xl w-full max-w-sm shadow-xl border border-gray-700/30`} onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-4">
+              <div className="flex items-center gap-2">
+                <FiPlusCircle size={15} className="text-(--primary)" />
+                <h3 className="text-sm font-bold">Add Enquiry</h3>
+              </div>
+              <button onClick={closeAddModal} className="opacity-50 cursor-pointer hover:text-(--primary) hover:opacity-100 transition-all">
+                <FiXCircle size={16} />
+              </button>
+            </div>
+
+            <Formik
+              initialValues={{ name: "", email: "", mobile: "", message: "" }}
+              validationSchema={enquirySchema}
+              onSubmit={handleSubmitEnquiry}
+            >
+              {({ errors, touched, isSubmitting }) => (
+                <Form className="space-y-3">
+                  {/* Name */}
+                  <div>
+                    <label className="block text-[10px] font-bold opacity-50 uppercase mb-1">Name</label>
+                    <div className="relative">
+                      <FiUser size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 opacity-40 pointer-events-none" />
+                      <Field
+                        name="name"
+                        placeholder="Enter your name"
+                        className={`w-full pl-7 pr-3 py-2 text-sm rounded-lg border outline-none focus:border-(--primary) transition-all ${theme.input} ${errors.name && touched.name ? "border-red-500" : ""}`}
+                      />
+                    </div>
+                    <ErrorMessage name="name" component="span" className="text-red-400 text-[10px] mt-1 block" />
+                  </div>
+
+                  {/* Email */}
+                  <div>
+                    <label className="block text-[10px] font-bold opacity-50 uppercase mb-1">Email</label>
+                    <div className="relative">
+                      <FiMail size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 opacity-40 pointer-events-none" />
+                      <Field
+                        name="email"
+                        type="email"
+                        placeholder="Enter your email"
+                        className={`w-full pl-7 pr-3 py-2 text-sm rounded-lg border outline-none focus:border-(--primary) transition-all ${theme.input} ${errors.email && touched.email ? "border-red-500" : ""}`}
+                      />
+                    </div>
+                    <ErrorMessage name="email" component="span" className="text-red-400 text-[10px] mt-1 block" />
+                  </div>
+
+                  {/* Mobile */}
+                  <div>
+                    <label className="block text-[10px] font-bold opacity-50 uppercase mb-1">Mobile Number</label>
+                    <div className="relative">
+                      <FiPhone size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 opacity-40 pointer-events-none" />
+                      <Field
+                        name="mobile"
+                        type="tel"
+                        placeholder="Enter 10-digit mobile number"
+                        maxLength={10}
+                        className={`w-full pl-7 pr-3 py-2 text-sm rounded-lg border outline-none focus:border-(--primary) transition-all ${theme.input} ${errors.mobile && touched.mobile ? "border-red-500" : ""}`}
+                      />
+                    </div>
+                    <ErrorMessage name="mobile" component="span" className="text-red-400 text-[10px] mt-1 block" />
+                  </div>
+
+                  {/* Message */}
+                  <div>
+                    <label className="block text-[10px] font-bold opacity-50 uppercase mb-1">Message</label>
+                    <Field
+                      as="textarea"
+                      name="message"
+                      rows={3}
+                      placeholder="Write your message..."
+                      className={`w-full px-3 py-2 text-sm rounded-lg border outline-none focus:border-(--primary) transition-all resize-none ${theme.input} ${errors.message && touched.message ? "border-red-500" : ""}`}
+                    />
+                    <ErrorMessage name="message" component="span" className="text-red-400 text-[10px] mt-1 block" />
+                  </div>
+
+                  {/* Submit */}
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full cursor-pointer py-2 bg-(--primary) hover:opacity-90 text-white rounded-lg text-xs font-bold transition-all disabled:opacity-50"
+                  >
+                    {isSubmitting ? "Submitting..." : "Submit"}
+                  </button>
+                </Form>
+              )}
+            </Formik>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Enquires;

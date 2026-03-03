@@ -112,7 +112,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       icon: <PenTool size={18} />,
     },
     {
-      path: "/dashboard/enquiry",
+      path: "/dashboard/Client",
       name: "Enquiry",
       icon: <MessageCircle size={18}/>
     },

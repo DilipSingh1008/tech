@@ -1,0 +1,412 @@
+import React, { useState, useEffect } from "react";
+import {
+  FiMessageSquare,
+  FiChevronLeft,
+  FiChevronRight,
+  FiXCircle,
+  FiUser,
+  FiTag,
+  FiSettings,
+  FiCalendar,
+  FiSearch,
+} from "react-icons/fi";
+import { useTheme } from "../../context/ThemeContext";
+import { getItems } from "../../services/api";
+import Searchbar from "../../components/Searchbar";
+
+// ── Sample/Mock Data ──────────────────────────────────────────────────────────
+const MOCK_ENQUIRIES = [
+  {
+    _id: "1",
+    client_id: "CLT-001",
+    service_id: "SVC-101",
+    type: "Support",
+    date: "2024-12-01",
+    message:
+      "Hello, I need help with my recent order. The product arrived damaged and I would like a replacement as soon as possible. Please let me know what steps I need to take.",
+  },
+  {
+    _id: "2",
+    client_id: "CLT-002",
+    service_id: "SVC-202",
+    type: "Sales",
+    date: "2024-12-03",
+    message:
+      "I'm interested in upgrading my current plan to the premium tier. Could you provide details about the pricing and benefits?",
+  },
+  {
+    _id: "3",
+    client_id: "CLT-003",
+    service_id: "SVC-103",
+    type: "Billing",
+    date: "2024-12-05",
+    message:
+      "There seems to be a discrepancy in my latest invoice. I was charged twice for the same service. Please review and issue a refund for the duplicate charge.",
+  },
+  {
+    _id: "4",
+    client_id: "CLT-004",
+    service_id: "SVC-304",
+    type: "General",
+    date: "2024-12-07",
+    message:
+      "Can you tell me more about your partnership program? We are a mid-sized company looking for a long-term service provider.",
+  },
+  {
+    _id: "5",
+    client_id: "CLT-005",
+    service_id: "SVC-205",
+    type: "Support",
+    date: "2024-12-09",
+    message:
+      "The API integration is failing with a 403 error. Our team has checked credentials but still unable to connect. Need urgent assistance.",
+  },
+  {
+    _id: "6",
+    client_id: "CLT-006",
+    service_id: "SVC-106",
+    type: "Sales",
+    date: "2024-12-10",
+    message: "We would like to schedule a product demo for our team of 20 people. Please suggest available time slots for this week.",
+  },
+  {
+    _id: "7",
+    client_id: "CLT-007",
+    service_id: "SVC-307",
+    type: "Billing",
+    date: "2024-12-11",
+    message: "I need an official invoice with GST details for tax filing purposes.",
+  },
+];
+
+const TYPE_COLORS = {
+  Support: "text-blue-400 bg-blue-400/10 border-blue-400/20",
+  Sales: "text-green-400 bg-green-400/10 border-green-400/20",
+  Billing: "text-yellow-400 bg-yellow-400/10 border-yellow-400/20",
+  General: "text-purple-400 bg-purple-400/10 border-purple-400/20",
+};
+
+const LIMIT = 5;
+
+const Enquires = () => {
+  const { isDarkMode } = useTheme();
+
+  const [enquiriesData, setEnquiriesData] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [sortBy, setSortBy] = useState("date");
+  const [order, setOrder] = useState("desc");
+
+  const [selectedEnquiry, setSelectedEnquiry] = useState(null);
+
+  useEffect(() => {
+    fetchData();
+  }, [page, sortBy, order, searchQuery]);
+
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      // ── Replace with real API call ──
+      // const res = await getItems(`enquiries?page=${page}&limit=${LIMIT}&sortBy=${sortBy}&order=${order}&search=${searchQuery}`);
+      // setEnquiriesData(res.data || []);
+      // setTotalPages(res.pagination?.totalPages || 1);
+
+      // Mock implementation
+      await new Promise((r) => setTimeout(r, 300));
+      let filtered = MOCK_ENQUIRIES.filter(
+        (e) =>
+          !searchQuery ||
+          e.client_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          e.service_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          e.type.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      const sorted = [...filtered].sort((a, b) => {
+        const av = a[sortBy] ?? "";
+        const bv = b[sortBy] ?? "";
+        return order === "asc" ? (av > bv ? 1 : -1) : av < bv ? 1 : -1;
+      });
+      const start = (page - 1) * LIMIT;
+      setEnquiriesData(sorted.slice(start, start + LIMIT));
+      setTotalPages(Math.max(1, Math.ceil(sorted.length / LIMIT)));
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSort = (field) => {
+    const isAsc = sortBy === field && order === "asc";
+    setOrder(isAsc ? "desc" : "asc");
+    setSortBy(field);
+    setPage(1);
+  };
+
+  const SortIcon = ({ field }) => (
+    <span className="opacity-50 text-[10px]">
+      {sortBy === field ? (order === "asc" ? "▲" : "▼") : "↕"}
+    </span>
+  );
+
+  const theme = {
+    main: isDarkMode
+      ? "bg-[#0b0e14] text-slate-300"
+      : "bg-gray-50 text-gray-700",
+    card: isDarkMode
+      ? "bg-[#151b28] border-gray-800"
+      : "bg-white border-gray-200",
+    header: isDarkMode
+      ? "bg-[#1f2637] text-gray-400"
+      : "bg-gray-100 text-gray-500",
+    input: isDarkMode
+      ? "bg-gray-500/5 border-gray-500/20 text-white"
+      : "bg-gray-50 border-gray-300 text-gray-900",
+    modal: isDarkMode ? "bg-[#151b28] text-white" : "bg-white text-gray-800",
+    divider: isDarkMode ? "divide-gray-800" : "divide-gray-100",
+    borderT: isDarkMode ? "border-gray-800" : "border-gray-100",
+  };
+
+  return (
+    <div className={`h-screen w-full flex flex-col ${theme.main}`}>
+      <main className="flex-1 overflow-y-auto">
+        <div className="max-w-5xl mx-auto">
+          {/* Header */}
+          <div className="flex items-center justify-between mb-4">
+            <Searchbar
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setPage(1);
+              }}
+            />
+          </div>
+
+          {/* Table */}
+          <div className={`rounded-xl border shadow-sm overflow-hidden ${theme.card}`}>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead className={`uppercase tracking-wider font-bold ${theme.header}`}>
+                  <tr>
+                    <th className="px-4 py-3 w-14">ID</th>
+                    <th
+                      className="px-4 py-3 cursor-pointer hover:text-(--primary) transition-colors"
+                      onClick={() => handleSort("client_id")}
+                    >
+                      <div className="flex items-center gap-1">
+                        Client ID <SortIcon field="client_id" />
+                      </div>
+                    </th>
+                    <th
+                      className="px-4 py-3 cursor-pointer hover:text-(--primary) transition-colors"
+                      onClick={() => handleSort("service_id")}
+                    >
+                      <div className="flex items-center gap-1">
+                        Service ID <SortIcon field="service_id" />
+                      </div>
+                    </th>
+                    <th
+                      className="px-4 py-3 cursor-pointer hover:text-(--primary) transition-colors"
+                      onClick={() => handleSort("type")}
+                    >
+                      <div className="flex items-center gap-1">
+                        Type <SortIcon field="type" />
+                      </div>
+                    </th>
+                    <th
+                      className="px-4 py-3 cursor-pointer hover:text-(--primary) transition-colors"
+                      onClick={() => handleSort("date")}
+                    >
+                      <div className="flex items-center gap-1">
+                        Date <SortIcon field="date" />
+                      </div>
+                    </th>
+                    <th className="px-4 py-3">Message</th>
+                  </tr>
+                </thead>
+
+                <tbody className={`divide-y ${theme.divider}`}>
+                  {isLoading ? (
+                    <tr>
+                      <td colSpan={6} className="px-4 py-10 text-center opacity-40 italic">
+                        Loading...
+                      </td>
+                    </tr>
+                  ) : enquiriesData.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="px-4 py-10 text-center opacity-40">
+                        No enquiries found.
+                      </td>
+                    </tr>
+                  ) : (
+                    enquiriesData.map((enquiry, index) => (
+                      <tr
+                        key={enquiry._id}
+                        className="hover:bg-(--primary)/5 transition-colors"
+                      >
+                        {/* # */}
+                        <td className="px-4 py-2.5 font-mono opacity-50 text-[10px]">
+                          {(page - 1) * LIMIT + (index + 1)}
+                        </td>
+
+                        {/* Client ID */}
+                        <td className="px-4 py-2.5">
+                          <div className="flex items-center gap-1.5">
+                            <FiUser size={11} className="opacity-40" />
+                            <span className="font-semibold">{enquiry.client_id}</span>
+                          </div>
+                        </td>
+
+                        {/* Service ID */}
+                        <td className="px-4 py-2.5">
+                          <div className="flex items-center gap-1.5">
+                            <FiSettings size={11} className="opacity-40" />
+                            <span className="font-mono text-[11px]">{enquiry.service_id}</span>
+                          </div>
+                        </td>
+
+                        {/* Type badge */}
+                        <td className="px-4 py-2.5">
+                          <span
+                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-semibold ${
+                              TYPE_COLORS[enquiry.type] || "text-gray-400 bg-gray-400/10 border-gray-400/20"
+                            }`}
+                          >
+                            <FiTag size={9} />
+                            {enquiry.type}
+                          </span>
+                        </td>
+
+                        {/* Date */}
+                        <td className="px-4 py-2.5">
+                          <div className="flex items-center gap-1.5 opacity-70">
+                            <FiCalendar size={11} />
+                            <span>{new Date(enquiry.date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}</span>
+                          </div>
+                        </td>
+
+                        {/* Message preview + popup trigger */}
+                        <td className="px-4 py-2.5 max-w-[220px]">
+                          <button
+                            onClick={() => setSelectedEnquiry(enquiry)}
+                            className="flex items-center gap-1.5 group cursor-pointer"
+                          >
+                            <FiMessageSquare
+                              size={13}
+                              className="shrink-0 opacity-50 group-hover:text-(--primary) group-hover:opacity-100 transition-all"
+                            />
+                            <span className="truncate text-[11px] opacity-60 group-hover:text-(--primary) group-hover:opacity-100 transition-all underline-offset-2 group-hover:underline">
+                              {enquiry.message}
+                            </span>
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination */}
+            <div className={`flex items-center justify-between p-3 border-t ${theme.borderT}`}>
+              <span className="text-[11px] opacity-60">
+                Showing {enquiriesData.length} entries
+              </span>
+
+              <div className="flex items-center gap-1">
+                <button
+                  disabled={page === 1 || isLoading}
+                  onClick={() => setPage(page - 1)}
+                  className="p-1.5 border rounded-md disabled:opacity-30 hover:border-(--primary) hover:text-(--primary) transition-colors"
+                >
+                  <FiChevronLeft size={16} />
+                </button>
+
+                {[...Array(totalPages)].map((_, i) => (
+                  <button
+                    key={i + 1}
+                    onClick={() => setPage(i + 1)}
+                    className={`w-7 h-7 text-[11px] rounded-md border transition-all ${
+                      page === i + 1
+                        ? "bg-(--primary) text-white border-(--primary) shadow-sm"
+                        : "hover:border-(--primary) hover:text-(--primary) border-transparent"
+                    }`}
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+
+                <button
+                  disabled={page === totalPages || isLoading}
+                  onClick={() => setPage(page + 1)}
+                  className="p-1.5 border rounded-md disabled:opacity-30 hover:border-(--primary) hover:text-(--primary) transition-colors"
+                >
+                  <FiChevronRight size={16} />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      {/* Message Popup Modal */}
+      {selectedEnquiry && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-4"
+          onClick={() => setSelectedEnquiry(null)}
+        >
+          <div
+            className={`${theme.modal} p-5 rounded-xl w-full max-w-sm shadow-xl border border-gray-700/30`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex justify-between items-center mb-4">
+              <div className="flex items-center gap-2">
+                <FiMessageSquare size={15} className="text-(--primary)" />
+                <h3 className="text-sm font-bold">Enquiry Message</h3>
+              </div>
+              <button
+                onClick={() => setSelectedEnquiry(null)}
+                className="opacity-50 cursor-pointer hover:text-(--primary) hover:opacity-100 transition-all"
+              >
+                <FiXCircle size={16} />
+              </button>
+            </div>
+
+            {/* Meta info */}
+            <div className={`flex flex-wrap gap-2 mb-4 pb-4 border-b ${theme.borderT}`}>
+              <span className="flex items-center gap-1 text-[10px] opacity-60">
+                <FiUser size={10} /> {selectedEnquiry.client_id}
+              </span>
+              <span className="flex items-center gap-1 text-[10px] opacity-60">
+                <FiSettings size={10} /> {selectedEnquiry.service_id}
+              </span>
+              <span
+                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-semibold ${
+                  TYPE_COLORS[selectedEnquiry.type] || "text-gray-400 bg-gray-400/10 border-gray-400/20"
+                }`}
+              >
+                <FiTag size={9} /> {selectedEnquiry.type}
+              </span>
+              <span className="flex items-center gap-1 text-[10px] opacity-60">
+                <FiCalendar size={10} />
+                {new Date(selectedEnquiry.date).toLocaleDateString("en-GB", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                })}
+              </span>
+            </div>
+
+            {/* Message Body */}
+            <p className="text-sm leading-relaxed opacity-80">
+              {selectedEnquiry.message}
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Enquires;

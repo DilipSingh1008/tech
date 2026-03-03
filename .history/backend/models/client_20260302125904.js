@@ -13,13 +13,11 @@ const clientSchema = new mongoose.Schema(
       required: true,
       lowercase: true,
       trim: true,
-      unique: true
     },
 
     mobile: {
       type: String,
       required: true,
-      unique: true
     },
 
     country: {

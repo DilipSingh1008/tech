@@ -27,7 +27,6 @@ const newsRoutes = require("./routes/newsRoutes");
 const blogCategoryRoutes = require("./routes/blogCategoryRoutes");
 const blogRoutes = require("./routes/blogRoutes");
 const clientRoutes = require("./routes/clientRoutes");
-const enquiryRoute = require("./routes/enquiryRoute")
 
 connectDB();
 
@@ -66,7 +65,6 @@ app.use("/api/news", newsRoutes);
 app.use("/api/blog-category", blogCategoryRoutes);
 app.use("/api/blogs", blogRoutes);
 app.use("/api/client", clientRoutes);
-app.use("/api/enquiry", enquiryRoute)
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
