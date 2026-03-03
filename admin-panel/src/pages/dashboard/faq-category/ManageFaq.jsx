@@ -17,7 +17,6 @@ import { useSelector } from "react-redux";
 const ManageFaq = () => {
   const { isDarkMode } = useTheme();
 
-  // ── Permission Logic ──
   const permissions = useSelector((state) => state.permission.permissions);
   const rawFaqPermission = permissions?.find(
     (p) => p.module.name === "faq"

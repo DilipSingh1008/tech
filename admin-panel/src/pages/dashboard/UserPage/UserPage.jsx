@@ -28,13 +28,15 @@ const UserPage = () => {
   const [sortBy, setSortBy] = useState("createdAt");
   const [order, setOrder] = useState("desc");
 
-  const permissions = useSelector(state => state.permission.permissions);
-  const roleType = useSelector(state => state.permission.roleName);
+  const permissions = useSelector((state) => state.permission.permissions);
+  const roleType = useSelector((state) => state.permission.roleName);
 
-  console.log("===", roleType)
+  console.log("===", roleType);
 
   // console.log("---", permissions)
-  const rawUsersPermission = permissions?.find(p => p.module.name === "users");
+  const rawUsersPermission = permissions?.find(
+    (p) => p.module.name === "users",
+  );
 
   const localRole = localStorage.getItem("role");
 
@@ -77,7 +79,7 @@ const UserPage = () => {
     setLoading(true);
     try {
       const res = await getItems(
-        `user?page=${page}&limit=${limit}&search=${searchQuery}&sortBy=${sortBy}&order=${order}`
+        `user?page=${page}&limit=${limit}&search=${searchQuery}&sortBy=${sortBy}&order=${order}`,
       );
       setUsers(res.data || []);
       setTotalPages(res.pagination?.totalPages || 1);
@@ -112,8 +114,8 @@ const UserPage = () => {
     await updateItem(`user/${id}`, { status: !currentStatus });
     setUsers((prev) =>
       prev.map((user) =>
-        user._id === id ? { ...user, status: !currentStatus } : user
-      )
+        user._id === id ? { ...user, status: !currentStatus } : user,
+      ),
     );
   };
 
@@ -208,8 +210,8 @@ const UserPage = () => {
                       <div className="flex items-center gap-1">Status</div>
                     </th>
 
-                    {(usersPermission?.edit === true ||
-                      usersPermission?.delete === true) ? (
+                    {usersPermission?.edit === true ||
+                    usersPermission?.delete === true ? (
                       <th className="px-4 py-3 text-right w-24">Action</th>
                     ) : null}
                   </tr>
@@ -276,9 +278,7 @@ const UserPage = () => {
 
                         <td className="px-4 py-2.5">
                           <button
-                            onClick={() =>
-                              handleToggleStatus(u._id, u.status)
-                            }
+                            onClick={() => handleToggleStatus(u._id, u.status)}
                             className={`cursor-pointer w-8 h-4 rounded-full relative transition-colors ${
                               u.status ? "bg-(--primary)" : "bg-gray-400"
                             }`}

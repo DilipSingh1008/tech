@@ -11,6 +11,7 @@ import { Link } from "react-router-dom";
 import Searchbar from "../../../components/Searchbar";
 import { FiChevronRight, FiChevronLeft } from "react-icons/fi";
 import { useSelector } from "react-redux";
+import CommonImage from "../../../components/CommonImage";
 
 const ManageCategories = () => {
   const { isDarkMode } = useTheme();
@@ -213,15 +214,15 @@ const ManageCategories = () => {
                       </td>
                       <td className="px-4 py-2.5">
                         <div className="w-8 h-8 rounded bg-gray-500/10 border border-gray-500/10 overflow-hidden flex items-center justify-center">
-                          {cat.icon ? (
-                            <img
-                              src={`http://localhost:5000${cat.icon}`}
-                              className="w-full h-full object-cover"
-                              alt="icon"
-                            />
-                          ) : (
-                            <ImageIcon size={14} className="opacity-30" />
-                          )}
+                          <CommonImage
+                            src={
+                              cat.icon
+                                ? `http://localhost:5000${cat.icon}`
+                                : null
+                            }
+                            alt="category"
+                            className="w-full h-full object-cover"
+                          />
                         </div>
                       </td>
                       <td className="px-4 py-2.5">
@@ -371,7 +372,7 @@ const ManageCategories = () => {
                   </div>
 
                   {formData.icon && (
-                    <img
+                    <CommonImage
                       src={
                         formData.icon instanceof File
                           ? URL.createObjectURL(formData.icon)

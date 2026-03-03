@@ -16,7 +16,7 @@ exports.createCategory = async (req, res) => {
       catid: catid || null,
     };
     if (req.file) {
-      categoryData.icon = `/uploads/subcategories/${req.file.filename}`;
+      categoryData.icon = `/uploads/categories/${req.file.filename}`;
     }
 
     const category = await Category.create(categoryData);
