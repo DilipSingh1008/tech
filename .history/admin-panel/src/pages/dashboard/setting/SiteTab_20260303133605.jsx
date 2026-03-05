@@ -3,7 +3,7 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { useTheme } from "../../../context/ThemeContext";
 import { getItems, updateItem } from "../../../services/api";
-import CommonImage from "../../../components/CommonImage";
+
 
 const SiteSettingsForm = () => {
   const { isDarkMode } = useTheme();
@@ -22,7 +22,8 @@ const SiteSettingsForm = () => {
         const res = await getItems("setting/site");
         const fetchedData = res.data;
 
-        console.log("rgregr", fetchedData);
+        console.log("rgregr",fetchedData);
+        
 
         if (fetchedData) {
           setInitialValues({
@@ -34,12 +35,8 @@ const SiteSettingsForm = () => {
 
           // Fallback to localhost if path exists
           setPreviews({
-            logo: fetchedData.logo
-              ? `http://localhost:5000${fetchedData.logo}`
-              : null,
-            favicon: fetchedData.favicon
-              ? `http://localhost:5000${fetchedData.favicon}`
-              : null,
+            logo: fetchedData.logo ? `http://localhost:5000${fetchedData.logo}` : null,
+            favicon: fetchedData.favicon ? `http://localhost:5000${fetchedData.favicon}` : null,
           });
         }
       } catch (err) {
@@ -51,9 +48,7 @@ const SiteSettingsForm = () => {
 
   const validationSchema = Yup.object().shape({
     site_name: Yup.string().min(3, "Too Short!").required("Required"),
-    site_address: Yup.string()
-      .min(10, "Address too short")
-      .required("Required"),
+    site_address: Yup.string().min(10, "Address too short").required("Required"),
   });
 
   // Dynamic Theme Object consistent with your Location page
@@ -62,11 +57,9 @@ const SiteSettingsForm = () => {
       ? "bg-gray-500/5 border-gray-500/20 text-white focus:border-(--primary)"
       : "bg-gray-50 border-gray-300 text-gray-900 focus:border-(--primary)",
     label: isDarkMode ? "text-gray-400" : "text-gray-500",
-    imageBox: isDarkMode
-      ? "bg-[#0b0e14] border-gray-800"
-      : "bg-gray-100 border-gray-200",
-    buttonSecondary: isDarkMode
-      ? "bg-(--primary)/10 text-(--primary) border-(--primary)/20 hover:bg-(--primary)/20"
+    imageBox: isDarkMode ? "bg-[#0b0e14] border-gray-800" : "bg-gray-100 border-gray-200",
+    buttonSecondary: isDarkMode 
+      ? "bg-(--primary)/10 text-(--primary) border-(--primary)/20 hover:bg-(--primary)/20" 
       : "bg-gray-200 text-gray-700 border-gray-300 hover:bg-gray-300",
   };
 
@@ -89,10 +82,10 @@ const SiteSettingsForm = () => {
       if (values.logo) {
         formData.append("logo", values.logo);
       }
-      if (values.favicon) {
-        formData.append("favicon", values.favicon);
+      if (values.favicon){
+        formData.append("logo", values.favicon);
       }
-      formData.append("folder", "settings");
+        formData.append("folder", "settings");
 
       await updateItem("setting/site", formData);
       alert("Settings updated successfully!");
@@ -116,9 +109,7 @@ const SiteSettingsForm = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Site Name */}
               <div>
-                <label
-                  className={`block text-[10px] font-bold uppercase mb-1 tracking-wider ${theme.label}`}
-                >
+                <label className={`block text-[10px] font-bold uppercase mb-1 tracking-wider ${theme.label}`}>
                   Site Name
                 </label>
                 <Field
@@ -128,18 +119,12 @@ const SiteSettingsForm = () => {
                     theme.input
                   } ${errors.site_name && touched.site_name ? "border-red-500" : ""}`}
                 />
-                <ErrorMessage
-                  name="site_name"
-                  component="div"
-                  className="text-red-400 text-[10px] mt-1"
-                />
+                <ErrorMessage name="site_name" component="div" className="text-red-400 text-[10px] mt-1" />
               </div>
 
               {/* Office Address */}
               <div>
-                <label
-                  className={`block text-[10px] font-bold uppercase mb-1 tracking-wider ${theme.label}`}
-                >
+                <label className={`block text-[10px] font-bold uppercase mb-1 tracking-wider ${theme.label}`}>
                   Office Address
                 </label>
                 <Field
@@ -151,11 +136,7 @@ const SiteSettingsForm = () => {
                     theme.input
                   } ${errors.site_address && touched.site_address ? "border-red-500" : ""}`}
                 />
-                <ErrorMessage
-                  name="site_address"
-                  component="div"
-                  className="text-red-400 text-[10px] mt-1"
-                />
+                <ErrorMessage name="site_address" component="div" className="text-red-400 text-[10px] mt-1" />
               </div>
             </div>
 
@@ -166,25 +147,23 @@ const SiteSettingsForm = () => {
                 { label: "Favicon", name: "favicon" },
               ].map((item) => (
                 <div key={item.name} className="flex flex-col gap-4">
-                  <label
-                    className={`block text-[10px] font-bold uppercase tracking-wider ${theme.label}`}
-                  >
+                  <label className={`block text-[10px] font-bold uppercase tracking-wider ${theme.label}`}>
                     {item.label}
                   </label>
-
-                  <div
-                    className={`w-40 h-40 rounded-xl border-2 border-dashed flex items-center justify-center overflow-hidden transition-colors ${theme.imageBox}`}
-                  >
+                  
+                  <div className={`w-40 h-40 rounded-xl border-2 border-dashed flex items-center justify-center overflow-hidden transition-colors ${theme.imageBox}`}>
                     {previews[item.name] ? (
                       <CommonImage
-                        src={previews[item.name]}
-                        alt="preview"
-                        className="w-full h-full object-cover"
-                      />
+                            src={
+                              cat.icon
+                                ? `http://localhost:5000${cat.icon}`
+                                : null
+                            }
+                            alt="category"
+                            className="w-full h-full object-cover"
+                          /> 
                     ) : (
-                      <span className="text-[10px] opacity-40 italic">
-                        No Image Uploaded
-                      </span>
+                      <span className="text-[10px] opacity-40 italic">No Image Uploaded</span>
                     )}
                   </div>
 
@@ -192,9 +171,7 @@ const SiteSettingsForm = () => {
                     <input
                       type="file"
                       accept="image/*"
-                      onChange={(e) =>
-                        handleFileChange(e, setFieldValue, item.name)
-                      }
+                      onChange={(e) => handleFileChange(e, setFieldValue, item.name)}
                       className="hidden"
                       id={`file-${item.name}`}
                     />

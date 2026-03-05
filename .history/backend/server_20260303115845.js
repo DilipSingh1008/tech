@@ -28,7 +28,7 @@ const blogCategoryRoutes = require("./routes/blogCategoryRoutes");
 const blogRoutes = require("./routes/blogRoutes");
 const clientRoutes = require("./routes/clientRoutes");
 const enquiryRoute = require("./routes/enquiryRoute")
-const vendorRoutes = require("./routes/vendorRoute");
+const vendorRoutes = require("./routes/vendorRoutes");
 connectDB();
 
 const app = express();
