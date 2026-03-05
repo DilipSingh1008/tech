@@ -38,6 +38,8 @@ import BlogAdd from "../pages/dashboard/Blog/BlogAdd.jsx";
 import ClientPage from "../pages/dashboard/client/ClientPage.jsx";
 import Enquires from "../pages/enquiry/Enquires.jsx";
 import Vendor from "../pages/vendor/Vendor.jsx";
+import ManageCareer from "../pages/dashboard/Career/ManageCareer.jsx";
+import ManageMediaPost from "../pages/dashboard/MediaPost/ManageMediaPost.jsx";
 // import ProductManagement from "../pages/dashboard/product/ProductCategory";
 // import ThemeToggleButton from "./components/Button";
 
@@ -124,6 +126,11 @@ function AppRouter() {
               <Route path="/dashboard/Client" element={<ClientPage />} />
               <Route path="/dashboard/enquiry" element={<Enquires />} />
               <Route path="/dashboard/vendor" element={<Vendor />} />
+              <Route path="/dashboard/career" element={<ManageCareer />} />
+              <Route
+                path="/dashboard/Media-Post"
+                element={<ManageMediaPost />}
+              />
             </Route>
 
             <Route path="*" element={<NotFound />} />

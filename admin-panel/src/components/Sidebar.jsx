@@ -30,7 +30,6 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         ? true
         : false;
 
-  console.log("allow", allow);
   const menuItems = [
     {
       path: "/dashboard",
@@ -114,12 +113,22 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     {
       path: "/dashboard/enquiry",
       name: "Enquiry",
-      icon: <MessageCircle size={18}/>
+      icon: <MessageCircle size={18} />,
     },
     {
       path: "/dashboard/vendor",
       name: "Vendor",
-      icon: <MessageCircle size={18}/>
+      icon: <MessageCircle size={18} />,
+    },
+    {
+      path: "/dashboard/career",
+      name: "Career",
+      icon: <Briefcase size={18} />,
+    },
+    {
+      path: "/dashboard/Media-Post",
+      name: "MediaPost",
+      icon: <Briefcase size={18} />,
     },
     {
       path: "/dashboard/settings",
@@ -127,7 +136,6 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       icon: <Settings size={18} />,
     },
   ];
-
   return (
     <>
       <div

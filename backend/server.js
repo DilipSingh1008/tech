@@ -6,7 +6,7 @@ const connectDB = require("./config/db");
 
 // Routes
 // const authRoutes = require("./routes/authRoutes");
-const careerRoutes = require("./routes/careerRoutes");
+const careerRoute = require("./routes/careerRoute");
 const categoryRoutes = require("./routes/categoryRoutes");
 const subCategoryRoutes = require("./routes/subCategoryRoutes");
 const countryLocationRoute = require("./routes/countryLocationRoute");
@@ -27,8 +27,10 @@ const newsRoutes = require("./routes/newsRoutes");
 const blogCategoryRoutes = require("./routes/blogCategoryRoutes");
 const blogRoutes = require("./routes/blogRoutes");
 const clientRoutes = require("./routes/clientRoutes");
-const enquiryRoute = require("./routes/enquiryRoute")
+const enquiryRoute = require("./routes/enquiryRoute");
 const vendorRoutes = require("./routes/vendorRoute");
+const mediaPostRoutes = require("./routes/mediaPostRoutes");
+5558;
 connectDB();
 
 const app = express();
@@ -45,7 +47,8 @@ app.use("/uploads", express.static("uploads"));
 
 // API Routes
 app.use("/api/auth", authRoutes);
-app.use("/api/career", careerRoutes);
+// new carrer route
+app.use("/api/career", careerRoute);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/subcategories", subCategoryRoutes);
 app.use("/api/countrylocation", countryLocationRoute);
@@ -68,6 +71,7 @@ app.use("/api/blogs", blogRoutes);
 app.use("/api/client", clientRoutes);
 app.use("/api/enquiry", enquiryRoute);
 app.use("/api/vendors", vendorRoutes);
+app.use("/api/media-posts", mediaPostRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

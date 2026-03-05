@@ -1,48 +1,107 @@
-const Career = require("../models/Career");
+const Career = require("../models/careerModel");
+
+exports.createCareer = async (req, res) => {
+  try {
+    const career = await Career.create(req.body);
+    res.status(201).json({ success: true, data: career });
+  } catch (error) {
+    res.status(400).json({ success: false, error: error.message });
+  }
+};
 
 exports.getCareers = async (req, res) => {
   try {
-    const careers = await Career.find().sort({ title: 1 });
-    res.json(careers);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server Error" });
+    const {
+      page = 1,
+      limit = 10,
+      search = "",
+      sortField = "title",
+      sortOrder = "asc",
+    } = req.query;
+
+    const query = {
+      $or: [
+        { title: { $regex: search, $options: "i" } },
+        { location: { $regex: search, $options: "i" } },
+      ],
+    };
+
+    const total = await Career.countDocuments(query);
+    const totalPages = Math.ceil(total / limit);
+
+    const careers = await Career.find(query)
+      .sort({ [sortField]: sortOrder === "asc" ? 1 : -1 })
+      .skip((page - 1) * limit)
+      .limit(Number(limit));
+
+    res.status(200).json({
+      success: true,
+      data: careers,
+      pagination: { total, totalPages, page: Number(page) },
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 
-exports.createCareer = async (req, res) => {
-  const { title, location, type, stack } = req.body;
-
+// Get single Career
+exports.getCareerById = async (req, res) => {
   try {
-    const career = new Career({ title, location, type, stack });
-    await career.save();
-    res.status(201).json(career);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server Error" });
+    const career = await Career.findById(req.params.id);
+    if (!career)
+      return res
+        .status(404)
+        .json({ success: false, error: "Career not found" });
+    res.status(200).json({ success: true, data: career });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 
-// Update career
+// Update Career
 exports.updateCareer = async (req, res) => {
   try {
     const career = await Career.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
     });
-    if (!career) return res.status(404).json({ message: "Career not found" });
-    res.json(career);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+    if (!career)
+      return res
+        .status(404)
+        .json({ success: false, error: "Career not found" });
+    res.status(200).json({ success: true, data: career });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 
-// Delete career
+// Delete Career
 exports.deleteCareer = async (req, res) => {
   try {
     const career = await Career.findByIdAndDelete(req.params.id);
-    if (!career) return res.status(404).json({ message: "Career not found" });
-    res.json({ message: "Career deleted successfully" });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+    if (!career)
+      return res
+        .status(404)
+        .json({ success: false, error: "Career not found" });
+    res.status(200).json({ success: true, message: "Career deleted" });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// Toggle Status
+exports.toggleStatus = async (req, res) => {
+  try {
+    const career = await Career.findById(req.params.id);
+    if (!career)
+      return res
+        .status(404)
+        .json({ success: false, error: "Career not found" });
+
+    career.status = !career.status;
+    await career.save();
+
+    res.status(200).json({ success: true, data: career });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
   }
 };
