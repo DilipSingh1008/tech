@@ -35,7 +35,7 @@ exports.getBanners = async (req, res) => {
     page = parseInt(page);
     limit = parseInt(limit);
 
-    const filter = {};
+    const filter = { isDeleted: false };
     if (search) filter.title = { $regex: search, $options: "i" };
 
     const total = await Banner.countDocuments(filter);
@@ -95,19 +95,36 @@ exports.updateBanner = async (req, res) => {
   }
 };
 
+// exports.deleteBanner = async (req, res) => {
+//   try {
+//     const banner = await Banner.findByIdAndDelete(req.params.id);
+//     if (!banner) return res.status(404).json({ error: "Banner not found" });
+
+//     if (banner.image) {
+//       const imgPath = path.join(__dirname, "..", banner.image);
+//       fs.unlink(imgPath, (err) => {
+//         if (err) console.error("Failed to delete image:", err);
+//       });
+//     }
+
+//     res.json({ message: "Banner deleted" });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ error: "Failed to delete banner" });
+//   }
+// };
+
 exports.deleteBanner = async (req, res) => {
   try {
-    const banner = await Banner.findByIdAndDelete(req.params.id);
+    const banner = await Banner.findByIdAndUpdate(
+      req.params.id,
+      { isDeleted: true },
+      { new: true },
+    );
+
     if (!banner) return res.status(404).json({ error: "Banner not found" });
 
-    if (banner.image) {
-      const imgPath = path.join(__dirname, "..", banner.image);
-      fs.unlink(imgPath, (err) => {
-        if (err) console.error("Failed to delete image:", err);
-      });
-    }
-
-    res.json({ message: "Banner deleted" });
+    res.json({ message: "Banner deleted successfully", banner });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to delete banner" });

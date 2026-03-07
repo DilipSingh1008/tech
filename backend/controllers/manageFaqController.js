@@ -30,6 +30,7 @@ exports.getManageFaqs = async (req, res) => {
     } = req.query;
 
     const query = {
+      isDeleted: false,
       $or: [
         { category: { $regex: search, $options: "i" } },
         { question: { $regex: search, $options: "i" } },
@@ -76,23 +77,35 @@ exports.updateManageFaq = async (req, res) => {
   }
 };
 
-// DELETE FAQ
 exports.deleteManageFaq = async (req, res) => {
   try {
-    await ManageFaq.findByIdAndDelete(req.params.id);
+    const faq = await ManageFaq.findById(req.params.id);
+
+    if (!faq) {
+      return res.status(404).json({
+        success: false,
+        message: "FAQ not found",
+      });
+    }
+
+    faq.isDeleted = true;
+    await faq.save();
 
     res.status(200).json({
       success: true,
       message: "FAQ deleted successfully",
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
 exports.getActiveManageFaq = async (req, res) => {
   try {
     const categories = await faqCategory
-      .find({ status: true })
+      .find({ status: true, isDeleted: false })
       .select("_id category")
       .sort({ category: 1 });
     res.status(200).json({

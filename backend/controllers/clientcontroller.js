@@ -108,7 +108,7 @@ exports.getClients = async (req, res) => {
     page = parseInt(page);
     limit = parseInt(limit);
 
-    const query = { status: true };
+    const query = { status: true, isDeleted: false };
     if (search) {
       // Search by name, email or mobile
       query.$or = [
@@ -179,18 +179,24 @@ exports.deleteClient = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const deleted = await Client.findByIdAndUpdate(
-      id,
-      { status: false },
-      { new: true },
-    );
+    const client = await Client.findById(id);
 
-    if (!deleted) {
+    if (!client) {
       return res.status(404).json({
         success: false,
         message: "Client not found",
       });
     }
+
+    if (client.isDeleted) {
+      return res.status(400).json({
+        success: false,
+        message: "Client is already deleted",
+      });
+    }
+
+    client.isDeleted = true;
+    await client.save();
 
     return res.status(200).json({
       success: true,

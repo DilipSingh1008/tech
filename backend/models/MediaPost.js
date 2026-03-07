@@ -25,6 +25,10 @@ const mediaPostSchema = new mongoose.Schema(
     publishDate: { type: Date, required: true },
     image: { type: String, required: true },
     status: { type: Boolean, default: true },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true },
 );

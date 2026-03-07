@@ -47,6 +47,7 @@ exports.getBlogs = async (req, res) => {
     limit = parseInt(limit);
 
     const query = {
+      isDeleted: false,
       title: { $regex: search, $options: "i" },
     };
 
@@ -127,7 +128,10 @@ exports.updateBlog = async (req, res) => {
 
 exports.getActiveCategories = async (req, res) => {
   try {
-    const categories = await BlogCategory.find({ status: true })
+    const categories = await BlogCategory.find({
+      status: true,
+      isDeleted: false,
+    })
       .select("_id name")
       .sort({ name: 1 });
     res.status(200).json({
@@ -143,14 +147,15 @@ exports.getActiveCategories = async (req, res) => {
 // DELETE BLOG
 exports.deleteBlog = async (req, res) => {
   try {
-    const blog = await Blog.findByIdAndDelete(req.params.id);
+    const blog = await Blog.findById(req.params.id);
     if (!blog) return res.status(404).json({ message: "Blog not found" });
 
-    blog.images.forEach((img) => {
-      const imgPath = path.join("uploads", img);
-      if (fs.existsSync(imgPath)) fs.unlinkSync(imgPath);
-    });
-
+    // blog.images.forEach((img) => {
+    //   const imgPath = path.join("uploads", img);
+    //   if (fs.existsSync(imgPath)) fs.unlinkSync(imgPath);
+    // });
+    blog.isDeleted = true;
+    await blog.save();
     res.status(200).json({
       success: true,
       message: "Blog deleted",

@@ -13,6 +13,10 @@ const faqCategorySchema = new mongoose.Schema(
       trim: true,
     },
     status: { type: Boolean, default: true },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true },
 );

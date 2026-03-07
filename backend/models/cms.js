@@ -38,14 +38,17 @@ const cmsSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
-
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
     images: [
       {
-        type: String, // ⭐ only url
+        type: String,
       },
     ],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 module.exports = mongoose.model("CMS", cmsSchema);

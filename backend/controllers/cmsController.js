@@ -1,7 +1,6 @@
 const CMS = require("../models/cms.js");
 const fs = require("fs");
 const path = require("path");
-// ⭐ custom slugify
 const makeSlug = (text = "") => {
   return text
     .toString()
@@ -29,20 +28,17 @@ exports.createCMS = async (req, res) => {
       return res.status(400).json({ message: "Title is required" });
     }
 
-    // ⭐ slug generate
     const finalSlug = slug ? makeSlug(slug) : makeSlug(title);
 
-    // ⭐ duplicate slug check
     const exists = await CMS.findOne({ slug: finalSlug });
     if (exists) {
       return res.status(400).json({ message: "Slug already exists" });
     }
 
-    // ⭐ images save (dynamic folder multer)
     let images = [];
     if (req.files && req.files.length > 0) {
       images = req.files.map(
-        (file) => `/uploads/${folder || "default"}/${file.filename}`
+        (file) => `/uploads/${folder || "default"}/${file.filename}`,
       );
     }
 
@@ -66,7 +62,6 @@ exports.createCMS = async (req, res) => {
   }
 };
 
-
 exports.getAllCMS = async (req, res) => {
   try {
     let {
@@ -80,12 +75,11 @@ exports.getAllCMS = async (req, res) => {
     page = parseInt(page);
     limit = parseInt(limit);
 
-    // ⭐ search query
     const query = {
+      isDeleted: false,
       title: { $regex: search, $options: "i" },
     };
 
-    // ⭐ sorting
     const sortOrder = order === "asc" ? 1 : -1;
 
     const data = await CMS.find(query)
@@ -106,7 +100,6 @@ exports.getAllCMS = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
 
 exports.getSingleCMS = async (req, res) => {
   try {
@@ -129,7 +122,6 @@ exports.getSingleCMS = async (req, res) => {
   }
 };
 
-
 exports.updateCMS = async (req, res) => {
   try {
     const { id } = req.params;
@@ -149,26 +141,19 @@ exports.updateCMS = async (req, res) => {
       return res.status(404).json({ message: "CMS not found" });
     }
 
-    // ⭐ slug update
     const finalSlug = slug ? makeSlug(slug) : makeSlug(title || cms.title);
 
-    // ⭐ duplicate slug check
     const exists = await CMS.findOne({ slug: finalSlug, _id: { $ne: id } });
     if (exists) {
       return res.status(400).json({ message: "Slug already exists" });
     }
 
-    // ⭐ parse existing images from frontend
     const existingImagesFromFrontend = JSON.parse(existingImages || "[]");
 
-    console.log("existingImagesFromFrontend", existingImagesFromFrontend)
-
-    // ⭐ images to delete
     const imagesToDelete = cms.images.filter(
-      (img) => !existingImagesFromFrontend.includes(img)
+      (img) => !existingImagesFromFrontend.includes(img),
     );
 
-    // ⭐ delete images from folder
     imagesToDelete.forEach((img) => {
       const filePath = path.join(__dirname, "..", img);
       if (fs.existsSync(filePath)) {
@@ -176,24 +161,22 @@ exports.updateCMS = async (req, res) => {
       }
     });
 
-    // ⭐ new images upload
     let newImages = [];
     if (req.files && req.files.length > 0) {
       newImages = req.files.map(
-        (file) => `/uploads/${folder || "default"}/${file.filename}`
+        (file) => `/uploads/${folder || "default"}/${file.filename}`,
       );
     }
 
-    // ⭐ final images merge
     cms.images = [...existingImagesFromFrontend, ...newImages];
 
-    // ⭐ other fields update
     cms.title = title || cms.title;
     cms.meta = meta || cms.meta;
     cms.metaDescription = metaDescription || cms.metaDescription;
     cms.shortDescription = shortDescription || cms.shortDescription;
     cms.slug = finalSlug;
-    cms.status = status !== undefined ? status === "true" || status === true : cms.status;
+    cms.status =
+      status !== undefined ? status === "true" || status === true : cms.status;
 
     await cms.save();
 
@@ -204,11 +187,10 @@ exports.updateCMS = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    
+
     res.status(500).json({ message: error.message });
   }
 };
-
 
 exports.toggleCMSStatus = async (req, res) => {
   try {
@@ -219,7 +201,6 @@ exports.toggleCMSStatus = async (req, res) => {
       return res.status(404).json({ message: "CMS not found" });
     }
 
-    // ⭐ toggle logic
     cms.status = !cms.status;
 
     await cms.save();
@@ -228,6 +209,28 @@ exports.toggleCMSStatus = async (req, res) => {
       success: true,
       message: "CMS status toggled",
       data: cms,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.deleteCMS = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const cms = await CMS.findById(id);
+
+    if (!cms) {
+      return res.status(404).json({ message: "CMS not found" });
+    }
+
+    cms.isDeleted = true;
+    await cms.save();
+
+    res.status(200).json({
+      success: true,
+      message: "CMS deleted successfully",
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

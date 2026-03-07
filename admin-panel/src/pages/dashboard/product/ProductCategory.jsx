@@ -23,7 +23,9 @@ const ProductCategory = () => {
 
   // ── Permission Logic ──
   const permissions = useSelector((state) => state.permission.permissions);
-  const rawProductPermission = permissions?.find((p) => p.module.name === "products");
+  const rawProductPermission = permissions?.find(
+    (p) => p.module.name === "products",
+  );
   const localRole = localStorage.getItem("role");
   const productPermission =
     localRole === "admin"
@@ -32,7 +34,7 @@ const ProductCategory = () => {
 
   // ── RTK Query: fetch ──
   const { data, isLoading } = useGetItemsQuery(
-    `product-category?page=${page}&limit=${limit}&sortBy=${sortBy}&order=${order}&search=${searchQuery}`
+    `product-category?page=${page}&limit=${limit}&sortBy=${sortBy}&order=${order}&search=${searchQuery}`,
   );
 
   const products = data?.data || [];
@@ -67,7 +69,8 @@ const ProductCategory = () => {
 
   // ── Delete ──
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this product?")) return;
+    if (!window.confirm("Are you sure you want to delete this product?"))
+      return;
     try {
       await deleteItem(`product-category/${id}`);
     } catch (err) {
@@ -76,11 +79,15 @@ const ProductCategory = () => {
   };
 
   const theme = {
-    main: isDarkMode ? "bg-[#0b0e14] text-slate-300" : "bg-gray-50 text-gray-700",
+    main: isDarkMode
+      ? "bg-[#0b0e14] text-slate-300"
+      : "bg-gray-50 text-gray-700",
     card: isDarkMode
       ? "bg-[#151b28] border border-gray-800 text-white"
       : "bg-white border border-gray-200 text-gray-700",
-    header: isDarkMode ? "bg-[#1f2637] text-gray-400" : "bg-gray-100 text-gray-500",
+    header: isDarkMode
+      ? "bg-[#1f2637] text-gray-400"
+      : "bg-gray-100 text-gray-500",
     divider: isDarkMode ? "divide-gray-800" : "divide-gray-100",
   };
 
@@ -88,7 +95,6 @@ const ProductCategory = () => {
     <div className={`h-screen w-full flex flex-col ${theme.main}`}>
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-5xl mx-auto">
-
           {/* Top Bar */}
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
             <Searchbar
@@ -111,7 +117,9 @@ const ProductCategory = () => {
           <div className={`${theme.card} rounded-xl overflow-hidden shadow-sm`}>
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
-                <thead className={`uppercase tracking-wider font-bold ${theme.header}`}>
+                <thead
+                  className={`uppercase tracking-wider font-bold ${theme.header}`}
+                >
                   <tr>
                     <th className="px-4 py-3 w-16">ID</th>
                     <th
@@ -149,25 +157,40 @@ const ProductCategory = () => {
                 <tbody className={`divide-y ${theme.divider}`}>
                   {isLoading ? (
                     <tr>
-                      <td colSpan={7} className="px-4 py-10 text-center opacity-40 italic">
+                      <td
+                        colSpan={7}
+                        className="px-4 py-10 text-center opacity-40 italic"
+                      >
                         Loading...
                       </td>
                     </tr>
                   ) : products.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="px-4 py-10 text-center opacity-40">
+                      <td
+                        colSpan={7}
+                        className="px-4 py-10 text-center opacity-40"
+                      >
                         No products found.
                       </td>
                     </tr>
                   ) : (
                     products.map((prod, index) => (
-                      <tr key={prod._id} className="hover:bg-(--primary)/5 transition-colors">
+                      <tr
+                        key={prod._id}
+                        className="hover:bg-(--primary)/5 transition-colors"
+                      >
                         <td className="px-4 py-2.5 font-mono opacity-50 text-[10px]">
                           {(page - 1) * limit + index + 1}
                         </td>
-                        <td className="px-4 py-2.5 font-semibold">{prod.name}</td>
-                        <td className="px-4 py-2.5 opacity-70">{prod.category?.name || "N/A"}</td>
-                        <td className="px-4 py-2.5 opacity-70">{prod.subCategory?.name || "N/A"}</td>
+                        <td className="px-4 py-2.5 font-semibold">
+                          {prod.name}
+                        </td>
+                        <td className="px-4 py-2.5 opacity-70">
+                          {prod.category?.name || "N/A"}
+                        </td>
+                        <td className="px-4 py-2.5 opacity-70">
+                          {prod.subCategory?.name || "N/A"}
+                        </td>
                         <td className="px-4 py-2.5">Rs.{prod.salePrice}</td>
                         <td className="px-4 py-2.5">
                           <button
@@ -184,13 +207,18 @@ const ProductCategory = () => {
                           </button>
                         </td>
 
-                        {(productPermission?.edit || productPermission?.delete) && (
+                        {(productPermission?.edit ||
+                          productPermission?.delete) && (
                           <td className="px-4 py-2.5 text-right">
                             <div className="flex justify-end gap-2">
                               {productPermission?.edit && (
                                 <div className="relative group">
                                   <button
-                                    onClick={() => navigate(`/dashboard/products/edit/${prod._id}`)}
+                                    onClick={() =>
+                                      navigate(
+                                        `/dashboard/products/edit/${prod._id}`,
+                                      )
+                                    }
                                     className="p-1.5 cursor-pointer hover:text-(--primary) hover:bg-(--primary)/10 rounded-md transition-all"
                                   >
                                     <Edit3 size={14} />
@@ -227,7 +255,9 @@ const ProductCategory = () => {
             </div>
 
             {/* Pagination */}
-            <div className={`flex items-center justify-between p-3 border-t ${theme.divider}`}>
+            <div
+              className={`flex items-center justify-between p-3 border-t ${theme.divider}`}
+            >
               <span className="text-[11px] opacity-60">
                 Showing {products.length} entries
               </span>

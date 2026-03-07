@@ -4,10 +4,10 @@ const path = require("path");
 
 exports.createUser = async (req, res) => {
   try {
-    console.log(req.body)
+    console.log(req.body);
     const { name, email, password, roleId } = req.body;
 
-    console.log(req.body)
+    console.log(req.body);
     const existing = await User.findOne({ email });
     if (existing) {
       return res.status(400).json({ message: "Email already exists" });
@@ -43,6 +43,7 @@ exports.getUsers = async (req, res) => {
     const order = req.query.order || "desc";
 
     const query = {
+      isDeleted: false,
       $or: [
         { name: { $regex: search, $options: "i" } },
         { email: { $regex: search, $options: "i" } },
@@ -67,7 +68,7 @@ exports.getUsers = async (req, res) => {
       },
     });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -107,14 +108,15 @@ exports.deleteUser = async (req, res) => {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    if (user.image && fs.existsSync("." + user.image)) {
-      fs.unlinkSync("." + user.image);
-    }
+    // if (user.image && fs.existsSync("." + user.image)) {
+    //   fs.unlinkSync("." + user.image);
+    // }
 
-    await user.deleteOne();
-
+    user.isDeleted = true;
+    await user.save();
     res.json({
       message: "User deleted successfully",
+      data: user,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

@@ -19,6 +19,7 @@ exports.getCountries = async (req, res) => {
 
     //  search filter
     const searchFilter = {
+      isDeleted: false,
       name: { $regex: search, $options: "i" }, // case insensitive search
     };
 
@@ -87,12 +88,10 @@ exports.editCountryName = async (req, res) => {
       { new: true },
     );
 
-    res
-      .status(200)
-      .json({
-        message: "Country updated successfully",
-        country: updatedCountry,
-      });
+    res.status(200).json({
+      message: "Country updated successfully",
+      country: updatedCountry,
+    });
   } catch (error) {
     console.log(error);
 
@@ -106,19 +105,21 @@ exports.deleteCountry = async (req, res) => {
 
     const existingCountry = await Country.findById(id);
 
-    const associatedStates = await State.find({country: id});
+    const associatedStates = await State.find({ country: id });
 
-    const associatedCities = await City.find({country: id});
+    const associatedCities = await City.find({ country: id });
 
     if (!existingCountry) {
       return res.status(404).json({ message: "Country not found" });
     }
 
-    await City.deleteMany({state: {$in: associatedStates.map(state => state._id)}})
+    const stateIds = associatedStates.map((state) => state._id);
 
-    await State.deleteMany({country: id})
+    await City.updateMany({ state: { $in: stateIds } }, { isDeleted: true });
+    await State.updateMany({ country: id }, { isDeleted: true });
 
-    await Country.findByIdAndDelete(id);
+    existingCountry.isDeleted = true;
+    await existingCountry.save();
 
     res.status(200).json({ message: "Country deleted successfully" });
   } catch (error) {
@@ -127,7 +128,6 @@ exports.deleteCountry = async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 };
-
 
 exports.toggleCountryStatus = async (req, res) => {
   try {
@@ -140,14 +140,17 @@ exports.toggleCountryStatus = async (req, res) => {
       return res.status(404).json({ message: "Country not found" });
     }
 
-
-
     //  toggle logic
     existingCountry.status = !existingCountry.status;
 
     await existingCountry.save();
 
-    console.log("Toggled status for country:", existingCountry.name, "New status:", existingCountry.status);
+    console.log(
+      "Toggled status for country:",
+      existingCountry.name,
+      "New status:",
+      existingCountry.status,
+    );
 
     res.status(200).json({
       message: "Country status updated",

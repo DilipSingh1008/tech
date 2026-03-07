@@ -71,7 +71,7 @@ app.use("/api/blogs", blogRoutes);
 app.use("/api/client", clientRoutes);
 app.use("/api/enquiry", enquiryRoute);
 app.use("/api/vendors", vendorRoutes);
-app.use("/api/media-posts", mediaPostRoutes);
+app.use("/api/media-posts", mediaPostRoutes); 
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

@@ -17,6 +17,7 @@ exports.createMediaPost = async (req, res) => {
       month,
       publishDate,
       image: imagePath,
+      isDeleted: false,
     });
 
     res.json({ success: true, data: newPost });
@@ -37,7 +38,7 @@ exports.getMediaPosts = async (req, res) => {
     page = parseInt(page);
     limit = parseInt(limit);
 
-    const query = {};
+    const query = { isDeleted: false };
     if (search) query.title = { $regex: search, $options: "i" };
 
     const total = await MediaPost.countDocuments(query);
@@ -98,9 +99,17 @@ exports.updateMediaPost = async (req, res) => {
 
 exports.deleteMediaPost = async (req, res) => {
   try {
-    const post = await MediaPost.findByIdAndDelete(req.params.id);
-    if (post && post.image && fs.existsSync(post.image))
-      fs.unlinkSync(post.image);
+    const post = await MediaPost.findOne({
+      _id: req.params.id,
+      isDeleted: false,
+    });
+    if (!post)
+      return res
+        .status(404)
+        .json({ success: false, error: "Media post not found" });
+
+    post.isDeleted = true;
+    await post.save();
 
     res.json({ success: true, data: post });
   } catch (error) {

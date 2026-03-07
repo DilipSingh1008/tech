@@ -44,6 +44,7 @@ exports.getNews = async (req, res) => {
     limit = parseInt(limit);
 
     const query = {
+      isDeleted: false,
       title: { $regex: search, $options: "i" },
     };
 
@@ -117,18 +118,17 @@ exports.updateNews = async (req, res) => {
   }
 };
 
-// ✅ DELETE NEWS
 exports.deleteNews = async (req, res) => {
   try {
-    const news = await NewsItem.findByIdAndDelete(req.params.id);
+    const news = await NewsItem.findById(req.params.id);
     if (!news) return res.status(404).json({ message: "News not found" });
-
     // ⭐ delete images
-    news.images.forEach((img) => {
-      const imgPath = path.join("uploads", img);
-      if (fs.existsSync(imgPath)) fs.unlinkSync(imgPath);
-    });
-
+    // news.images.forEach((img) => {
+    //   const imgPath = path.join("uploads", img);
+    //   if (fs.existsSync(imgPath)) fs.unlinkSync(imgPath);
+    // });
+    news.isDeleted = true;
+    news.save();
     res.status(200).json({
       success: true,
       message: "News deleted",

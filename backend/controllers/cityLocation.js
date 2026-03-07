@@ -2,7 +2,7 @@ const { City } = require("../models/location.js");
 
 exports.getStates = async (req, res) => {
   try {
-    const states = await State.find();
+    const states = await State.find({ isDeleted: false });
     res.status(200).json(states);
   } catch (error) {
     console.log(error);
@@ -18,9 +18,13 @@ exports.getCityByStateId = async (req, res) => {
       return res.status(400).json({ message: "State ID is required" });
     }
 
-    // ⭐ query params
-    let { page = 1, limit = 10, sortBy = "createdAt", order = "desc", search="" } =
-      req.query;
+    let {
+      page = 1,
+      limit = 10,
+      sortBy = "createdAt",
+      order = "desc",
+      search = "",
+    } = req.query;
 
     page = parseInt(page);
     limit = parseInt(limit);
@@ -31,6 +35,7 @@ exports.getCityByStateId = async (req, res) => {
     //  combined filter (country + search)
     const filter = {
       state: stateId,
+      isDeleted: false,
       ...(search && {
         name: { $regex: search, $options: "i" },
       }),
@@ -99,9 +104,8 @@ exports.createCityLocation = async (req, res) => {
 };
 
 exports.editCityName = async (req, res) => {
-
   console.log("req.body", req.body);
-  
+
   try {
     const { city } = req.body;
 
@@ -144,7 +148,8 @@ exports.deletecity = async (req, res) => {
       return res.status(404).json({ message: "City not found" });
     }
 
-    await City.findByIdAndDelete(cityId);
+    existingCity.isDeleted = true;
+    await existingCity.save();
 
     res.status(200).json({ message: "City deleted successfully" });
   } catch (error) {

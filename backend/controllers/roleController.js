@@ -28,17 +28,18 @@ exports.getRoles = async (req, res) => {
     const page = Number(req.query.page) || 1;
     const limit = Number(req.query.limit) || 5;
     const search = req.query.search || "";
-    const sortBy = req.query.sortBy || "createdAt";   // ← add
-    const order = req.query.order || "desc";           // ← add
+    const sortBy = req.query.sortBy || "createdAt";
+    const order = req.query.order || "desc";
 
     const query = {
+      isDeleted: false,
       name: { $regex: search, $options: "i" },
     };
 
     const total = await Role.countDocuments(query);
 
     const roles = await Role.find(query)
-      .sort({ [sortBy]: order === "asc" ? 1 : -1 })   // ← dynamic, moved before skip
+      .sort({ [sortBy]: order === "asc" ? 1 : -1 })
       .skip((page - 1) * limit)
       .limit(limit);
 
@@ -80,10 +81,13 @@ exports.deleteRole = async (req, res) => {
     const role = await Role.findById(req.params.id);
     if (!role) return res.status(404).json({ message: "Role not found" });
 
-    await role.deleteOne();
+    // await role.deleteOne();
+    role.isDeleted = true;
+    await role.save();
 
     res.json({
       message: "Role deleted successfully",
+      data: role,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -118,13 +122,13 @@ exports.updatePermissions = async (req, res) => {
   }
 };
 
-
 exports.getPermissions = async (req, res) => {
   try {
-
     //  console.log("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz")
-    const role = await Role.findById(req.params.id)
-      .populate("permissions.module", "name label");
+    const role = await Role.findById(req.params.id).populate(
+      "permissions.module",
+      "name label",
+    );
 
     if (!role) return res.status(404).json({ message: "Role not found" });
 
@@ -133,7 +137,7 @@ exports.getPermissions = async (req, res) => {
       permissions: role.permissions,
     });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -142,8 +146,7 @@ exports.getModules = async (req, res) => {
   try {
     const modules = await Module.find();
 
-    console.log("=================",modules);
-    
+    console.log("=================", modules);
 
     res.json(modules);
   } catch (error) {

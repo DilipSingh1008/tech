@@ -6,6 +6,10 @@ const manageFaqSchema = new mongoose.Schema(
     question: { type: String, required: true },
     answer: { type: String, required: true },
     status: { type: Boolean, default: true },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true },
 );

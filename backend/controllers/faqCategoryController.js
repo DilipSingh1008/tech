@@ -38,6 +38,7 @@ exports.getFaqCategories = async (req, res) => {
     const field = validSortFields.includes(sortField) ? sortField : "createdAt";
 
     const query = {
+      isDeleted: false,
       $or: [
         { category: { $regex: search, $options: "i" } },
         { description: { $regex: search, $options: "i" } },
@@ -87,8 +88,17 @@ exports.updateFaqCategory = async (req, res) => {
 // DELETE
 exports.deleteFaqCategory = async (req, res) => {
   try {
-    await FaqCategory.findByIdAndDelete(req.params.id);
+    const category = await FaqCategory.findById(req.params.id);
 
+    if (!category) {
+      return res.status(404).json({
+        success: false,
+        message: "FAQ Category not found",
+      });
+    }
+
+    category.isDeleted = true;
+    await category.save();
     res.status(200).json({
       success: true,
       message: "FAQ Category deleted successfully",

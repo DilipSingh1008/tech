@@ -54,10 +54,14 @@ const vendorSchema = new mongoose.Schema(
       trim: true,
       lowercase: true,
     },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 module.exports = mongoose.model("Vendor", vendorSchema);

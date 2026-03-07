@@ -133,7 +133,7 @@ const ManageCareer = () => {
                   setEditingItem(null);
                   setIsModalOpen(true);
                 }}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-(--primary) text-white rounded-lg text-xs font-semibold"
+                className="flex  cursor-pointer items-center gap-1.5 px-3 py-1.5 bg-(--primary) text-white rounded-lg text-xs font-semibold"
               >
                 <Plus size={14} /> Add Career
               </button>
@@ -208,7 +208,7 @@ const ManageCareer = () => {
                         <td className="px-4 py-2.5">
                           <button
                             onClick={() => handleToggleStatus(item._id)}
-                            className={`w-8 h-4 rounded-full relative ${
+                            className={`w-8 h-4 cursor-pointer rounded-full relative ${
                               item.status ? "bg-(--primary)" : "bg-gray-400"
                             }`}
                           >
@@ -227,14 +227,14 @@ const ManageCareer = () => {
                                 setEditingItem(item);
                                 setIsModalOpen(true);
                               }}
-                              className="p-1.5 hover:text-(--primary)"
+                              className="p-1.5 cursor-pointer hover:text-(--primary)"
                             >
                               <Edit3 size={14} />
                             </button>
 
                             <button
                               onClick={() => handleDelete(item._id)}
-                              className="p-1.5 hover:text-red-500"
+                              className="p-1.5 cursor-pointer hover:text-red-500"
                             >
                               <Trash2 size={14} />
                             </button>
@@ -259,7 +259,7 @@ const ManageCareer = () => {
                 <button
                   disabled={page === 1}
                   onClick={() => setPage(page - 1)}
-                  className="p-1.5 border rounded-md"
+                  className="p-1.5 cursor-pointer border rounded-md"
                 >
                   <FiChevronLeft size={16} />
                 </button>
@@ -268,7 +268,7 @@ const ManageCareer = () => {
                   <button
                     key={i + 1}
                     onClick={() => setPage(i + 1)}
-                    className={`w-7 h-7 text-[11px] rounded-md border ${
+                    className={`w-7 h-7 cursor-pointer text-[11px] rounded-md border ${
                       page === i + 1
                         ? "bg-(--primary) text-white border-(--primary)"
                         : ""
@@ -281,7 +281,7 @@ const ManageCareer = () => {
                 <button
                   disabled={page === totalPages}
                   onClick={() => setPage(page + 1)}
-                  className="p-1.5 border rounded-md"
+                  className="p-1.5 cursor-pointer border rounded-md"
                 >
                   <FiChevronRight size={16} />
                 </button>
@@ -310,7 +310,7 @@ const ManageCareer = () => {
 
                   <button
                     onClick={closeModal}
-                    className="opacity-60 hover:opacity-100 transition"
+                    className="opacity-60 cursor-pointer hover:opacity-100 transition"
                   >
                     <X size={16} />
                   </button>
@@ -416,7 +416,7 @@ const ManageCareer = () => {
                           disabled={
                             createLoading || updateLoading || isSubmitting
                           }
-                          className="w-full py-2 mt-2 bg-(--primary) text-white rounded-lg text-xs font-semibold hover:opacity-90 disabled:opacity-50 transition"
+                          className="w-full cursor-pointer py-2 mt-2 bg-(--primary) text-white rounded-lg text-xs font-semibold hover:opacity-90 disabled:opacity-50 transition"
                         >
                           {editingItem
                             ? updateLoading

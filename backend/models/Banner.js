@@ -6,6 +6,7 @@ const bannerSchema = new mongoose.Schema(
     url: { type: String },
     image: { type: String },
     status: { type: Boolean, default: true },
+    isDeleted: { type: Boolean, default: false },
   },
   { timestamps: true },
 );

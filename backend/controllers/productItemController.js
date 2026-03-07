@@ -2,7 +2,6 @@ const ProductItem = require("../models/productItemSchema.js");
 const fs = require("fs");
 const path = require("path");
 
-
 // ✅ CREATE PRODUCT
 exports.createProduct = async (req, res) => {
   try {
@@ -36,8 +35,6 @@ exports.createProduct = async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 };
-
-
 
 // ✅ GET ALL PRODUCTS
 exports.getProducts = async (req, res) => {
@@ -78,18 +75,15 @@ exports.getProducts = async (req, res) => {
   }
 };
 
-
-
 // ✅ GET SINGLE PRODUCT
 exports.getProductById = async (req, res) => {
   try {
     const product = await ProductItem.findById(req.params.id).populate(
       "category",
-      "name"
+      "name",
     );
 
-    if (!product)
-      return res.status(404).json({ message: "Product not found" });
+    if (!product) return res.status(404).json({ message: "Product not found" });
 
     res.status(200).json(product);
   } catch (error) {
@@ -98,15 +92,12 @@ exports.getProductById = async (req, res) => {
   }
 };
 
-
-
 // ✅ UPDATE PRODUCT
 exports.updateProduct = async (req, res) => {
   try {
     const product = await ProductItem.findById(req.params.id);
 
-    if (!product)
-      return res.status(404).json({ message: "Product not found" });
+    if (!product) return res.status(404).json({ message: "Product not found" });
 
     const { name, slug, description, price, salePrice, stock, category } =
       req.body;
@@ -127,7 +118,7 @@ exports.updateProduct = async (req, res) => {
       });
 
       product.images = req.files.map(
-        (file) => `${req.body.folder}/${file.filename}`
+        (file) => `${req.body.folder}/${file.filename}`,
       );
     }
 
@@ -144,15 +135,12 @@ exports.updateProduct = async (req, res) => {
   }
 };
 
-
-
 // ✅ DELETE PRODUCT
 exports.deleteProduct = async (req, res) => {
   try {
     const product = await ProductItem.findByIdAndDelete(req.params.id);
 
-    if (!product)
-      return res.status(404).json({ message: "Product not found" });
+    if (!product) return res.status(404).json({ message: "Product not found" });
 
     // ⭐ delete images
     product.images.forEach((img) => {
@@ -170,15 +158,12 @@ exports.deleteProduct = async (req, res) => {
   }
 };
 
-
-
 // ✅ STATUS TOGGLE
 exports.toggleProductStatus = async (req, res) => {
   try {
     const product = await ProductItem.findById(req.params.id);
 
-    if (!product)
-      return res.status(404).json({ message: "Product not found" });
+    if (!product) return res.status(404).json({ message: "Product not found" });
 
     product.status = !product.status;
     await product.save();

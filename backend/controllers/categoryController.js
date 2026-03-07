@@ -56,7 +56,8 @@ exports.getCategories = async (req, res) => {
     page = parseInt(page);
     limit = parseInt(limit);
 
-    const filter = {};
+    const filter = { isDeleted: false };
+    // console.log(filter);
     if (catid === "null") {
       filter.catid = null;
     } else if (catid) {
@@ -176,8 +177,8 @@ exports.deleteCategory = async (req, res) => {
       return res.status(404).json({ error: "Category not found" });
     }
 
-    await deleteCategoryRecursive(categoryId);
-
+    categoryExists.isDeleted = true;
+    await categoryExists.save();
     res.json({
       message: "Category, its subcategories, and all images deleted",
     });

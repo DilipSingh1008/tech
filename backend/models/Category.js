@@ -9,6 +9,7 @@ const categorySchema = new mongoose.Schema({
   },
   icon: { type: String },
   status: { type: Boolean, default: true },
+  isDeleted: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
 });
 

@@ -42,7 +42,9 @@ const BannerPage = () => {
 
   // ── Permission Logic ──
   const permissions = useSelector((state) => state.permission.permissions);
-  const rawBannerPermission = permissions?.find((p) => p.module.name === "banner");
+  const rawBannerPermission = permissions?.find(
+    (p) => p.module.name === "banner",
+  );
   const localRole = localStorage.getItem("role");
   const bannerPermission =
     localRole === "admin"
@@ -51,7 +53,7 @@ const BannerPage = () => {
 
   // ── RTK Query: fetch ──
   const { data, isLoading } = useGetItemsQuery(
-    `banner?page=${page}&limit=${limit}&search=${searchQuery}`
+    `banner?page=${page}&limit=${limit}&search=${searchQuery}`,
   );
 
   const banners = data?.data || [];
@@ -75,20 +77,19 @@ const BannerPage = () => {
     </span>
   );
 
-  const processedBanners = [...banners]
-    .sort((a, b) => {
-      let valA = a[sortBy];
-      let valB = b[sortBy];
-      if (typeof valA === "string") valA = valA.toLowerCase();
-      if (typeof valB === "string") valB = valB.toLowerCase();
-      if (sortBy === "createdAt" || sortBy === "updatedAt") {
-        valA = new Date(valA);
-        valB = new Date(valB);
-      }
-      if (valA < valB) return order === "asc" ? -1 : 1;
-      if (valA > valB) return order === "asc" ? 1 : -1;
-      return 0;
-    });
+  const processedBanners = [...banners].sort((a, b) => {
+    let valA = a[sortBy];
+    let valB = b[sortBy];
+    if (typeof valA === "string") valA = valA.toLowerCase();
+    if (typeof valB === "string") valB = valB.toLowerCase();
+    if (sortBy === "createdAt" || sortBy === "updatedAt") {
+      valA = new Date(valA);
+      valB = new Date(valB);
+    }
+    if (valA < valB) return order === "asc" ? -1 : 1;
+    if (valA > valB) return order === "asc" ? 1 : -1;
+    return 0;
+  });
 
   // ── Delete ──
   const handleDelete = async (id) => {
@@ -103,7 +104,10 @@ const BannerPage = () => {
   // ── Toggle Status ──
   const handleToggleStatus = async (id, currentStatus) => {
     try {
-      await updateItem({ url: `banner/${id}`, data: { status: !currentStatus } });
+      await updateItem({
+        url: `banner/${id}`,
+        data: { status: !currentStatus },
+      });
     } catch (err) {
       console.error("Error toggling status:", err);
       alert("Failed to update status");
@@ -120,7 +124,10 @@ const BannerPage = () => {
       if (values.image) formData.append("image", values.image);
 
       if (editingBanner) {
-        await updateItem({ url: `banner/${editingBanner._id}`, data: formData });
+        await updateItem({
+          url: `banner/${editingBanner._id}`,
+          data: formData,
+        });
       } else {
         await createItem({ url: "banner", data: formData });
       }
@@ -143,8 +150,10 @@ const BannerPage = () => {
     url: Yup.string()
       .nullable()
       .notRequired()
-      .test("is-valid-url", "Enter a valid URL", (value) =>
-        !value || /^https?:\/\/.+\..+/.test(value)
+      .test(
+        "is-valid-url",
+        "Enter a valid URL",
+        (value) => !value || /^https?:\/\/.+\..+/.test(value),
       ),
     image: Yup.mixed().when("isEdit", {
       is: false,
@@ -154,9 +163,15 @@ const BannerPage = () => {
   });
 
   const theme = {
-    main: isDarkMode ? "bg-[#0b0e14] text-slate-300" : "bg-gray-50 text-gray-700",
-    card: isDarkMode ? "bg-[#151b28] border-gray-800" : "bg-white border-gray-200",
-    header: isDarkMode ? "bg-[#1f2637] text-gray-400" : "bg-gray-100 text-gray-500",
+    main: isDarkMode
+      ? "bg-[#0b0e14] text-slate-300"
+      : "bg-gray-50 text-gray-700",
+    card: isDarkMode
+      ? "bg-[#151b28] border-gray-800"
+      : "bg-white border-gray-200",
+    header: isDarkMode
+      ? "bg-[#1f2637] text-gray-400"
+      : "bg-gray-100 text-gray-500",
     divider: isDarkMode ? "divide-gray-800" : "divide-gray-100",
   };
 
@@ -171,7 +186,6 @@ const BannerPage = () => {
     <div className={`h-screen w-full flex flex-col ${theme.main}`}>
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-5xl mx-auto">
-
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
             <Searchbar
@@ -194,10 +208,14 @@ const BannerPage = () => {
           </div>
 
           {/* Table */}
-          <div className={`rounded-xl border shadow-sm overflow-hidden ${theme.card}`}>
+          <div
+            className={`rounded-xl border shadow-sm overflow-hidden ${theme.card}`}
+          >
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
-                <thead className={`uppercase tracking-wider font-bold ${theme.header}`}>
+                <thead
+                  className={`uppercase tracking-wider font-bold ${theme.header}`}
+                >
                   <tr>
                     <th className="px-4 py-3 w-20">ID</th>
                     <th
@@ -226,17 +244,25 @@ const BannerPage = () => {
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                   {processedBanners.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="px-4 py-10 text-center opacity-40">
+                      <td
+                        colSpan={5}
+                        className="px-4 py-10 text-center opacity-40"
+                      >
                         No banners found.
                       </td>
                     </tr>
                   ) : (
                     processedBanners.map((b, index) => (
-                      <tr key={b._id} className="hover:bg-indigo-500/5 transition-colors">
+                      <tr
+                        key={b._id}
+                        className="hover:bg-indigo-500/5 transition-colors"
+                      >
                         <td className="px-4 py-2.5 font-semibold">
                           {(page - 1) * limit + index + 1}
                         </td>
-                        <td className="px-4 py-2.5 font-semibold text-sm">{b.title}</td>
+                        <td className="px-4 py-2.5 font-semibold text-sm">
+                          {b.title}
+                        </td>
                         <td className="px-4 py-2.5">
                           <div className="w-8 h-8 rounded bg-gray-500/10 border border-gray-500/10 overflow-hidden flex items-center justify-center">
                             {b.image ? (
@@ -265,7 +291,8 @@ const BannerPage = () => {
                           </button>
                         </td>
 
-                        {(bannerPermission?.edit || bannerPermission?.delete) && (
+                        {(bannerPermission?.edit ||
+                          bannerPermission?.delete) && (
                           <td className="px-4 py-2.5 text-right">
                             <div className="flex justify-end gap-1">
                               {bannerPermission?.edit && (
@@ -310,7 +337,9 @@ const BannerPage = () => {
             </div>
 
             {/* Pagination */}
-            <div className={`flex items-center justify-between p-3 border-t ${theme.divider}`}>
+            <div
+              className={`flex items-center justify-between p-3 border-t ${theme.divider}`}
+            >
               <span className="text-[11px] opacity-60">
                 Showing {processedBanners.length} entries
               </span>
@@ -360,7 +389,10 @@ const BannerPage = () => {
                   <h3 className="text-sm font-bold">
                     {editingBanner ? "Edit Banner" : "New Banner"}
                   </h3>
-                  <button onClick={closeModal} className="opacity-50 hover:opacity-100">
+                  <button
+                    onClick={closeModal}
+                    className="opacity-50 hover:opacity-100"
+                  >
                     <X size={16} />
                   </button>
                 </div>
@@ -386,7 +418,11 @@ const BannerPage = () => {
                           name="title"
                           className="w-full p-2 text-sm rounded-lg bg-gray-500/5 border border-gray-500/20 outline-none focus:border-(--primary)"
                         />
-                        <ErrorMessage name="title" component="div" className="text-red-500 text-[10px]" />
+                        <ErrorMessage
+                          name="title"
+                          component="div"
+                          className="text-red-500 text-[10px]"
+                        />
                       </div>
 
                       <div>
@@ -398,12 +434,17 @@ const BannerPage = () => {
                           name="url"
                           className="w-full p-2 text-sm rounded-lg bg-gray-500/5 border border-gray-500/20 outline-none focus:border-(--primary)"
                         />
-                        <ErrorMessage name="url" component="div" className="text-red-500 text-[10px] mt-1" />
+                        <ErrorMessage
+                          name="url"
+                          component="div"
+                          className="text-red-500 text-[10px] mt-1"
+                        />
                       </div>
 
                       <div>
                         <label className="block text-[10px] font-bold opacity-50 uppercase mb-1">
-                          Banner Image (200x200 px) <span className="text-red-500 text-sm">*</span>
+                          Banner Image (200x200 px){" "}
+                          <span className="text-red-500 text-sm">*</span>
                         </label>
                         <input
                           type="file"
@@ -432,17 +473,27 @@ const BannerPage = () => {
                             className="w-16 h-16 object-cover rounded mt-2"
                           />
                         )}
-                        <ErrorMessage name="image" component="div" className="text-red-500 text-[10px]" />
+                        <ErrorMessage
+                          name="image"
+                          component="div"
+                          className="text-red-500 text-[10px]"
+                        />
                       </div>
 
                       <button
                         type="submit"
-                        disabled={isSubmitting || createLoading || updateLoading}
+                        disabled={
+                          isSubmitting || createLoading || updateLoading
+                        }
                         className="w-full py-2 mt-2 bg-(--primary) text-white rounded-lg text-xs font-bold hover:opacity-90 transition-all disabled:opacity-50"
                       >
                         {editingBanner
-                          ? updateLoading ? "Updating..." : "Update Banner"
-                          : createLoading ? "Creating..." : "Create Banner"}
+                          ? updateLoading
+                            ? "Updating..."
+                            : "Update Banner"
+                          : createLoading
+                            ? "Creating..."
+                            : "Create Banner"}
                       </button>
                     </Form>
                   )}

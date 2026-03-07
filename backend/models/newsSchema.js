@@ -8,6 +8,10 @@ const newsSchema = new mongoose.Schema(
     images: [{ type: String }],
     publishedDate: { type: Date, default: Date.now },
     status: { type: Boolean, default: true },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true },
 );

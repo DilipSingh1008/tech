@@ -20,8 +20,6 @@
 
 // module.exports = mongoose.model("Role", roleSchema);
 
-
-
 const mongoose = require("mongoose");
 
 const roleSchema = new mongoose.Schema(
@@ -38,19 +36,26 @@ const roleSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
-
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
     permissions: [
-  {
-    module: { type: mongoose.Schema.Types.ObjectId, ref: "Module", required: true },
-    view: { type: Boolean, default: false },
-    add: { type: Boolean, default: false },
-    edit: { type: Boolean, default: false },
-    delete: { type: Boolean, default: false },
-    all: { type: Boolean, default: false },
+      {
+        module: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Module",
+          required: true,
+        },
+        view: { type: Boolean, default: false },
+        add: { type: Boolean, default: false },
+        edit: { type: Boolean, default: false },
+        delete: { type: Boolean, default: false },
+        all: { type: Boolean, default: false },
+      },
+    ],
   },
-]
-  },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 module.exports = mongoose.model("Role", roleSchema);

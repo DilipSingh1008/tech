@@ -20,6 +20,7 @@ exports.getCareers = async (req, res) => {
     } = req.query;
 
     const query = {
+      isDeleted: false,
       $or: [
         { title: { $regex: search, $options: "i" } },
         { location: { $regex: search, $options: "i" } },
@@ -77,11 +78,18 @@ exports.updateCareer = async (req, res) => {
 // Delete Career
 exports.deleteCareer = async (req, res) => {
   try {
-    const career = await Career.findByIdAndDelete(req.params.id);
+    const career = await Career.findOne({
+      _id: req.params.id,
+      isDeleted: false,
+    });
     if (!career)
       return res
         .status(404)
         .json({ success: false, error: "Career not found" });
+
+    career.isDeleted = true;
+    await career.save();
+
     res.status(200).json({ success: true, message: "Career deleted" });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });

@@ -33,6 +33,7 @@ exports.getBlogCategories = async (req, res) => {
     const field = validSortFields.includes(sortField) ? sortField : "createdAt";
 
     const query = {
+      isDeleted: false,
       name: { $regex: search, $options: "i" },
     };
 
@@ -77,13 +78,31 @@ exports.updateBlogCategory = async (req, res) => {
 
 exports.deleteBlogCategory = async (req, res) => {
   try {
-    await BlogCategory.findByIdAndDelete(req.params.id);
+    const category = await BlogCategory.findById(req.params.id);
+
+    if (!category) {
+      return res.status(404).json({
+        success: false,
+        message: "Blog Category not found",
+      });
+    }
+
+    if (category.isDeleted) {
+      return res.status(400).json({
+        success: false,
+        message: "Blog Category is already deleted",
+      });
+    }
+
+    category.isDeleted = true;
+    await category.save();
 
     res.status(200).json({
       success: true,
       message: "Blog Category deleted successfully",
     });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ success: false, message: error.message });
   }
 };

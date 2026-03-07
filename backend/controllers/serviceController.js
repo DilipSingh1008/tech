@@ -66,18 +66,21 @@ exports.getServices = async (req, res) => {
     const limit = parseInt(req.query.limit) || 5;
     const skip = (page - 1) * limit;
     const search = req.query.search || "";
-    const sortBy = req.query.sortBy || "createdAt"; // ← add
-    const order = req.query.order || "desc"; // ← add
+    const sortBy = req.query.sortBy || "createdAt";
+    const order = req.query.order || "desc";
+    const query = { isDeleted: false };
 
-    const query = search ? { name: { $regex: search, $options: "i" } } : {};
+    if (search) {
+      query.name = { $regex: search, $options: "i" };
+    }
 
-    const totalItems = await Service.countDocuments(query); // ← pass query (was missing!)
+    const totalItems = await Service.countDocuments(query);
     const totalPages = Math.ceil(totalItems / limit);
 
     const services = await Service.find(query)
       .populate("category", "name")
       .populate("subCategory", "name")
-      .sort({ [sortBy]: order === "asc" ? 1 : -1 }) // ← dynamic sort
+      .sort({ [sortBy]: order === "asc" ? 1 : -1 })
       .skip(skip)
       .limit(limit);
 
@@ -129,7 +132,8 @@ exports.deleteService = async (req, res) => {
       }
     }
 
-    await Service.findByIdAndDelete(id);
+    service.isDeleted = true;
+    await service.save();
 
     res
       .status(200)
@@ -245,8 +249,10 @@ exports.toggleServiceStatus = async (req, res) => {
 
 exports.getActiveCategories = async (req, res) => {
   try {
-    const allCategories = await Category.find({ status: true });
-
+    const allCategories = await Category.find({
+      status: true,
+      isDeleted: false,
+    });
     const mainCategories = allCategories
       .filter((c) => !c.catid)
       .map((main) => ({
@@ -258,10 +264,11 @@ exports.getActiveCategories = async (req, res) => {
         subCategories: allCategories.filter(
           (sub) =>
             sub.catid?.toString() === main._id.toString() &&
-            sub.status === true,
+            sub.status === true &&
+            sub.isDeleted === false,
         ),
       }));
-
+    console.log(mainCategories);
     res.status(200).json({ data: mainCategories });
   } catch (err) {
     console.error("Error in getActiveCategories:", err);

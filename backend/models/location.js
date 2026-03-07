@@ -1,64 +1,75 @@
 const mongoose = require("mongoose");
 
-
-// ✅ Country Schema
-const countrySchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-    unique: true
+const countrySchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    status: {
+      type: Boolean,
+      default: true,
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
-  status: {
-    type: Boolean,
-    default: true
-  }
-}, {timestamps: true});
+  { timestamps: true },
+);
 const Country = mongoose.model("Country", countrySchema);
 
-
-// ✅ State Schema
-const stateSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true
+const stateSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+    },
+    country: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Country",
+      required: true,
+    },
+    status: {
+      type: Boolean,
+      default: true,
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
-  country: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Country",
-    required: true
-  },
-   status: {
-    type: Boolean,
-    default: true
-  }
-}, {timestamps: true}
+  { timestamps: true },
 );
 const State = mongoose.model("State", stateSchema);
 
-
-// ✅ City Schema
-const citySchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true
+const citySchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+    },
+    state: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "State",
+      required: true,
+    },
+    status: {
+      type: Boolean,
+      default: true,
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
   },
-  state: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "State",
-    required: true
-  },
-   status: {
-    type: Boolean,
-    default: true
-  }
-}, {timestamps: true}
+  { timestamps: true },
 );
 const City = mongoose.model("City", citySchema);
 
-
-// ⭐ Export all models
 module.exports = {
   Country,
   State,
-  City
+  City,
 };

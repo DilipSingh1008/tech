@@ -2,7 +2,7 @@ const { State, City } = require("../models/location.js");
 
 exports.getStates = async (req, res) => {
   try {
-    const states = await State.find();
+    const states = await State.find({ isDeleted: false });
     res.status(200).json(states);
   } catch (error) {
     console.log(error);
@@ -35,6 +35,7 @@ exports.getStatesByCountryId = async (req, res) => {
     //  combined filter (country + search)
     const filter = {
       country: countryId,
+      isDeleted: false,
       ...(search && {
         name: { $regex: search, $options: "i" },
       }),
@@ -132,11 +133,10 @@ exports.deleteStates = async (req, res) => {
       return res.status(404).json({ message: "State not found" });
     }
 
-    // ✅ Delete all cities of this state
-    await City.deleteMany({ state: id });
+    await City.updateMany({ state: id }, { isDeleted: true });
 
-    // ✅ Delete state
-    await State.findByIdAndDelete(id);
+    existingState.isDeleted = true;
+    await existingState.save();
 
     res.status(200).json({ message: "State deleted successfully" });
   } catch (error) {
