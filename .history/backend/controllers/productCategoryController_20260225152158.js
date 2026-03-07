@@ -1,8 +1,8 @@
-
+const ProductCategory = require("../models/productCategory.js");
 
 const fs = require("fs");
 const path = require("path");
-
+const productCategory = require("../models/productCategory.js");
 const productItemSchema = require("../models/productItemSchema.js");
 
 // ✅ CREATE CATEGORY

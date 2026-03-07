@@ -50,7 +50,7 @@ const Login = () => {
     onSubmit: async (values, { setSubmitting, setStatus }) => {
       try {
         const response = await createItem({
-          resource: "admin/login",
+          url: "admin/login",
           data: values,
         }).unwrap();
 
