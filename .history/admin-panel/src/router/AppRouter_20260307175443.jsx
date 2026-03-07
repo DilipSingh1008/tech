@@ -16,11 +16,11 @@ import CityLocation from "../pages/dashboard/Location/CityLocation";
 import Subcategory from "../pages/dashboard/ManageCategories/Subcategory";
 import SiteSetting from "../pages/dashboard/setting/SiteSetting";
 import BannerPage from "../pages/dashboard/Banner/BannerPage";
- import ProductCategory from "../pages/dashboard/product/ProductCategory";
+// import ProductCategory from "../pages/dashboard/product/ProductCategory";
 // import ProductCategoryItems from "../pages/dashboard/product/ProductCategoryItems";
 import ServicePage from "../pages/dashboard/Manage Services/ServicePage.jsx";
 import AddServicePage from "../pages/dashboard/Manage Services/AddServicePage.jsx";
-// import ProductCategory from "../pages/dashboard/product/ProductCategory.jsx";
+import ProductCategory from "../pages/dashboard/product/ProductCategory.jsx";
 import UserPage from "../pages/dashboard/UserPage/UserPage.jsx";
 import ProductForm from "../pages/dashboard/product/ProductForm.jsx";
 import ManageRole from "../pages/dashboard/UserPage/ManageRole.jsx";
@@ -80,10 +80,10 @@ function AppRouter() {
                 element={<ProductForm />}
               />
               <Route path="/dashboard/service" element={<ServicePage />} />
-              {/* <Route
+              <Route
                 path="/dashboard/product-items"
                 element={<ProductCategoryItems />}
-              /> */}
+              />
               <Route
                 path="/dashboard/service/edit/:id"
                 element={<AddServicePage />}

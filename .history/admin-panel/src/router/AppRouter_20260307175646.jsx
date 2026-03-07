@@ -20,7 +20,7 @@ import BannerPage from "../pages/dashboard/Banner/BannerPage";
 // import ProductCategoryItems from "../pages/dashboard/product/ProductCategoryItems";
 import ServicePage from "../pages/dashboard/Manage Services/ServicePage.jsx";
 import AddServicePage from "../pages/dashboard/Manage Services/AddServicePage.jsx";
-// import ProductCategory from "../pages/dashboard/product/ProductCategory.jsx";
+import ProductCategory from "../pages/dashboard/product/ProductCategory.jsx";
 import UserPage from "../pages/dashboard/UserPage/UserPage.jsx";
 import ProductForm from "../pages/dashboard/product/ProductForm.jsx";
 import ManageRole from "../pages/dashboard/UserPage/ManageRole.jsx";
