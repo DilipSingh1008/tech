@@ -12,6 +12,7 @@ import {
 import { FiChevronRight, FiChevronLeft } from "react-icons/fi";
 import Searchbar from "../../../components/Searchbar";
 import { useSelector } from "react-redux";
+import CommonImage from "../../../components/CommonImage.jsx";
 
 const validateImageDimensions = (file) => {
   return new Promise((resolve, reject) => {
@@ -40,7 +41,6 @@ const BannerPage = () => {
   const [sortBy, setSortBy] = useState("createdAt");
   const [order, setOrder] = useState("desc");
 
-  // ── Permission Logic ──
   const permissions = useSelector((state) => state.permission.permissions);
   const rawBannerPermission = permissions?.find(
     (p) => p.module.name === "banner",
@@ -51,7 +51,6 @@ const BannerPage = () => {
       ? { add: true, edit: true, delete: true, view: true }
       : rawBannerPermission;
 
-  // ── RTK Query: fetch ──
   const { data, isLoading } = useGetItemsQuery(
     `banner?page=${page}&limit=${limit}&search=${searchQuery}`,
   );
@@ -59,12 +58,10 @@ const BannerPage = () => {
   const banners = data?.data || [];
   const totalPages = data?.pagination?.totalPages || 1;
 
-  // ── RTK Query: mutations ──
   const [createItem, { isLoading: createLoading }] = useCreateItemMutation();
   const [updateItem, { isLoading: updateLoading }] = useUpdateItemMutation();
   const [deleteItem] = useDeleteItemMutation();
 
-  // ── Sort (client-side on current page) ──
   const handleSort = (field) => {
     const isAsc = sortBy === field && order === "asc";
     setOrder(isAsc ? "desc" : "asc");
@@ -265,15 +262,15 @@ const BannerPage = () => {
                         </td>
                         <td className="px-4 py-2.5">
                           <div className="w-8 h-8 rounded bg-gray-500/10 border border-gray-500/10 overflow-hidden flex items-center justify-center">
-                            {b.image ? (
-                              <img
-                                src={`http://localhost:5000${b.image}`}
-                                className="w-full h-full object-cover"
-                                alt="banner"
-                              />
-                            ) : (
-                              <ImageIcon size={14} className="opacity-30" />
-                            )}
+                            <CommonImage
+                              src={
+                                b.image
+                                  ? `http://localhost:5000${b.image}`
+                                  : null
+                              }
+                              alt={b.title}
+                              className="w-16 h-10 object-cover rounded"
+                            />
                           </div>
                         </td>
                         <td className="px-4 py-2.5">

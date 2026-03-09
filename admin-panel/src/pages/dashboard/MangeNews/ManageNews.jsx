@@ -33,7 +33,6 @@ const ManageNews = () => {
   const [sortBy, setSortBy] = useState("createdAt");
   const [order, setOrder] = useState("desc");
 
-  // ── RTK Query: fetch news ─────────────────────────────────────────────────
   const { data, isLoading } = useGetItemsQuery(
     `news?page=${page}&limit=${limit}&sortBy=${sortBy}&order=${order}&search=${searchQuery}`
   );
@@ -41,11 +40,9 @@ const ManageNews = () => {
   const news = data?.data || [];
   const totalPages = data?.totalPages || data?.pagination?.totalPages || 1;
 
-  // ── RTK Query: mutations ──────────────────────────────────────────────────
   const [deleteItem, { isLoading: deleteLoading }] = useDeleteItemMutation();
   const [updateItem] = useUpdateItemMutation();
 
-  // ── Sort ──────────────────────────────────────────────────────────────────
   const handleSort = (field) => {
     const isAsc = sortBy === field && order === "asc";
     setOrder(isAsc ? "desc" : "asc");
@@ -59,13 +56,10 @@ const ManageNews = () => {
     </span>
   );
 
-  // ── Status Toggle ─────────────────────────────────────────────────────────
   const handleStatusToggle = async (item) => {
     await updateItem({ url: `news/status/${item._id}`, data: { status: !item.status } });
-    // RTK Query auto-invalidates and refetches — no manual state update needed
   };
 
-  // ── Delete ────────────────────────────────────────────────────────────────
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this news item?")) return;
     await deleteItem(`news/${id}`);
@@ -76,7 +70,6 @@ const ManageNews = () => {
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-5xl mx-auto">
 
-          {/* Top Bar */}
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
             <Searchbar
               onChange={(e) => {
@@ -94,7 +87,6 @@ const ManageNews = () => {
             </div>
           </div>
 
-          {/* Table */}
           <div className={`${theme.card} rounded-xl overflow-hidden shadow-sm`}>
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse min-w-[600px] md:min-w-full">

@@ -18,7 +18,6 @@ export const apiSlice = createApi({
   baseQuery,
   tagTypes: ["CRUD"],
   endpoints: (builder) => ({
-    
     getItems: builder.query({
       query: (resource) => ({
         url: `/${resource}`,
@@ -28,8 +27,8 @@ export const apiSlice = createApi({
     }),
 
     getItemById: builder.query({
-      query: ({ resource, id }) => ({
-        url: `/${resource}/${id}`,
+      query: ({ url }) => ({
+        url: `/${url}`,
         method: "GET",
       }),
       providesTags: ["CRUD"],
@@ -37,14 +36,14 @@ export const apiSlice = createApi({
 
     createItem: builder.mutation({
       query: ({ url, data }) => {
-        console.log("kk",url)
-        console.log(data)
+        console.log("kk", url);
+        console.log(data);
 
         return {
-        url: `/${url}`,
-        method: "POST",
-        body: data,
-      }
+          url: `/${url}`,
+          method: "POST",
+          body: data,
+        };
       },
       invalidatesTags: ["CRUD"],
     }),
@@ -74,7 +73,6 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ["CRUD"],
     }),
-
   }),
 });
 

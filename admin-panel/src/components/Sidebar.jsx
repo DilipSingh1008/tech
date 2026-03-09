@@ -131,6 +131,16 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       icon: <Briefcase size={18} />,
     },
     {
+      path: "/dashboard/Manage-media",
+      name: "Media Category",
+      icon: <Briefcase size={18} />,
+    },
+    {
+      path: "/dashboard/Manage-media-items",
+      name: "Media Items",
+      icon: <Briefcase size={18} />,
+    },
+    {
       path: "/dashboard/settings",
       name: "Settings",
       icon: <Settings size={18} />,

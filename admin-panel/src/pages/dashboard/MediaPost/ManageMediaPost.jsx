@@ -70,7 +70,6 @@ const ManageMediaPost = () => {
     refetch();
   };
 
-  // Toggle status
   const handleToggleStatus = async (id, status) => {
     await patchItem({
       url: `media-posts/toggle-status/${id}`,
@@ -79,12 +78,14 @@ const ManageMediaPost = () => {
     refetch();
   };
 
-  // Submit create/update
   const handleSubmit = async (values) => {
     const formData = new FormData();
+    formData.append("folder", "media-posts");
+
     for (const key in values) {
       formData.append(key, values[key]);
     }
+
     if (editingItem) {
       await updateItem({
         url: `media-posts/${editingItem._id}`,
@@ -122,7 +123,7 @@ const ManageMediaPost = () => {
       : "bg-gray-100 text-gray-500",
     divider: isDarkMode ? "divide-gray-800" : "divide-gray-100",
   };
-
+  console.log(posts);
   return (
     <div className={`h-screen w-full flex flex-col ${theme.main}`}>
       <main className="flex-1 overflow-y-auto">
@@ -203,7 +204,11 @@ const ManageMediaPost = () => {
                         </td>
                         <td className="px-4 py-2.5">
                           <CommonImage
-                            src={`http://localhost:5000${item.image}`}
+                            src={
+                              item.image
+                                ? `http://localhost:5000${item.image}`
+                                : null
+                            }
                             alt={item.title}
                             className="w-16 h-10 object-cover rounded"
                           />

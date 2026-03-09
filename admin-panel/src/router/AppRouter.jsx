@@ -16,7 +16,7 @@ import CityLocation from "../pages/dashboard/Location/CityLocation";
 import Subcategory from "../pages/dashboard/ManageCategories/Subcategory";
 import SiteSetting from "../pages/dashboard/setting/SiteSetting";
 import BannerPage from "../pages/dashboard/Banner/BannerPage";
- import ProductCategory from "../pages/dashboard/product/ProductCategory";
+import ProductCategory from "../pages/dashboard/product/ProductCategory";
 // import ProductCategoryItems from "../pages/dashboard/product/ProductCategoryItems";
 import ServicePage from "../pages/dashboard/Manage Services/ServicePage.jsx";
 import AddServicePage from "../pages/dashboard/Manage Services/AddServicePage.jsx";
@@ -40,6 +40,9 @@ import Enquires from "../pages/enquiry/Enquires.jsx";
 import Vendor from "../pages/vendor/Vendor.jsx";
 import ManageCareer from "../pages/dashboard/Career/ManageCareer.jsx";
 import ManageMediaPost from "../pages/dashboard/MediaPost/ManageMediaPost.jsx";
+import ManageMedia from "../pages/dashboard/ManageMedia/ManageMedia.jsx";
+import MediaItemsList from "../pages/dashboard/ManageMedia/MediaItemsList.jsx";
+import MediaAddEdit from "../pages/dashboard/ManageMedia/AddEditMediaItem.jsx";
 // import ProductManagement from "../pages/dashboard/product/ProductCategory";
 // import ThemeToggleButton from "./components/Button";
 
@@ -101,7 +104,6 @@ function AppRouter() {
                 path="/dashboard/manage-permission/:id"
                 element={<ManagePermissions />}
               />
-
               <Route
                 path="/dashboard/faq-category"
                 element={<ManageFaqCategory />}
@@ -130,6 +132,19 @@ function AppRouter() {
               <Route
                 path="/dashboard/Media-Post"
                 element={<ManageMediaPost />}
+              />
+              <Route path="/dashboard/Manage-media" element={<ManageMedia />} />
+              <Route
+                path="/dashboard/Manage-media-items"
+                element={<MediaItemsList />}
+              />
+              <Route
+                path="/dashboard/Manage-media-items/add"
+                element={<MediaAddEdit />}
+              />
+              <Route
+                path="/dashboard/Manage-media-items/edit/:id"
+                element={<MediaAddEdit />}
               />
             </Route>
 

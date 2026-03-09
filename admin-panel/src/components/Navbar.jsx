@@ -26,20 +26,15 @@ const getPageTitle = () => {
   if (path.startsWith("/dashboard/faq-category")) return "FAQ";
   if (path.startsWith("/dashboard/manage-faq")) return "Manage FAQ";
   if (path.startsWith("/dashboard/manage-news")) return "Manage News";
-  if (path.startsWith("/dashboard/Manage-Blog-Categor")) return "Blog Categorie";
+  if (path.startsWith("/dashboard/Manage-Blog-Categor"))
+    return "Blog Categorie";
   if (path.startsWith("/dashboard/Manage-Blog")) return "Manage Blog";
   if (path.startsWith("/dashboard/Client")) return "Clients";
-  if (path.startsWith("/dashboard/enquiry")) return "Enquiry";
-
-
-
-  
-  
-
-
-
-
-
+  if (path.startsWith("/dashboard/vendor")) return "Vendor";
+  if (path.startsWith("/dashboard/career")) return "Career";
+  if (path.startsWith("/dashboard/Media-Post")) return "Media-Post";
+  if (path.startsWith("/dashboard/Manage-media")) return "Manage-media";
+  if (path.startsWith("/dashboard/Manage-media-items")) return "media-items";
 
   return "Dashboard"; // default
 };
