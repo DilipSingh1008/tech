@@ -43,6 +43,7 @@ import ManageMediaPost from "../pages/dashboard/MediaPost/ManageMediaPost.jsx";
 import ManageMedia from "../pages/dashboard/ManageMedia/ManageMedia.jsx";
 import MediaItemsList from "../pages/dashboard/ManageMedia/MediaItemsList.jsx";
 import MediaAddEdit from "../pages/dashboard/ManageMedia/AddEditMediaItem.jsx";
+import ProtectedRoute from "../pages/auth/ProtectedRoute.jsx";
 // import ProductManagement from "../pages/dashboard/product/ProductCategory";
 // import ThemeToggleButton from "./components/Button";
 
@@ -56,96 +57,119 @@ function AppRouter() {
             <Route path="/register" element={<Register />} />
 
             <Route path="forgot-password" element={<ForgotPassword />} />
-            <Route path="/dashboard" element={<Dashboard />}>
-              <Route path="/dashboard" element={<DashboardShow />} />
-              <Route path="profile" element={<Profile />} />
-              {/* <Route path="/dashboard/*" element={<Dashboard />} /> */}
-              <Route path="/dashboard/location" element={<Location />} />
-              <Route
-                path="/dashboard/location/:id"
-                element={<StateLocation />}
-              />
-              <Route
-                path="/dashboard/citylocation/:id"
-                element={<CityLocation />}
-              />
-              <Route
-                path="/dashboard/categories"
-                element={<ManageCategories />}
-              />
-              <Route path="/dashboard/category/:id" element={<Subcategory />} />
-              <Route path="/dashboard/settings" element={<SiteSetting />} />
-              <Route path="/dashboard/banner" element={<BannerPage />} />
-              <Route path="/dashboard/products" element={<ProductCategory />} />
-              <Route path="/dashboard/products/add" element={<ProductForm />} />
-              <Route
-                path="/dashboard/products/edit/:id"
-                element={<ProductForm />}
-              />
-              <Route path="/dashboard/service" element={<ServicePage />} />
-              {/* <Route
+            <Route element={<ProtectedRoute />}>
+              <Route path="/dashboard" element={<Dashboard />}>
+                <Route index element={<DashboardShow />} />{" "}
+                <Route path="profile" element={<Profile />} />
+                {/* <Route path="/dashboard/*" element={<Dashboard />} /> */}
+                <Route path="/dashboard/location" element={<Location />} />
+                <Route
+                  path="/dashboard/location/:id"
+                  element={<StateLocation />}
+                />
+                <Route
+                  path="/dashboard/citylocation/:id"
+                  element={<CityLocation />}
+                />
+                <Route
+                  path="/dashboard/categories"
+                  element={<ManageCategories />}
+                />
+                <Route
+                  path="/dashboard/category/:id"
+                  element={<Subcategory />}
+                />
+                <Route path="/dashboard/settings" element={<SiteSetting />} />
+                <Route path="/dashboard/banner" element={<BannerPage />} />
+                <Route
+                  path="/dashboard/products"
+                  element={<ProductCategory />}
+                />
+                <Route
+                  path="/dashboard/products/add"
+                  element={<ProductForm />}
+                />
+                <Route
+                  path="/dashboard/products/edit/:id"
+                  element={<ProductForm />}
+                />
+                <Route path="/dashboard/service" element={<ServicePage />} />
+                {/* <Route
                 path="/dashboard/product-items"
                 element={<ProductCategoryItems />}
               /> */}
-              <Route
-                path="/dashboard/service/edit/:id"
-                element={<AddServicePage />}
-              />
-              <Route
-                path="/dashboard/service/add"
-                element={<AddServicePage />}
-              />
-              <Route path="/dashboard/cms" element={<Cms />} />
-              <Route path="/dashboard/add-cms" element={<AddCmsForm />} />
-              <Route path="/dashboard/edit-cms/:id" element={<AddCmsForm />} />
-              <Route path="/dashboard/user" element={<UserPage />} />
-              <Route path="/dashboard/managerole" element={<ManageRole />} />
-              <Route
-                path="/dashboard/manage-permission/:id"
-                element={<ManagePermissions />}
-              />
-              <Route
-                path="/dashboard/faq-category"
-                element={<ManageFaqCategory />}
-              />
-              <Route path="/dashboard/manage-faq" element={<ManageFaq />} />
-              <Route path="/dashboard/manage-news" element={<ManageNews />} />
-              <Route path="/dashboard/manage-news/add" element={<NewsForm />} />
-              <Route
-                path="/dashboard/manage-news/edit/:id"
-                element={<NewsForm />}
-              />
-              <Route
-                path="/dashboard/Manage-Blog-Categor"
-                element={<ManageBlogCategory />}
-              />
-              <Route path="/dashboard/Manage-Blog" element={<ManageBlog />} />
-              <Route path="/dashboard/Manage-Blog/add" element={<BlogAdd />} />
-              <Route
-                path="/dashboard/Manage-Blog/edit/:id"
-                element={<BlogAdd />}
-              />
-              <Route path="/dashboard/Client" element={<ClientPage />} />
-              <Route path="/dashboard/enquiry" element={<Enquires />} />
-              <Route path="/dashboard/vendor" element={<Vendor />} />
-              <Route path="/dashboard/career" element={<ManageCareer />} />
-              <Route
-                path="/dashboard/Media-Post"
-                element={<ManageMediaPost />}
-              />
-              <Route path="/dashboard/Manage-media" element={<ManageMedia />} />
-              <Route
-                path="/dashboard/Manage-media-items"
-                element={<MediaItemsList />}
-              />
-              <Route
-                path="/dashboard/Manage-media-items/add"
-                element={<MediaAddEdit />}
-              />
-              <Route
-                path="/dashboard/Manage-media-items/edit/:id"
-                element={<MediaAddEdit />}
-              />
+                <Route
+                  path="/dashboard/service/edit/:id"
+                  element={<AddServicePage />}
+                />
+                <Route
+                  path="/dashboard/service/add"
+                  element={<AddServicePage />}
+                />
+                <Route path="/dashboard/cms" element={<Cms />} />
+                <Route path="/dashboard/add-cms" element={<AddCmsForm />} />
+                <Route
+                  path="/dashboard/edit-cms/:id"
+                  element={<AddCmsForm />}
+                />
+                <Route path="/dashboard/user" element={<UserPage />} />
+                <Route path="/dashboard/managerole" element={<ManageRole />} />
+                <Route
+                  path="/dashboard/manage-permission/:id"
+                  element={<ManagePermissions />}
+                />
+                <Route
+                  path="/dashboard/faq-category"
+                  element={<ManageFaqCategory />}
+                />
+                <Route path="/dashboard/manage-faq" element={<ManageFaq />} />
+                <Route path="/dashboard/manage-news" element={<ManageNews />} />
+                <Route
+                  path="/dashboard/manage-news/add"
+                  element={<NewsForm />}
+                />
+                <Route
+                  path="/dashboard/manage-news/edit/:id"
+                  element={<NewsForm />}
+                />
+                <Route
+                  path="/dashboard/Manage-Blog-Categor"
+                  element={<ManageBlogCategory />}
+                />
+                <Route path="/dashboard/Manage-Blog" element={<ManageBlog />} />
+                <Route
+                  path="/dashboard/Manage-Blog/add"
+                  element={<BlogAdd />}
+                />
+                <Route
+                  path="/dashboard/Manage-Blog/edit/:id"
+                  element={<BlogAdd />}
+                />
+                <Route path="/dashboard/Client" element={<ClientPage />} />
+                <Route path="/dashboard/enquiry" element={<Enquires />} />
+                <Route path="/dashboard/vendor" element={<Vendor />} />
+                <Route path="/dashboard/career" element={<ManageCareer />} />
+                <Route
+                  path="/dashboard/Media-Post"
+                  element={<ManageMediaPost />}
+                />
+                <Route
+                  path="/dashboard/Manage-media"
+                  element={<ManageMedia />}
+                />
+                <Route
+                  path="/dashboard/Manage-media-items"
+                  element={<MediaItemsList />}
+                />
+                <Route
+                  path="/dashboard/Manage-media-items/add"
+                  element={<MediaAddEdit />}
+                />
+                <Route
+                  path="/dashboard/Manage-media-items/edit/:id"
+                  element={<MediaAddEdit />}
+                />
+              </Route>
             </Route>
 
             <Route path="*" element={<NotFound />} />

@@ -34,7 +34,7 @@ const ManageNews = () => {
   const [order, setOrder] = useState("desc");
 
   const { data, isLoading } = useGetItemsQuery(
-    `news?page=${page}&limit=${limit}&sortBy=${sortBy}&order=${order}&search=${searchQuery}`
+    `news?page=${page}&limit=${limit}&sortBy=${sortBy}&order=${order}&search=${searchQuery}`,
   );
 
   const news = data?.data || [];
@@ -57,11 +57,15 @@ const ManageNews = () => {
   );
 
   const handleStatusToggle = async (item) => {
-    await updateItem({ url: `news/status/${item._id}`, data: { status: !item.status } });
+    await updateItem({
+      url: `news/status/${item._id}`,
+      data: { status: !item.status },
+    });
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this news item?")) return;
+    if (!window.confirm("Are you sure you want to delete this news item?"))
+      return;
     await deleteItem(`news/${id}`);
   };
 
@@ -69,28 +73,29 @@ const ManageNews = () => {
     <div className={`h-screen w-full flex flex-col ${theme.main}`}>
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-5xl mx-auto">
-
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
-            <Searchbar
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setPage(1);
-              }}
-            />
-            <div className="w-full sm:w-auto mt-2 sm:mt-0">
-              <button
-                onClick={() => navigate("/dashboard/manage-news/add")}
-                className="flex items-center justify-center gap-2 px-4 py-2 bg-(--primary) text-white rounded-lg text-xs font-bold hover:opacity-90 w-full sm:w-auto"
-              >
-                <Plus size={16} /> Add New News
-              </button>
+          <div className="flex items-center justify-between mb-4 gap-2">
+            <div className="flex-1 min-w-[150px]">
+              <Searchbar
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setPage(1);
+                }}
+              />
             </div>
+            <button
+              onClick={() => navigate("/dashboard/manage-news/add")}
+              className="flex items-center cursor-pointer gap-1.5 px-3 py-1.5 bg-(--primary) text-white rounded-lg text-xs font-semibold hover:opacity-90 transition-all"
+            >
+              <Plus size={16} /> Add New News
+            </button>
           </div>
 
           <div className={`${theme.card} rounded-xl overflow-hidden shadow-sm`}>
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse min-w-[600px] md:min-w-full">
-                <thead className={`uppercase tracking-wider font-bold ${theme.header}`}>
+                <thead
+                  className={`uppercase tracking-wider font-bold ${theme.header}`}
+                >
                   <tr>
                     <th className="px-4 py-3 w-10">ID</th>
                     <th
@@ -133,13 +138,19 @@ const ManageNews = () => {
                 <tbody className={`divide-y ${theme.divider}`}>
                   {isLoading ? (
                     <tr>
-                      <td colSpan={7} className="px-4 py-10 text-center opacity-40 italic">
+                      <td
+                        colSpan={7}
+                        className="px-4 py-10 text-center opacity-40 italic"
+                      >
                         Loading...
                       </td>
                     </tr>
                   ) : news.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="px-4 py-10 text-center opacity-40">
+                      <td
+                        colSpan={7}
+                        className="px-4 py-10 text-center opacity-40"
+                      >
                         No news found.
                       </td>
                     </tr>
@@ -152,7 +163,9 @@ const ManageNews = () => {
                         <td className="px-4 py-2.5 font-mono opacity-50 text-[10px]">
                           {(page - 1) * limit + index + 1}
                         </td>
-                        <td className="px-4 py-2.5 font-semibold">{item.title}</td>
+                        <td className="px-4 py-2.5 font-semibold">
+                          {item.title}
+                        </td>
                         <td className="px-4 py-2.5 opacity-70 hidden sm:table-cell">
                           {item.shortDescription?.length > 30
                             ? item.shortDescription.substring(0, 30) + "..."
@@ -160,7 +173,9 @@ const ManageNews = () => {
                         </td>
                         <td className="px-4 py-2.5 opacity-70 hidden lg:table-cell">
                           {item.mainDescription
-                            ? item.mainDescription.replace(/<[^>]+>/g, "").substring(0, 30) + "..."
+                            ? item.mainDescription
+                                .replace(/<[^>]+>/g, "")
+                                .substring(0, 30) + "..."
                             : "-"}
                         </td>
                         <td className="px-4 py-2.5 hidden md:table-cell">
@@ -185,7 +200,11 @@ const ManageNews = () => {
                         <td className="px-4 py-2.5 text-right">
                           <div className="flex justify-end gap-2">
                             <button
-                              onClick={() => navigate(`/dashboard/manage-news/edit/${item._id}`)}
+                              onClick={() =>
+                                navigate(
+                                  `/dashboard/manage-news/edit/${item._id}`,
+                                )
+                              }
                               className="p-1.5 cursor-pointer hover:text-(--primary) hover:bg-(--primary)/10 rounded-md transition-all"
                               title="Edit"
                             >
@@ -246,7 +265,6 @@ const ManageNews = () => {
               </div>
             </div>
           </div>
-
         </div>
       </main>
     </div>

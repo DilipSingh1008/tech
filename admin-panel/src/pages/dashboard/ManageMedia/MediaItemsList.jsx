@@ -78,18 +78,20 @@ const MediaItemsList = () => {
       <main className="flex-1 overflow-y-auto ">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-            <Searchbar
-              placeholder="Search media..."
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setPage(1);
-              }}
-            />
+          <div className="flex items-center justify-between mb-4 gap-2">
+            <div className="flex-1 min-w-[150px]">
+              <Searchbar
+                placeholder="Search media..."
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setPage(1);
+                }}
+              />
+            </div>
             <div className="flex flex-col sm:flex-row sm:items-center gap-2">
               <button
                 onClick={() => navigate("/dashboard/Manage-media-items/add")}
-                className="flex items-center gap-2 px-4 py-2 bg-(--primary) text-white rounded-lg text-xs font-bold hover:opacity-90 w-full sm:w-auto"
+                className="flex cursor-pointer items-center gap-2 px-4 py-2 bg-(--primary) text-white rounded-lg text-xs font-bold hover:opacity-90 w-full sm:w-auto"
               >
                 <Plus size={16} /> Add Media
               </button>
@@ -114,9 +116,7 @@ const MediaItemsList = () => {
                       </div>
                     </th>
                     <th className="px-4 py-3 hidden sm:table-cell">Category</th>
-                    <th className="px-4 py-3 hidden md:table-cell">URL</th>
-                    <th className="px-4 py-3 hidden lg:table-cell">Link</th>
-                    <th className="px-4 py-3 w-32">Media</th>
+                    <th className=" w-32">Media</th>
                     <th className="px-4 py-3 text-right w-24">Action</th>
                   </tr>
                 </thead>
@@ -146,30 +146,13 @@ const MediaItemsList = () => {
                         <td className="px-4 py-2.5 hidden sm:table-cell">
                           {item.category || "-"}
                         </td>
-                        <td className="px-4 py-2.5 hidden md:table-cell break-all">
-                          {item.url || "-"}
-                        </td>
-                        <td className="px-4 py-2.5 hidden lg:table-cell break-all">
-                          {item.link || "-"}
-                        </td>
                         <td className="px-4 py-2.5">
-                          {item.type === "video" ? (
-                            <video
-                              src={`http://localhost:5000${item.icon}`}
-                              controls
-                              className="w-32 h-20 object-cover rounded-lg border"
-                            />
-                          ) : (
-                            <CommonImage
-                              src={
-                                item.icon
-                                  ? `http://localhost:5000${item.icon}`
-                                  : null
-                              }
-                              alt="media"
-                              className="w-32 h-20 object-cover rounded-lg border"
-                            />
-                          )}
+                          <MediaPreview
+                            type={item.type}
+                            link={item.link}
+                            icon={item.icon}
+                            title={item.title}
+                          />
                         </td>
                         <td className="px-4 py-2.5 text-right">
                           <div className="flex justify-end gap-2">
@@ -244,3 +227,119 @@ const MediaItemsList = () => {
 };
 
 export default MediaItemsList;
+
+// -----------------------------------------
+// Universal MediaPreview Component
+// -----------------------------------------
+const MediaPreview = ({ type, icon, link, title }) => {
+  const getYouTubeVideoId = (url) => {
+    if (!url) return null;
+    const regex = /(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/;
+    const match = url.match(regex);
+    return match ? match[1] : null;
+  };
+
+  const getFacebookVideoEmbed = (url) => {
+    if (!url) return null;
+    return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(
+      url,
+    )}&show_text=false&width=200`;
+  };
+
+  const getInstagramEmbed = (url) => {
+    if (!url) return null;
+
+    if (url.includes("/p/")) {
+      const shortcode = url.split("/p/")[1]?.split("/")[0];
+      return shortcode
+        ? `https://www.instagram.com/p/${shortcode}/embed`
+        : null;
+    }
+
+    if (url.includes("/reel/")) {
+      const shortcode = url.split("/reel/")[1]?.split("/")[0];
+      return shortcode
+        ? `https://www.instagram.com/reel/${shortcode}/embed`
+        : null;
+    }
+
+    return null;
+  };
+
+  if (type === "image" && icon) {
+    return (
+      <CommonImage
+        src={icon.startsWith("http") ? icon : `http://localhost:5000${icon}`}
+        alt={title}
+        className="w-32 h-20 object-cover rounded-lg border"
+      />
+    );
+  }
+
+  if (type === "video") {
+    if (link) {
+      const youtubeId = getYouTubeVideoId(link);
+      if (youtubeId) {
+        return (
+          <iframe
+            width="200"
+            height="120"
+            src={`https://www.youtube.com/embed/${youtubeId}`}
+            title={title}
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            className="rounded-lg border"
+          />
+        );
+      }
+
+      if (link.includes("facebook.com")) {
+        const fbEmbed = getFacebookVideoEmbed(link);
+        return (
+          <iframe
+            src={fbEmbed}
+            width="200"
+            height="120"
+            style={{ border: "none", overflow: "hidden" }}
+            scrolling="no"
+            frameBorder="0"
+            allowFullScreen
+            allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+            className="rounded-lg border"
+          />
+        );
+      }
+
+      if (link.includes("instagram.com")) {
+        const igEmbed = getInstagramEmbed(link);
+        if (igEmbed) {
+          return (
+            <iframe
+              src={igEmbed}
+              width="200"
+              height="120"
+              style={{ border: "none", overflow: "hidden" }}
+              scrolling="no"
+              frameBorder="0"
+              allowFullScreen
+              className="rounded-lg border"
+            />
+          );
+        }
+      }
+    }
+
+    if (icon) {
+      return (
+        <video
+          src={icon.startsWith("http") ? icon : `http://localhost:5000${icon}`}
+          controls
+          className="w-32 h-20 object-cover rounded-lg border"
+        />
+      );
+    }
+  }
+
+  return <span className="text-[10px] opacity-40">No media</span>;
+};

@@ -38,7 +38,7 @@ const ManageBlogCategory = () => {
 
   // ── RTK Query: fetch categories ───────────────────────────────────────────
   const { data, isLoading } = useGetItemsQuery(
-    `blog-category?page=${page}&limit=${limit}&search=${searchQuery}&sortField=${sortField}&sortOrder=${sortOrder}`
+    `blog-category?page=${page}&limit=${limit}&search=${searchQuery}&sortField=${sortField}&sortOrder=${sortOrder}`,
   );
 
   const categories = data?.data || [];
@@ -62,7 +62,10 @@ const ManageBlogCategory = () => {
 
   // ── Status Toggle ─────────────────────────────────────────────────────────
   const handleToggleStatus = async (item) => {
-    await updateItem({ url: `blog-category/toggle-status/${item._id}`, data: { status: !item.status } });
+    await updateItem({
+      url: `blog-category/toggle-status/${item._id}`,
+      data: { status: !item.status },
+    });
   };
 
   // ── Delete ────────────────────────────────────────────────────────────────
@@ -75,7 +78,10 @@ const ManageBlogCategory = () => {
   // ── Submit (create / update) ──────────────────────────────────────────────
   const handleSubmit = async (values) => {
     if (editingItem) {
-      await updateItem({ url: `blog-category/${editingItem._id}`, data: values }).unwrap();
+      await updateItem({
+        url: `blog-category/${editingItem._id}`,
+        data: values,
+      }).unwrap();
     } else {
       await createItem({ url: "blog-category", data: values }).unwrap();
     }
@@ -91,15 +97,16 @@ const ManageBlogCategory = () => {
     <div className={`h-screen w-full flex flex-col ${theme.main}`}>
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-5xl mx-auto">
-
           {/* Top Bar */}
-          <div className="flex items-center justify-between mb-4">
-            <Searchbar
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setPage(1);
-              }}
-            />
+          <div className="flex items-center justify-between mb-4 gap-2">
+            <div className="flex-1 min-w-[150px]">
+              <Searchbar
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setPage(1);
+                }}
+              />
+            </div>
             <button
               onClick={() => {
                 setEditingItem(null);
@@ -112,10 +119,14 @@ const ManageBlogCategory = () => {
           </div>
 
           {/* Category Table */}
-          <div className={`rounded-xl border shadow-sm overflow-hidden ${theme.card}`}>
+          <div
+            className={`rounded-xl border shadow-sm overflow-hidden ${theme.card}`}
+          >
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
-                <thead className={`uppercase tracking-wider font-bold ${theme.header}`}>
+                <thead
+                  className={`uppercase tracking-wider font-bold ${theme.header}`}
+                >
                   <tr>
                     <th className="px-4 py-3 w-16">ID</th>
                     <th
@@ -126,7 +137,9 @@ const ManageBlogCategory = () => {
                         Name
                         <span className="opacity-50 text-[10px]">
                           {sortField === "name"
-                            ? sortOrder === "asc" ? "▲" : "▼"
+                            ? sortOrder === "asc"
+                              ? "▲"
+                              : "▼"
                             : "↕"}
                         </span>
                       </div>
@@ -139,7 +152,10 @@ const ManageBlogCategory = () => {
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                   {isLoading ? (
                     <tr>
-                      <td colSpan="4" className="text-center py-6 opacity-40 italic">
+                      <td
+                        colSpan="4"
+                        className="text-center py-6 opacity-40 italic"
+                      >
                         Loading...
                       </td>
                     </tr>
@@ -198,7 +214,9 @@ const ManageBlogCategory = () => {
             </div>
 
             {/* Pagination */}
-            <div className={`flex items-center justify-between p-3 border-t ${theme.divider}`}>
+            <div
+              className={`flex items-center justify-between p-3 border-t ${theme.divider}`}
+            >
               <span className="text-[11px] opacity-60">
                 Showing {categories.length} entries
               </span>
@@ -290,7 +308,6 @@ const ManageBlogCategory = () => {
               </div>
             </div>
           )}
-
         </div>
       </main>
     </div>

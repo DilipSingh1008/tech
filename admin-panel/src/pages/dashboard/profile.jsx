@@ -52,7 +52,7 @@ const ProfilePage = () => {
 
   // ── RTK Query: fetch profile ──
   const { data: profileRes, isLoading } = useGetItemsQuery("admin/profile");
-
+  console.log(profileRes);
   // ── RTK Query: mutations ──
   const [updateItem] = useUpdateItemMutation();
 
@@ -142,7 +142,6 @@ const ProfilePage = () => {
       <div className="flex-1 flex flex-col min-w-0">
         <main className="flex-1 overflow-y-auto bg-[#fafafa] dark:bg-[var(--main-bg)]">
           <div className="mx-auto p-1 md:p-10 space-y-10">
-
             {/* ── BASIC INFORMATION FORM ── */}
             <div className="bg-white dark:bg-[var(--card-bg)] rounded-xl shadow-sm overflow-hidden">
               <div className="p-1 px-6 py-4 border-b border-gray-50 bg-gray-50/50 dark:bg-white/5">
@@ -154,14 +153,13 @@ const ProfilePage = () => {
 
               <form onSubmit={profileForm.handleSubmit} className="p-6 md:p-8">
                 <div className="flex flex-col md:flex-row gap-10">
-
                   {/* Photo Section */}
                   <div className="flex flex-col items-center gap-3">
                     <div className="relative group">
                       <div className="w-24 h-24 rounded-full border-2 border-gray-100 p-1">
                         <div className="w-full h-full rounded-full bg-gray-100 overflow-hidden flex items-center justify-center text-gray-400">
                           <CommonImage
-                            src={profilePhotoPreview}
+                            src={`http://localhost:5000/${profileData?.image}`}
                             alt="preview"
                             className="w-full h-full object-cover"
                           />
@@ -191,11 +189,17 @@ const ProfilePage = () => {
                       <input
                         type="text"
                         {...profileForm.getFieldProps("fullName")}
-                        className={inputClass(profileForm.touched.fullName, profileForm.errors.fullName)}
+                        className={inputClass(
+                          profileForm.touched.fullName,
+                          profileForm.errors.fullName,
+                        )}
                       />
-                      {profileForm.touched.fullName && profileForm.errors.fullName && (
-                        <p className="text-[10px] text-red-500 ml-1">{profileForm.errors.fullName}</p>
-                      )}
+                      {profileForm.touched.fullName &&
+                        profileForm.errors.fullName && (
+                          <p className="text-[10px] text-red-500 ml-1">
+                            {profileForm.errors.fullName}
+                          </p>
+                        )}
                     </div>
 
                     <div className="space-y-1.5">
@@ -204,7 +208,9 @@ const ProfilePage = () => {
                       </label>
                       <input
                         type="text"
-                        value="Admin"
+                        value={
+                          profileData?.role?.name || profileData?.role || ""
+                        }
                         readOnly
                         className="w-full px-3 py-2 text-sm rounded-lg border bg-gray-50 dark:bg-white/5 border-gray-100 cursor-not-allowed text-gray-400 outline-none"
                       />
@@ -217,11 +223,17 @@ const ProfilePage = () => {
                       <input
                         type="email"
                         {...profileForm.getFieldProps("email")}
-                        className={inputClass(profileForm.touched.email, profileForm.errors.email)}
+                        className={inputClass(
+                          profileForm.touched.email,
+                          profileForm.errors.email,
+                        )}
                       />
-                      {profileForm.touched.email && profileForm.errors.email && (
-                        <p className="text-[10px] text-red-500 ml-1">{profileForm.errors.email}</p>
-                      )}
+                      {profileForm.touched.email &&
+                        profileForm.errors.email && (
+                          <p className="text-[10px] text-red-500 ml-1">
+                            {profileForm.errors.email}
+                          </p>
+                        )}
                     </div>
 
                     <div className="space-y-1.5">
@@ -231,11 +243,17 @@ const ProfilePage = () => {
                       <input
                         type="text"
                         {...profileForm.getFieldProps("phone")}
-                        className={inputClass(profileForm.touched.phone, profileForm.errors.phone)}
+                        className={inputClass(
+                          profileForm.touched.phone,
+                          profileForm.errors.phone,
+                        )}
                       />
-                      {profileForm.touched.phone && profileForm.errors.phone && (
-                        <p className="text-[10px] text-red-500 ml-1">{profileForm.errors.phone}</p>
-                      )}
+                      {profileForm.touched.phone &&
+                        profileForm.errors.phone && (
+                          <p className="text-[10px] text-red-500 ml-1">
+                            {profileForm.errors.phone}
+                          </p>
+                        )}
                     </div>
                   </div>
                 </div>
@@ -251,7 +269,11 @@ const ProfilePage = () => {
                     disabled={profileForm.isSubmitting}
                     className="flex items-center cursor-pointer gap-2 px-5 py-2 bg-[var(--primary)] text-white text-sm font-medium rounded-lg hover:shadow-lg transition-all disabled:opacity-50"
                   >
-                    {profileForm.isSubmitting ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                    {profileForm.isSubmitting ? (
+                      <Loader2 size={14} className="animate-spin" />
+                    ) : (
+                      <Save size={14} />
+                    )}
                     {profileForm.isSubmitting ? "Saving..." : "Save Changes"}
                   </button>
                 </div>
@@ -267,9 +289,13 @@ const ProfilePage = () => {
                 </h2>
               </div>
 
-              <form onSubmit={passwordForm.handleSubmit} className="p-6 md:p-8 space-y-6">
+              <form
+                onSubmit={passwordForm.handleSubmit}
+                className="p-6 md:p-8 space-y-6"
+              >
                 <p className="text-xs text-gray-400">
-                  Set a new password for your account. Must be at least 6 characters.
+                  Set a new password for your account. Must be at least 6
+                  characters.
                 </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -284,9 +310,12 @@ const ProfilePage = () => {
                       onToggle={() => setShowNew((v) => !v)}
                       form={passwordForm}
                     />
-                    {passwordForm.touched.newPassword && passwordForm.errors.newPassword && (
-                      <p className="text-[10px] text-red-500">{passwordForm.errors.newPassword}</p>
-                    )}
+                    {passwordForm.touched.newPassword &&
+                      passwordForm.errors.newPassword && (
+                        <p className="text-[10px] text-red-500">
+                          {passwordForm.errors.newPassword}
+                        </p>
+                      )}
                   </div>
 
                   <div className="space-y-1.5">
@@ -300,9 +329,12 @@ const ProfilePage = () => {
                       onToggle={() => setShowConfirm((v) => !v)}
                       form={passwordForm}
                     />
-                    {passwordForm.touched.confirmPassword && passwordForm.errors.confirmPassword && (
-                      <p className="text-[10px] text-red-500">{passwordForm.errors.confirmPassword}</p>
-                    )}
+                    {passwordForm.touched.confirmPassword &&
+                      passwordForm.errors.confirmPassword && (
+                        <p className="text-[10px] text-red-500">
+                          {passwordForm.errors.confirmPassword}
+                        </p>
+                      )}
                   </div>
                 </div>
 
@@ -321,14 +353,19 @@ const ProfilePage = () => {
                       disabled={passwordForm.isSubmitting}
                       className="flex items-center cursor-pointer gap-2 px-5 py-2 bg-[var(--primary)] text-white text-sm font-medium rounded-lg hover:shadow-lg transition-all disabled:opacity-50"
                     >
-                      {passwordForm.isSubmitting ? <Loader2 size={14} className="animate-spin" /> : <ShieldCheck size={14} />}
-                      {passwordForm.isSubmitting ? "Updating..." : "Update Password"}
+                      {passwordForm.isSubmitting ? (
+                        <Loader2 size={14} className="animate-spin" />
+                      ) : (
+                        <ShieldCheck size={14} />
+                      )}
+                      {passwordForm.isSubmitting
+                        ? "Updating..."
+                        : "Update Password"}
                     </button>
                   </div>
                 </div>
               </form>
             </div>
-
           </div>
         </main>
       </div>

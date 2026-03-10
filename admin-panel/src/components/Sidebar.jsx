@@ -108,7 +108,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     {
       path: "/dashboard/Client",
       name: "Client ",
-      icon: <PenTool size={18} />,
+      icon: <Users size={18} />,
     },
     {
       path: "/dashboard/enquiry",
@@ -118,7 +118,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     {
       path: "/dashboard/vendor",
       name: "Vendor",
-      icon: <MessageCircle size={18} />,
+      icon: <Briefcase size={18} />,
     },
     {
       path: "/dashboard/career",
@@ -133,12 +133,12 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     {
       path: "/dashboard/Manage-media",
       name: "Media Category",
-      icon: <Briefcase size={18} />,
+      icon: <ImageIcon size={18} />,
     },
     {
       path: "/dashboard/Manage-media-items",
       name: "Media Items",
-      icon: <Briefcase size={18} />,
+      icon: <ImageIcon size={18} />,
     },
     {
       path: "/dashboard/settings",

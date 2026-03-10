@@ -36,14 +36,15 @@ const ManageFaq = () => {
 
   // ── RTK Query: fetch FAQs ──
   const { data: faqRes, isLoading } = useGetItemsQuery(
-    `manage-faq?page=${page}&limit=${limit}&search=${searchQuery}&sortField=${sortField}&sortOrder=${sortOrder}`
+    `manage-faq?page=${page}&limit=${limit}&search=${searchQuery}&sortField=${sortField}&sortOrder=${sortOrder}`,
   );
 
   const faqs = faqRes?.data || [];
   const totalPages = faqRes?.pagination?.totalPages || 1;
 
   // ── RTK Query: fetch categories for dropdown ──
-  const { data: catRes, isLoading: loadingCategories } = useGetItemsQuery("manage-faq/active");
+  const { data: catRes, isLoading: loadingCategories } =
+    useGetItemsQuery("manage-faq/active");
   const categories = catRes?.data || [];
 
   // ── RTK Query: mutations ──
@@ -92,7 +93,10 @@ const ManageFaq = () => {
   const handleSubmit = async (values) => {
     try {
       if (editingItem) {
-        await updateItem({ url: `manage-faq/${editingItem._id}`, data: values });
+        await updateItem({
+          url: `manage-faq/${editingItem._id}`,
+          data: values,
+        });
       } else {
         await createItem({ url: "manage-faq", data: values });
       }
@@ -115,9 +119,15 @@ const ManageFaq = () => {
   });
 
   const theme = {
-    main: isDarkMode ? "bg-[#0b0e14] text-slate-300" : "bg-gray-50 text-gray-700",
-    card: isDarkMode ? "bg-[#151b28] border-gray-800" : "bg-white border-gray-200",
-    header: isDarkMode ? "bg-[#1f2637] text-gray-400" : "bg-gray-100 text-gray-500",
+    main: isDarkMode
+      ? "bg-[#0b0e14] text-slate-300"
+      : "bg-gray-50 text-gray-700",
+    card: isDarkMode
+      ? "bg-[#151b28] border-gray-800"
+      : "bg-white border-gray-200",
+    header: isDarkMode
+      ? "bg-[#1f2637] text-gray-400"
+      : "bg-gray-100 text-gray-500",
     divider: isDarkMode ? "divide-gray-800" : "divide-gray-100",
   };
 
@@ -125,19 +135,23 @@ const ManageFaq = () => {
     <div className={`h-screen w-full flex flex-col ${theme.main}`}>
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-5xl mx-auto">
-
           {/* Header */}
-          <div className="flex items-center justify-between mb-4">
-            <Searchbar
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setPage(1);
-              }}
-            />
+          <div className="flex items-center justify-between mb-4 gap-2">
+            <div className="flex-1 min-w-[150px]">
+              <Searchbar
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setPage(1);
+                }}
+              />
+            </div>
             {faqPermission?.add && (
               <button
-                onClick={() => { setEditingItem(null); setIsModalOpen(true); }}
-                className="flex cursor-pointer items-center gap-1.5 px-3 py-1.5 bg-(--primary) text-white rounded-lg text-xs font-semibold hover:opacity-90"
+                onClick={() => {
+                  setEditingItem(null);
+                  setIsModalOpen(true);
+                }}
+                className="flex items-center cursor-pointer gap-1.5 px-3 py-1.5 bg-(--primary) text-white rounded-lg text-xs font-semibold hover:opacity-90 transition-all"
               >
                 <Plus size={14} /> Add FAQ
               </button>
@@ -145,10 +159,14 @@ const ManageFaq = () => {
           </div>
 
           {/* Table */}
-          <div className={`rounded-xl border shadow-sm overflow-hidden ${theme.card}`}>
+          <div
+            className={`rounded-xl border shadow-sm overflow-hidden ${theme.card}`}
+          >
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
-                <thead className={`uppercase tracking-wider font-bold ${theme.header}`}>
+                <thead
+                  className={`uppercase tracking-wider font-bold ${theme.header}`}
+                >
                   <tr>
                     <th className="px-4 py-3 w-16">ID</th>
                     <th
@@ -185,21 +203,35 @@ const ManageFaq = () => {
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                   {isLoading ? (
                     <tr>
-                      <td colSpan="6" className="text-center py-6 opacity-40 italic">Loading...</td>
+                      <td
+                        colSpan="6"
+                        className="text-center py-6 opacity-40 italic"
+                      >
+                        Loading...
+                      </td>
                     </tr>
                   ) : faqs.length === 0 ? (
                     <tr>
-                      <td colSpan="6" className="text-center py-6 opacity-40">No FAQs found.</td>
+                      <td colSpan="6" className="text-center py-6 opacity-40">
+                        No FAQs found.
+                      </td>
                     </tr>
                   ) : (
                     faqs.map((item, index) => (
-                      <tr key={item._id} className="hover:bg-indigo-500/5 transition-colors">
+                      <tr
+                        key={item._id}
+                        className="hover:bg-indigo-500/5 transition-colors"
+                      >
                         <td className="px-4 py-2.5 font-semibold">
                           {(page - 1) * limit + index + 1}
                         </td>
-                        <td className="px-4 py-2.5 text-sm capitalize">{item.category}</td>
+                        <td className="px-4 py-2.5 text-sm capitalize">
+                          {item.category}
+                        </td>
                         <td className="px-4 py-2.5">{item.question}</td>
-                        <td className="px-4 py-2.5 truncate max-w-xs">{item.answer}</td>
+                        <td className="px-4 py-2.5 truncate max-w-xs">
+                          {item.answer}
+                        </td>
                         <td className="px-4 py-2.5">
                           <button
                             onClick={() => handleToggleStatus(item._id)}
@@ -221,7 +253,10 @@ const ManageFaq = () => {
                               {faqPermission?.edit && (
                                 <div className="relative group">
                                   <button
-                                    onClick={() => { setEditingItem(item); setIsModalOpen(true); }}
+                                    onClick={() => {
+                                      setEditingItem(item);
+                                      setIsModalOpen(true);
+                                    }}
                                     className="cursor-pointer p-1.5 hover:text-(--primary)"
                                   >
                                     <Edit3 size={14} />
@@ -257,8 +292,12 @@ const ManageFaq = () => {
             </div>
 
             {/* Pagination */}
-            <div className={`flex items-center justify-between p-3 border-t ${theme.divider}`}>
-              <span className="text-[11px] opacity-60">Showing {faqs.length} entries</span>
+            <div
+              className={`flex items-center justify-between p-3 border-t ${theme.divider}`}
+            >
+              <span className="text-[11px] opacity-60">
+                Showing {faqs.length} entries
+              </span>
               <div className="flex items-center gap-1">
                 <button
                   disabled={page === 1 || isLoading}
@@ -301,7 +340,10 @@ const ManageFaq = () => {
                   <h3 className="text-sm font-bold">
                     {editingItem ? "Edit FAQ" : "New FAQ"}
                   </h3>
-                  <button onClick={closeModal} className="cursor-pointer opacity-60 hover:opacity-100">
+                  <button
+                    onClick={closeModal}
+                    className="cursor-pointer opacity-60 hover:opacity-100"
+                  >
                     <X size={16} />
                   </button>
                 </div>
@@ -329,7 +371,9 @@ const ManageFaq = () => {
                           disabled={loadingCategories}
                         >
                           <option value="">
-                            {loadingCategories ? "Loading categories..." : "-- Select Category --"}
+                            {loadingCategories
+                              ? "Loading categories..."
+                              : "-- Select Category --"}
                           </option>
                           {!loadingCategories &&
                             categories.map((cat) => (
@@ -338,7 +382,11 @@ const ManageFaq = () => {
                               </option>
                             ))}
                         </Field>
-                        <ErrorMessage name="category" component="div" className="text-red-500 text-[10px]" />
+                        <ErrorMessage
+                          name="category"
+                          component="div"
+                          className="text-red-500 text-[10px]"
+                        />
                       </div>
 
                       <div>
@@ -349,7 +397,11 @@ const ManageFaq = () => {
                           name="question"
                           className="w-full p-2 text-sm rounded-lg border border-gray-300 outline-none focus:border-(--primary)"
                         />
-                        <ErrorMessage name="question" component="div" className="text-red-500 text-[10px]" />
+                        <ErrorMessage
+                          name="question"
+                          component="div"
+                          className="text-red-500 text-[10px]"
+                        />
                       </div>
 
                       <div>
@@ -362,17 +414,27 @@ const ManageFaq = () => {
                           rows="3"
                           className="w-full p-2 text-sm rounded-lg border border-gray-300 outline-none focus:border-(--primary)"
                         />
-                        <ErrorMessage name="answer" component="div" className="text-red-500 text-[10px]" />
+                        <ErrorMessage
+                          name="answer"
+                          component="div"
+                          className="text-red-500 text-[10px]"
+                        />
                       </div>
 
                       <button
                         type="submit"
-                        disabled={createLoading || updateLoading || isSubmitting}
+                        disabled={
+                          createLoading || updateLoading || isSubmitting
+                        }
                         className="cursor-pointer w-full py-2 mt-2 bg-(--primary) text-white rounded-lg text-xs font-bold hover:opacity-90 disabled:opacity-50"
                       >
                         {editingItem
-                          ? updateLoading ? "Updating..." : "Update FAQ"
-                          : createLoading ? "Creating..." : "Create FAQ"}
+                          ? updateLoading
+                            ? "Updating..."
+                            : "Update FAQ"
+                          : createLoading
+                            ? "Creating..."
+                            : "Create FAQ"}
                       </button>
                     </Form>
                   )}

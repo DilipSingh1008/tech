@@ -2,19 +2,19 @@ import { useState } from "react";
 import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
 import { Outlet } from "react-router-dom";
-import { useGetItemsQuery } from "../../redux/api/apiSlice";
+// import { useGetItemsQuery } from "../../redux/api/apiSlice";
 
 const DashboardLayout = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
 
-  const roleId = localStorage.getItem("roleId");
-  const role = localStorage.getItem("role");
+  //yh hide kiya kyu ki use nhi ho rha tha kahi pr bhi
 
- const{data} = useGetItemsQuery(`role/${roleId}/permissions`, {
-    skip: !roleId || role === "admin",
-  });
+  //   const roleId = localStorage.getItem("roleId");
+  //   const role = localStorage.getItem("role");
 
-  console.log(data)
+  //  const{data} = useGetItemsQuery(`role/${roleId}/permissions`, {
+  //     skip: !roleId || role === "admin",
+  //   });
 
   return (
     <div className="flex min-h-screen bg-[var(--main-bg)]">

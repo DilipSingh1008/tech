@@ -36,7 +36,7 @@ const Location = () => {
   // ── Permission Logic ──
   const permissions = useSelector((state) => state.permission.permissions);
   const rawLocationPermission = permissions?.find(
-    (p) => p.module.name === "location"
+    (p) => p.module.name === "location",
   );
   const localRole = localStorage.getItem("role");
   const locationPermission =
@@ -46,7 +46,7 @@ const Location = () => {
 
   // ── RTK Query: fetch ──
   const { data, isLoading } = useGetItemsQuery(
-    `countrylocation?page=${page}&limit=${limit}&sortBy=${sortBy}&order=${order}&search=${searchQuery}`
+    `countrylocation?page=${page}&limit=${limit}&sortBy=${sortBy}&order=${order}&search=${searchQuery}`,
   );
 
   const countriesData = data?.data || [];
@@ -68,7 +68,8 @@ const Location = () => {
 
   // ── Delete ──
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this country?")) return;
+    if (!window.confirm("Are you sure you want to delete this country?"))
+      return;
     await deleteItem(`countrylocation/${id}/delete-country`);
   };
 
@@ -95,7 +96,10 @@ const Location = () => {
   };
 
   // ── Submit ──
-  const submitCountryFunction = async (values, { resetForm, setSubmitting }) => {
+  const submitCountryFunction = async (
+    values,
+    { resetForm, setSubmitting },
+  ) => {
     const payload = { country: values.countryName.trim() };
     try {
       if (editingCountry) {
@@ -144,15 +148,16 @@ const Location = () => {
     <div className={`h-screen w-full flex flex-col ${theme.main}`}>
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-5xl mx-auto">
-
           {/* Header */}
-          <div className="flex items-center justify-between mb-4">
-            <Searchbar
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setPage(1);
-              }}
-            />
+          <div className="flex items-center justify-between mb-4 gap-2">
+            <div className="flex-1 min-w-[150px]">
+              <Searchbar
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setPage(1);
+                }}
+              />
+            </div>
             {locationPermission?.add && (
               <button
                 onClick={openAddModal}
@@ -164,10 +169,14 @@ const Location = () => {
           </div>
 
           {/* Table */}
-          <div className={`rounded-xl border shadow-sm overflow-hidden ${theme.card}`}>
+          <div
+            className={`rounded-xl border shadow-sm overflow-hidden ${theme.card}`}
+          >
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
-                <thead className={`uppercase tracking-wider font-bold ${theme.header}`}>
+                <thead
+                  className={`uppercase tracking-wider font-bold ${theme.header}`}
+                >
                   <tr>
                     <th className="px-4 py-3 w-16">id</th>
                     <th
@@ -177,12 +186,17 @@ const Location = () => {
                       <div className="flex items-center gap-1">
                         Country Name
                         <span className="opacity-50 text-[10px]">
-                          {sortBy === "name" ? (order === "asc" ? "▲" : "▼") : "↕"}
+                          {sortBy === "name"
+                            ? order === "asc"
+                              ? "▲"
+                              : "▼"
+                            : "↕"}
                         </span>
                       </div>
                     </th>
                     <th className="px-4 py-3 w-24">Status</th>
-                    {(locationPermission?.edit || locationPermission?.delete) && (
+                    {(locationPermission?.edit ||
+                      locationPermission?.delete) && (
                       <th className="px-4 py-3 text-right w-24">Action</th>
                     )}
                   </tr>
@@ -191,13 +205,19 @@ const Location = () => {
                 <tbody className={`divide-y ${theme.divider}`}>
                   {isLoading ? (
                     <tr>
-                      <td colSpan={4} className="px-4 py-10 text-center opacity-40 italic">
+                      <td
+                        colSpan={4}
+                        className="px-4 py-10 text-center opacity-40 italic"
+                      >
                         Loading...
                       </td>
                     </tr>
                   ) : countriesData.length === 0 ? (
                     <tr>
-                      <td colSpan={4} className="px-4 py-10 text-center opacity-40">
+                      <td
+                        colSpan={4}
+                        className="px-4 py-10 text-center opacity-40"
+                      >
                         No countries found.
                       </td>
                     </tr>
@@ -212,13 +232,17 @@ const Location = () => {
                         </td>
                         <td
                           className="px-4 py-2.5 font-semibold text-sm cursor-pointer hover:text-(--primary)"
-                          onClick={() => navigate(`/dashboard/location/${country._id}`)}
+                          onClick={() =>
+                            navigate(`/dashboard/location/${country._id}`)
+                          }
                         >
                           {country.name}
                         </td>
                         <td className="px-4 py-2.5">
                           <button
-                            onClick={() => handleToggle(country._id, country.status)}
+                            onClick={() =>
+                              handleToggle(country._id, country.status)
+                            }
                             className={`cursor-pointer w-8 h-4 rounded-full relative transition-colors ${
                               country.status ? "bg-(--primary)" : "bg-gray-400"
                             }`}
@@ -231,7 +255,8 @@ const Location = () => {
                           </button>
                         </td>
 
-                        {(locationPermission?.edit || locationPermission?.delete) && (
+                        {(locationPermission?.edit ||
+                          locationPermission?.delete) && (
                           <td className="px-4 py-2.5 text-right">
                             <div className="flex justify-end gap-2">
                               {locationPermission?.edit && (
@@ -275,7 +300,9 @@ const Location = () => {
             </div>
 
             {/* Pagination */}
-            <div className={`flex items-center justify-between p-3 border-t ${theme.divider}`}>
+            <div
+              className={`flex items-center justify-between p-3 border-t ${theme.divider}`}
+            >
               <span className="text-[11px] opacity-60">
                 Showing {countriesData.length} entries
               </span>
@@ -318,12 +345,17 @@ const Location = () => {
       {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-4">
-          <div className={`${theme.modal} p-5 rounded-xl w-full max-w-xs shadow-xl border border-gray-700/30`}>
+          <div
+            className={`${theme.modal} p-5 rounded-xl w-full max-w-xs shadow-xl border border-gray-700/30`}
+          >
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-sm font-bold">
                 {editingCountry ? "Edit Country" : "New Country"}
               </h3>
-              <button onClick={closeModal} className="opacity-50 cursor-pointer hover:text-(--primary)">
+              <button
+                onClick={closeModal}
+                className="opacity-50 cursor-pointer hover:text-(--primary)"
+              >
                 <FiXCircle size={16} />
               </button>
             </div>
@@ -344,7 +376,9 @@ const Location = () => {
                       name="countryName"
                       placeholder="Enter country name"
                       className={`w-full p-2 text-sm rounded-lg border outline-none focus:border-(--primary) transition-all ${theme.input} ${
-                        errors.countryName && touched.countryName ? "border-red-500" : ""
+                        errors.countryName && touched.countryName
+                          ? "border-red-500"
+                          : ""
                       }`}
                     />
                     <ErrorMessage
@@ -359,8 +393,12 @@ const Location = () => {
                     className="w-full cursor-pointer py-2 bg-(--primary) hover:opacity-90 text-white rounded-lg text-xs font-bold transition-all disabled:opacity-50"
                   >
                     {editingCountry
-                      ? updateLoading ? "Updating..." : "Update"
-                      : createLoading ? "Creating..." : "Create"}
+                      ? updateLoading
+                        ? "Updating..."
+                        : "Update"
+                      : createLoading
+                        ? "Creating..."
+                        : "Create"}
                   </button>
                 </Form>
               )}

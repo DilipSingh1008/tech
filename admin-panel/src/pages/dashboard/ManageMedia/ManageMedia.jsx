@@ -131,17 +131,18 @@ const ManageMedia = () => {
     <div className={`h-screen w-full flex flex-col ${theme.main}`}>
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-5xl mx-auto">
-          <div className="flex items-center justify-between mb-4">
-            <Searchbar
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setPage(1);
-              }}
-            />
-
+          <div className="flex items-center justify-between mb-4 gap-2">
+            <div className="flex-1 min-w-[150px]">
+              <Searchbar
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setPage(1);
+                }}
+              />
+            </div>
             <button
-              onClick={() => Navigate("/dashboard/manage-media/add")}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-(--primary) text-white rounded-lg text-xs font-semibold"
+              onClick={() => setIsModalOpen(true)}
+              className="flex cursor-pointer items-center gap-1.5 px-3 py-1.5 bg-(--primary) text-white rounded-lg text-xs font-semibold"
             >
               <Plus size={14} /> Add Media
             </button>
@@ -210,12 +211,12 @@ const ManageMedia = () => {
                             onClick={() =>
                               handleToggleStatus(item._id, item.status)
                             }
-                            className={`w-8 h-4 rounded-full relative ${
+                            className={`w-8 h-4 cursor-pointer rounded-full relative ${
                               item.status ? "bg-(--primary)" : "bg-gray-400"
                             }`}
                           >
                             <div
-                              className={`absolute top-0.5 w-3 h-3 bg-white rounded-full ${
+                              className={`absolute cursor-pointer top-0.5 w-3 h-3 bg-white rounded-full ${
                                 item.status ? "left-4.5" : "left-0.5"
                               }`}
                             />
@@ -233,14 +234,14 @@ const ManageMedia = () => {
                                 });
                                 setIsModalOpen(true);
                               }}
-                              className="p-1.5 hover:text-(--primary)"
+                              className="p-1.5 cursor-pointer hover:text-(--primary)"
                             >
                               <Edit3 size={14} />
                             </button>
 
                             <button
                               onClick={() => handleDelete(item._id)}
-                              className="p-1.5 hover:text-red-500"
+                              className="p-1.5 cursor-pointer hover:text-red-500"
                             >
                               <Trash2 size={14} />
                             </button>
@@ -264,7 +265,7 @@ const ManageMedia = () => {
                 <button
                   disabled={page === 1}
                   onClick={() => setPage(page - 1)}
-                  className="p-1.5 border rounded-md"
+                  className="p-1.5 cursor-pointer border rounded-md"
                 >
                   <FiChevronLeft size={16} />
                 </button>
@@ -273,7 +274,7 @@ const ManageMedia = () => {
                   <button
                     key={i}
                     onClick={() => setPage(i + 1)}
-                    className={`w-7 h-7 text-[11px] rounded-md border ${
+                    className={`w-7 h-7 text-[11px] cursor-pointer rounded-md border ${
                       page === i + 1 ? "bg-(--primary) text-white" : ""
                     }`}
                   >
@@ -284,7 +285,7 @@ const ManageMedia = () => {
                 <button
                   disabled={page === totalPages}
                   onClick={() => setPage(page + 1)}
-                  className="p-1.5 border rounded-md"
+                  className="p-1.5  cursor-pointer border rounded-md"
                 >
                   <FiChevronRight size={16} />
                 </button>
@@ -360,7 +361,7 @@ const ManageMedia = () => {
                       type="file"
                       accept="image/*"
                       required={!formData.id}
-                      className="w-full text-xs file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-bold file:bg-(--primary) file:text-white cursor-pointer"
+                      className="w-full cursor-pointer text-xs file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-bold file:bg-(--primary) file:text-white "
                       onChange={(e) =>
                         setFormData({
                           ...formData,
@@ -373,7 +374,7 @@ const ManageMedia = () => {
                   <button
                     type="submit"
                     disabled={createLoading || updateLoading}
-                    className="w-full py-2 mt-2 bg-(--primary) text-white rounded-lg text-xs font-bold hover:opacity-90 transition disabled:opacity-50"
+                    className="w-full cursor-pointer py-2 mt-2 bg-(--primary) text-white rounded-lg text-xs font-bold hover:opacity-90 transition disabled:opacity-50"
                   >
                     {formData.id
                       ? updateLoading

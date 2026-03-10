@@ -73,6 +73,13 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ["CRUD"],
     }),
+    logout: builder.mutation({
+      query: () => ({
+        url: "admin/logout",
+        method: "POST",
+      }),
+    }),
+    
   }),
 });
 
@@ -83,4 +90,5 @@ export const {
   useUpdateItemMutation,
   usePatchItemMutation,
   useDeleteItemMutation,
+  useLogoutMutation,
 } = apiSlice;

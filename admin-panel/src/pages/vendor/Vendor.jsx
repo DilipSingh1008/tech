@@ -52,7 +52,7 @@ const VendorPage = () => {
 
   // ── RTK Query: fetch vendors ──────────────────────────────────────────────
   const { data: vendorsData, isLoading } = useGetItemsQuery(
-    `vendors?page=${page}&limit=${limit}&search=${searchQuery}&sortField=${sortField}&sortOrder=${sortOrder}`
+    `vendors?page=${page}&limit=${limit}&search=${searchQuery}&sortField=${sortField}&sortOrder=${sortOrder}`,
   );
   const vendors = vendorsData?.data || [];
   const totalPages = vendorsData?.pagination?.totalPages || 1;
@@ -64,14 +64,14 @@ const VendorPage = () => {
   // ── RTK Query: fetch states (skip until country selected) ─────────────────
   const { data: statesData } = useGetItemsQuery(
     `statelocation/${selectedCountry}`,
-    { skip: !selectedCountry }
+    { skip: !selectedCountry },
   );
   const states = statesData?.data || [];
 
   // ── RTK Query: fetch cities (skip until state selected) ───────────────────
   const { data: citiesData } = useGetItemsQuery(
     `statelocation/${selectedState}/all-cities`,
-    { skip: !selectedState }
+    { skip: !selectedState },
   );
   const cities = citiesData?.data || [];
 
@@ -79,7 +79,7 @@ const VendorPage = () => {
   const [createItem] = useCreateItemMutation();
   const [updateItem] = useUpdateItemMutation();
   const [deleteItem] = useDeleteItemMutation();
-  const [patchItem] = usePatchItemMutation()
+  const [patchItem] = usePatchItemMutation();
 
   // ── Sort ──────────────────────────────────────────────────────────────────
   const handleSort = (field) => {
@@ -106,14 +106,20 @@ const VendorPage = () => {
 
   // ── Status Toggle ─────────────────────────────────────────────────────────
   const handleToggleStatus = async (item) => {
-    await patchItem({ url: `vendors/toggle-status/${item._id}`, data: { status: !item.status } });
+    await patchItem({
+      url: `vendors/toggle-status/${item._id}`,
+      data: { status: !item.status },
+    });
   };
 
   // ── Submit (create / update) ──────────────────────────────────────────────
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
       if (editingVendor) {
-        await updateItem({ url: `vendors/${editingVendor._id}`, data: values }).unwrap();
+        await updateItem({
+          url: `vendors/${editingVendor._id}`,
+          data: values,
+        }).unwrap();
       } else {
         await createItem({ url: "vendors", data: values }).unwrap();
       }
@@ -132,7 +138,7 @@ const VendorPage = () => {
     // Pre-seed cascading dropdowns for edit mode
     // Note: vendor stores names (lowercase), so we match by name to find IDs
     const matchedCountry = countries.find(
-      (c) => c.name?.toLowerCase() === vendor?.country
+      (c) => c.name?.toLowerCase() === vendor?.country,
     );
     setSelectedCountry(matchedCountry?._id || "");
     setSelectedState(""); // states will load after country resolves
@@ -160,16 +166,17 @@ const VendorPage = () => {
   return (
     <div className={`h-screen w-full flex flex-col ${theme.main}`}>
       <main className="flex-1 overflow-y-auto">
-        <div className="max-w-6xl mx-auto p-4">
-
+        <div className="max-w-6xl mx-auto">
           {/* Top Bar */}
-          <div className="flex items-center justify-between mb-4">
-            <Searchbar
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setPage(1);
-              }}
-            />
+          <div className="flex items-center justify-between mb-4 gap-2">
+            <div className="flex-1 min-w-[150px]">
+              <Searchbar
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setPage(1);
+                }}
+              />
+            </div>
             {vendorPermission?.add && (
               <button
                 onClick={() => openModal()}
@@ -181,30 +188,40 @@ const VendorPage = () => {
           </div>
 
           {/* Table */}
-          <div className={`rounded-xl border shadow-sm overflow-hidden ${theme.card}`}>
+          <div
+            className={`rounded-xl border shadow-sm overflow-hidden ${theme.card}`}
+          >
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
-                <thead className={`uppercase tracking-wider font-bold ${theme.header}`}>
+                <thead
+                  className={`uppercase tracking-wider font-bold ${theme.header}`}
+                >
                   <tr>
                     <th className="px-4 py-3">ID</th>
                     <th
                       className="px-4 py-3 cursor-pointer hover:text-(--primary) transition-colors"
                       onClick={() => handleSort("firmName")}
                     >
-                      <div className="flex items-center gap-1">Firm Name <SortIcon field="firmName" /></div>
+                      <div className="flex items-center gap-1">
+                        Firm Name <SortIcon field="firmName" />
+                      </div>
                     </th>
                     <th className="px-4 py-3">GST</th>
                     <th
                       className="px-4 py-3 cursor-pointer hover:text-(--primary) transition-colors"
                       onClick={() => handleSort("contactName")}
                     >
-                      <div className="flex items-center gap-1">Contact Name <SortIcon field="contactName" /></div>
+                      <div className="flex items-center gap-1">
+                        Contact Name <SortIcon field="contactName" />
+                      </div>
                     </th>
                     <th
                       className="px-4 py-3 cursor-pointer hover:text-(--primary) transition-colors"
                       onClick={() => handleSort("mobile")}
                     >
-                      <div className="flex items-center gap-1">Mobile <SortIcon field="mobile" /></div>
+                      <div className="flex items-center gap-1">
+                        Mobile <SortIcon field="mobile" />
+                      </div>
                     </th>
                     <th className="px-4 py-3">Location</th>
                     <th className="px-4 py-3">Status</th>
@@ -217,7 +234,10 @@ const VendorPage = () => {
                 <tbody className={`divide-y ${theme.divider}`}>
                   {isLoading ? (
                     <tr>
-                      <td colSpan={8} className="text-center py-6 opacity-40 italic">
+                      <td
+                        colSpan={8}
+                        className="text-center py-6 opacity-40 italic"
+                      >
                         Loading...
                       </td>
                     </tr>
@@ -229,14 +249,21 @@ const VendorPage = () => {
                     </tr>
                   ) : (
                     vendors.map((v, index) => (
-                      <tr key={v._id} className="hover:bg-indigo-500/5 transition-colors">
-                        <td className="px-4 py-2.5">{(page - 1) * limit + index + 1}</td>
+                      <tr
+                        key={v._id}
+                        className="hover:bg-indigo-500/5 transition-colors"
+                      >
+                        <td className="px-4 py-2.5">
+                          {(page - 1) * limit + index + 1}
+                        </td>
                         <td className="px-4 py-2.5">{v.firmName}</td>
                         <td className="px-4 py-2.5 uppercase">{v.gst}</td>
                         <td className="px-4 py-2.5">{v.contactName}</td>
                         <td className="px-4 py-2.5">{v.mobile}</td>
                         <td className="px-4 py-2.5">
-                          {[v.city, v.state, v.country].filter(Boolean).join(", ")}
+                          {[v.city, v.state, v.country]
+                            .filter(Boolean)
+                            .join(", ")}
                         </td>
                         <td className="px-4 py-2.5">
                           <button
@@ -252,7 +279,8 @@ const VendorPage = () => {
                             />
                           </button>
                         </td>
-                        {(vendorPermission?.edit || vendorPermission?.delete) && (
+                        {(vendorPermission?.edit ||
+                          vendorPermission?.delete) && (
                           <td className="px-4 py-2.5 text-right">
                             <div className="flex justify-end gap-2">
                               {vendorPermission?.edit && (
@@ -282,7 +310,9 @@ const VendorPage = () => {
             </div>
 
             {/* Pagination */}
-            <div className={`flex items-center justify-between p-3 border-t ${theme.divider}`}>
+            <div
+              className={`flex items-center justify-between p-3 border-t ${theme.divider}`}
+            >
               <span className="text-[11px] opacity-60">
                 Showing {vendors.length} entries
               </span>
@@ -358,7 +388,6 @@ const VendorPage = () => {
                 >
                   {({ values, setFieldValue, isSubmitting }) => (
                     <Form className="space-y-3">
-
                       {/* Firm Name */}
                       <div>
                         <Field
@@ -366,7 +395,11 @@ const VendorPage = () => {
                           placeholder="Firm Name"
                           className="w-full p-2 text-sm rounded-lg border border-gray-300 outline-none focus:border-(--primary)"
                         />
-                        <ErrorMessage name="firmName" component="div" className="text-red-500 text-xs" />
+                        <ErrorMessage
+                          name="firmName"
+                          component="div"
+                          className="text-red-500 text-xs"
+                        />
                       </div>
 
                       {/* GST */}
@@ -376,7 +409,11 @@ const VendorPage = () => {
                           placeholder="GST Number"
                           className="w-full p-2 text-sm rounded-lg border border-gray-300 uppercase outline-none focus:border-(--primary)"
                         />
-                        <ErrorMessage name="gst" component="div" className="text-red-500 text-xs" />
+                        <ErrorMessage
+                          name="gst"
+                          component="div"
+                          className="text-red-500 text-xs"
+                        />
                       </div>
 
                       {/* Contact Name */}
@@ -386,7 +423,11 @@ const VendorPage = () => {
                           placeholder="Contact Name"
                           className="w-full p-2 text-sm rounded-lg border border-gray-300 outline-none focus:border-(--primary)"
                         />
-                        <ErrorMessage name="contactName" component="div" className="text-red-500 text-xs" />
+                        <ErrorMessage
+                          name="contactName"
+                          component="div"
+                          className="text-red-500 text-xs"
+                        />
                       </div>
 
                       {/* Mobile */}
@@ -396,7 +437,11 @@ const VendorPage = () => {
                           placeholder="Mobile"
                           className="w-full p-2 text-sm rounded-lg border border-gray-300 outline-none focus:border-(--primary)"
                         />
-                        <ErrorMessage name="mobile" component="div" className="text-red-500 text-xs" />
+                        <ErrorMessage
+                          name="mobile"
+                          component="div"
+                          className="text-red-500 text-xs"
+                        />
                       </div>
 
                       {/* Address */}
@@ -408,7 +453,11 @@ const VendorPage = () => {
                           rows={2}
                           className="w-full p-2 text-sm rounded-lg border border-gray-300 resize-none outline-none focus:border-(--primary)"
                         />
-                        <ErrorMessage name="address" component="div" className="text-red-500 text-xs" />
+                        <ErrorMessage
+                          name="address"
+                          component="div"
+                          className="text-red-500 text-xs"
+                        />
                       </div>
 
                       {/* Country */}
@@ -417,22 +466,37 @@ const VendorPage = () => {
                           as="select"
                           name="country"
                           onChange={(e) => {
-                            const selected = countries.find((c) => c._id === e.target.value);
-                            setFieldValue("country", selected?.name?.toLowerCase() || "");
+                            const selected = countries.find(
+                              (c) => c._id === e.target.value,
+                            );
+                            setFieldValue(
+                              "country",
+                              selected?.name?.toLowerCase() || "",
+                            );
                             setFieldValue("state", "");
                             setFieldValue("city", "");
                             setSelectedCountry(e.target.value);
                             setSelectedState("");
                           }}
-                          value={countries.find((c) => c.name?.toLowerCase() === values.country)?._id || ""}
+                          value={
+                            countries.find(
+                              (c) => c.name?.toLowerCase() === values.country,
+                            )?._id || ""
+                          }
                           className="w-full p-2 text-sm rounded-lg border border-gray-300 outline-none focus:border-(--primary)"
                         >
                           <option value="">Select Country</option>
                           {countries.map((c) => (
-                            <option key={c._id} value={c._id}>{c.name}</option>
+                            <option key={c._id} value={c._id}>
+                              {c.name}
+                            </option>
                           ))}
                         </Field>
-                        <ErrorMessage name="country" component="div" className="text-red-500 text-xs" />
+                        <ErrorMessage
+                          name="country"
+                          component="div"
+                          className="text-red-500 text-xs"
+                        />
                       </div>
 
                       {/* State */}
@@ -442,20 +506,35 @@ const VendorPage = () => {
                           name="state"
                           disabled={!values.country}
                           onChange={(e) => {
-                            const selected = states.find((s) => s._id === e.target.value);
-                            setFieldValue("state", selected?.name?.toLowerCase() || "");
+                            const selected = states.find(
+                              (s) => s._id === e.target.value,
+                            );
+                            setFieldValue(
+                              "state",
+                              selected?.name?.toLowerCase() || "",
+                            );
                             setFieldValue("city", "");
                             setSelectedState(e.target.value);
                           }}
-                          value={states.find((s) => s.name?.toLowerCase() === values.state)?._id || ""}
+                          value={
+                            states.find(
+                              (s) => s.name?.toLowerCase() === values.state,
+                            )?._id || ""
+                          }
                           className="w-full p-2 text-sm rounded-lg border border-gray-300 outline-none focus:border-(--primary) disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           <option value="">Select State</option>
                           {states.map((s) => (
-                            <option key={s._id} value={s._id}>{s.name}</option>
+                            <option key={s._id} value={s._id}>
+                              {s.name}
+                            </option>
                           ))}
                         </Field>
-                        <ErrorMessage name="state" component="div" className="text-red-500 text-xs" />
+                        <ErrorMessage
+                          name="state"
+                          component="div"
+                          className="text-red-500 text-xs"
+                        />
                       </div>
 
                       {/* City */}
@@ -465,18 +544,33 @@ const VendorPage = () => {
                           name="city"
                           disabled={!values.state}
                           onChange={(e) => {
-                            const selected = cities.find((c) => c._id === e.target.value);
-                            setFieldValue("city", selected?.name?.toLowerCase() || "");
+                            const selected = cities.find(
+                              (c) => c._id === e.target.value,
+                            );
+                            setFieldValue(
+                              "city",
+                              selected?.name?.toLowerCase() || "",
+                            );
                           }}
-                          value={cities.find((c) => c.name?.toLowerCase() === values.city)?._id || ""}
+                          value={
+                            cities.find(
+                              (c) => c.name?.toLowerCase() === values.city,
+                            )?._id || ""
+                          }
                           className="w-full p-2 text-sm rounded-lg border border-gray-300 outline-none focus:border-(--primary) disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           <option value="">Select City</option>
                           {cities.map((c) => (
-                            <option key={c._id} value={c._id}>{c.name}</option>
+                            <option key={c._id} value={c._id}>
+                              {c.name}
+                            </option>
                           ))}
                         </Field>
-                        <ErrorMessage name="city" component="div" className="text-red-500 text-xs" />
+                        <ErrorMessage
+                          name="city"
+                          component="div"
+                          className="text-red-500 text-xs"
+                        />
                       </div>
 
                       <button
@@ -492,7 +586,6 @@ const VendorPage = () => {
               </div>
             </div>
           )}
-
         </div>
       </main>
     </div>

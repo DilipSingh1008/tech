@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 
 import { useDispatch } from "react-redux";
+import { setPermissions } from "../../redux/store/permissionSlice";
+
 // import { setPermissions } from "../../redux/store/permissionSlice.js";
 import {
   useCreateItemMutation,
@@ -60,9 +62,17 @@ const Login = () => {
         localStorage.setItem("roleId", user.roleId);
         localStorage.setItem("role", user.role);
 
+        dispatch(
+          setPermissions({
+            roleId: user.roleId,
+            roleName: user.role,
+            permissions: [],
+          }),
+        );
+
         navigate("/dashboard");
       } catch (error) {
-        console.log(error)
+        console.log(error);
         setStatus(error?.data?.message || "Login failed");
       } finally {
         setSubmitting(false);
@@ -75,24 +85,14 @@ const Login = () => {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[var(--primary-glow)] rounded-full blur-[120px] opacity-40 pointer-events-none" />
 
       <div className="w-full max-w-[400px] z-10">
-        <button
-          onClick={() => navigate(-1)}
-          className="mb-4 flex items-center gap-2 text-[var(--text-muted)] hover:text-[var(--primary)] transition-colors text-sm font-medium"
-        >
-          <ArrowLeft size={16} /> Back
-        </button>
-
         <div className="dark-glass rounded-2xl p-8 shadow-2xl border border-[var(--border-color)] bg-[var(--card-bg)]/80">
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-[var(--primary)]/10 border border-[var(--primary)]/20 mb-4">
               <Edit3 className="text-[var(--primary)]" size={24} />
             </div>
             <h1 className="text-2xl font-bold text-[var(--text-main)] tracking-tight">
-              Update Record
+              Login Admin Pannel
             </h1>
-            <p className="text-[var(--text-muted)] text-sm mt-1">
-              Modifying entry ID: {id}
-            </p>
           </div>
 
           {formik.status && (
@@ -105,7 +105,7 @@ const Login = () => {
             {/* Email Field */}
             <div className="space-y-2">
               <label className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider ml-1">
-                Update Email
+                Email
               </label>
               <div className="relative">
                 <Mail
@@ -130,7 +130,7 @@ const Login = () => {
             {/* Password Field */}
             <div className="space-y-2">
               <label className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider px-1">
-                New Password
+                Password
               </label>
               <div className="relative">
                 <Edit3
@@ -160,9 +160,7 @@ const Login = () => {
               {formik.isSubmitting ? (
                 <Loader2 className="animate-spin" size={20} />
               ) : (
-                <>
-                  <Save size={18} /> Login
-                </>
+                <>Login</>
               )}
             </button>
           </form>

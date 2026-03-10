@@ -3,7 +3,7 @@ const bcrypt = require("bcrypt");
 
 const userSchema = new mongoose.Schema(
   {
-    name: {
+    fullName: {
       type: String,
       required: true,
       trim: true,
@@ -33,7 +33,10 @@ const userSchema = new mongoose.Schema(
     },
 
     role: { type: mongoose.Schema.Types.ObjectId, ref: "Role", required: true },
-
+    phone: {
+      type: String,
+      default: "",
+    },
     status: {
       type: Boolean,
       default: true,

@@ -68,7 +68,7 @@ const Enquires = () => {
 
   // ── RTK Query: fetch enquiries ────────────────────────────────────────────
   const { data, isLoading } = useGetItemsQuery(
-    `enquiry?page=${page}&limit=${LIMIT}&sortBy=${sortBy}&order=${order}&search=${searchQuery}`
+    `enquiry?page=${page}&limit=${LIMIT}&sortBy=${sortBy}&order=${order}&search=${searchQuery}`,
   );
   const enquiriesData = data?.data || [];
   const totalPages = data?.pagination?.totalPages || 1;
@@ -76,7 +76,7 @@ const Enquires = () => {
   // ── RTK Query: mobile autocomplete search ─────────────────────────────────
   const { data: mobileData } = useGetItemsQuery(
     `enquiry/search-mobile-number?mobile=${mobileSearch}`,
-    { skip: mobileSearch.length < 3 }
+    { skip: mobileSearch.length < 3 },
   );
   const mobileResults = mobileData || [];
 
@@ -132,15 +132,16 @@ const Enquires = () => {
     <div className={`h-screen w-full flex flex-col ${theme.main}`}>
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-5xl mx-auto">
-
           {/* Header */}
-          <div className="flex items-center justify-between mb-4">
-            <Searchbar
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setPage(1);
-              }}
-            />
+          <div className="flex items-center justify-between mb-4 gap-2">
+            <div className="flex-1 min-w-[150px]">
+              <Searchbar
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setPage(1);
+                }}
+              />
+            </div>
             <button
               onClick={() => setIsAddModalOpen(true)}
               className="flex items-center cursor-pointer gap-1.5 px-3 py-1.5 bg-(--primary) hover:opacity-90 text-white rounded-lg text-xs font-semibold transition-all shadow-sm"
@@ -150,47 +151,63 @@ const Enquires = () => {
           </div>
 
           {/* Table */}
-          <div className={`rounded-xl border shadow-sm overflow-hidden ${theme.card}`}>
+          <div
+            className={`rounded-xl border shadow-sm overflow-hidden ${theme.card}`}
+          >
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
-                <thead className={`uppercase tracking-wider font-bold ${theme.header}`}>
+                <thead
+                  className={`uppercase tracking-wider font-bold ${theme.header}`}
+                >
                   <tr>
                     <th className="px-4 py-3 w-14">ID</th>
                     <th
                       className="px-4 py-3 cursor-pointer hover:text-(--primary) transition-colors"
                       onClick={() => handleSort("name")}
                     >
-                      <div className="flex items-center gap-1">Client Name <SortIcon field="name" /></div>
+                      <div className="flex items-center gap-1">
+                        Client Name <SortIcon field="name" />
+                      </div>
                     </th>
                     <th
                       className="px-4 py-3 cursor-pointer hover:text-(--primary) transition-colors"
                       onClick={() => handleSort("email")}
                     >
-                      <div className="flex items-center gap-1">Email <SortIcon field="email" /></div>
+                      <div className="flex items-center gap-1">
+                        Email <SortIcon field="email" />
+                      </div>
                     </th>
                     <th
                       className="px-4 py-3 cursor-pointer hover:text-(--primary) transition-colors"
                       onClick={() => handleSort("mobile")}
                     >
-                      <div className="flex items-center gap-1">Mobile <SortIcon field="mobile" /></div>
+                      <div className="flex items-center gap-1">
+                        Mobile <SortIcon field="mobile" />
+                      </div>
                     </th>
                     <th
                       className="px-4 py-3 cursor-pointer hover:text-(--primary) transition-colors"
                       onClick={() => handleSort("service_id")}
                     >
-                      <div className="flex items-center gap-1">Service Name <SortIcon field="service_id" /></div>
+                      <div className="flex items-center gap-1">
+                        Service Name <SortIcon field="service_id" />
+                      </div>
                     </th>
                     <th
                       className="px-4 py-3 cursor-pointer hover:text-(--primary) transition-colors"
                       onClick={() => handleSort("type")}
                     >
-                      <div className="flex items-center gap-1">Type <SortIcon field="type" /></div>
+                      <div className="flex items-center gap-1">
+                        Type <SortIcon field="type" />
+                      </div>
                     </th>
                     <th
                       className="px-4 py-3 cursor-pointer hover:text-(--primary) transition-colors"
                       onClick={() => handleSort("date")}
                     >
-                      <div className="flex items-center gap-1">Date <SortIcon field="date" /></div>
+                      <div className="flex items-center gap-1">
+                        Date <SortIcon field="date" />
+                      </div>
                     </th>
                     <th className="px-4 py-3">Message</th>
                   </tr>
@@ -199,13 +216,19 @@ const Enquires = () => {
                 <tbody className={`divide-y ${theme.divider}`}>
                   {isLoading ? (
                     <tr>
-                      <td colSpan={8} className="px-4 py-10 text-center opacity-40 italic">
+                      <td
+                        colSpan={8}
+                        className="px-4 py-10 text-center opacity-40 italic"
+                      >
                         Loading...
                       </td>
                     </tr>
                   ) : enquiriesData.length === 0 ? (
                     <tr>
-                      <td colSpan={8} className="px-4 py-10 text-center opacity-40">
+                      <td
+                        colSpan={8}
+                        className="px-4 py-10 text-center opacity-40"
+                      >
                         No enquiries found.
                       </td>
                     </tr>
@@ -221,25 +244,33 @@ const Enquires = () => {
                         <td className="px-4 py-2.5">
                           <div className="flex items-center gap-1.5">
                             <FiUser size={11} className="opacity-40" />
-                            <span className="font-semibold">{enquiry.client?.name}</span>
+                            <span className="font-semibold">
+                              {enquiry.client?.name}
+                            </span>
                           </div>
                         </td>
                         <td className="px-4 py-2.5">
                           <div className="flex items-center gap-1.5">
                             <FiMail size={11} className="shrink-0" />
-                            <span className="text-[11px]">{enquiry.client?.email || "N/A"}</span>
+                            <span className="text-[11px]">
+                              {enquiry.client?.email || "N/A"}
+                            </span>
                           </div>
                         </td>
                         <td className="px-4 py-2.5">
                           <div className="flex items-center gap-1.5">
                             <FiPhone size={11} className="shrink-0" />
-                            <span className="text-[11px]">{enquiry.client?.mobile || "N/A"}</span>
+                            <span className="text-[11px]">
+                              {enquiry.client?.mobile || "N/A"}
+                            </span>
                           </div>
                         </td>
                         <td className="px-4 py-2.5">
                           <div className="flex items-center gap-1.5">
                             <FiSettings size={11} className="opacity-40" />
-                            <span className="font-mono text-[11px]">{enquiry.service_id || "N/A"}</span>
+                            <span className="font-mono text-[11px]">
+                              {enquiry.service_id || "N/A"}
+                            </span>
                           </div>
                         </td>
                         <td className="px-4 py-2.5">
@@ -254,11 +285,14 @@ const Enquires = () => {
                           <div className="flex items-center gap-1.5">
                             <FiCalendar size={11} />
                             <span>
-                              {new Date(enquiry.enquiryDate).toLocaleDateString("en-GB", {
-                                day: "2-digit",
-                                month: "short",
-                                year: "numeric",
-                              })}
+                              {new Date(enquiry.enquiryDate).toLocaleDateString(
+                                "en-GB",
+                                {
+                                  day: "2-digit",
+                                  month: "short",
+                                  year: "numeric",
+                                },
+                              )}
                             </span>
                           </div>
                         </td>
@@ -279,7 +313,9 @@ const Enquires = () => {
             </div>
 
             {/* Pagination */}
-            <div className={`flex items-center justify-between p-3 border-t ${theme.borderT}`}>
+            <div
+              className={`flex items-center justify-between p-3 border-t ${theme.borderT}`}
+            >
               <span className="text-[11px] opacity-60">
                 Showing {enquiriesData.length} entries
               </span>
@@ -340,24 +376,35 @@ const Enquires = () => {
               </button>
             </div>
 
-            <div className={`grid grid-cols-2 gap-x-4 gap-y-2 mb-4 pb-4 border-b ${theme.borderT}`}>
+            <div
+              className={`grid grid-cols-2 gap-x-4 gap-y-2 mb-4 pb-4 border-b ${theme.borderT}`}
+            >
               <span className="flex items-center gap-1.5 text-[10px] opacity-60 truncate">
-                <FiUser size={10} className="shrink-0" /> {selectedEnquiry.client?.name || "N/A"}
+                <FiUser size={10} className="shrink-0" />{" "}
+                {selectedEnquiry.client?.name || "N/A"}
               </span>
               <span className="flex items-center gap-1.5 text-[10px] opacity-60 truncate">
-                <FiSettings size={10} className="shrink-0" /> {selectedEnquiry.service_id || "N/A"}
+                <FiSettings size={10} className="shrink-0" />{" "}
+                {selectedEnquiry.service_id || "N/A"}
               </span>
               <span className="flex items-center gap-1.5 text-[10px] opacity-60 truncate">
-                <FiMail size={10} className="shrink-0" /> {selectedEnquiry.email || "N/A"}
+                <FiMail size={10} className="shrink-0" />{" "}
+                {selectedEnquiry.email || "N/A"}
               </span>
               <span className="flex items-center gap-1.5 text-[10px] opacity-60 truncate">
-                <FiPhone size={10} className="shrink-0" /> {selectedEnquiry.mobile || "N/A"}
+                <FiPhone size={10} className="shrink-0" />{" "}
+                {selectedEnquiry.mobile || "N/A"}
               </span>
               <span className="flex items-center gap-1.5 text-[10px] opacity-60">
                 <FiCalendar size={10} className="shrink-0" />
-                {new Date(selectedEnquiry.enquiryDate).toLocaleDateString("en-GB", {
-                  day: "2-digit", month: "short", year: "numeric",
-                })}
+                {new Date(selectedEnquiry.enquiryDate).toLocaleDateString(
+                  "en-GB",
+                  {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                  },
+                )}
               </span>
               <span
                 className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-semibold w-fit ${TYPE_COLORS[selectedEnquiry.type] || "text-gray-400 bg-gray-400/10 border-gray-400/20"}`}
@@ -403,7 +450,6 @@ const Enquires = () => {
             >
               {({ errors, touched, isSubmitting, setFieldValue }) => (
                 <Form className="space-y-3" noValidate>
-
                   {/* Mobile */}
                   <div>
                     <label className="block text-[10px] font-bold opacity-50 uppercase mb-1">
@@ -473,7 +519,11 @@ const Enquires = () => {
                         className={`w-full pl-7 pr-3 py-2 text-sm rounded-lg border outline-none focus:border-(--primary) transition-all ${theme.input} ${errors.name && touched.name ? "border-red-500" : ""}`}
                       />
                     </div>
-                    <ErrorMessage name="name" component="span" className="text-red-400 text-[10px] mt-1 block" />
+                    <ErrorMessage
+                      name="name"
+                      component="span"
+                      className="text-red-400 text-[10px] mt-1 block"
+                    />
                   </div>
 
                   {/* Email */}
@@ -493,7 +543,11 @@ const Enquires = () => {
                         className={`w-full pl-7 pr-3 py-2 text-sm rounded-lg border outline-none focus:border-(--primary) transition-all ${theme.input} ${errors.email && touched.email ? "border-red-500" : ""}`}
                       />
                     </div>
-                    <ErrorMessage name="email" component="span" className="text-red-400 text-[10px] mt-1 block" />
+                    <ErrorMessage
+                      name="email"
+                      component="span"
+                      className="text-red-400 text-[10px] mt-1 block"
+                    />
                   </div>
 
                   {/* Message */}
@@ -508,7 +562,11 @@ const Enquires = () => {
                       placeholder="Write your message..."
                       className={`w-full px-3 py-2 text-sm rounded-lg border outline-none focus:border-(--primary) transition-all resize-none ${theme.input} ${errors.message && touched.message ? "border-red-500" : ""}`}
                     />
-                    <ErrorMessage name="message" component="span" className="text-red-400 text-[10px] mt-1 block" />
+                    <ErrorMessage
+                      name="message"
+                      component="span"
+                      className="text-red-400 text-[10px] mt-1 block"
+                    />
                   </div>
 
                   <button

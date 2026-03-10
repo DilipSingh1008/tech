@@ -3,7 +3,7 @@ const router = express.Router();
 const User = require("../models/User");
 const register = require("../controllers/authController");
 // Admin Register (One-time)
-console.log(register);
+// console.log(register);
 router.post("/register", async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -25,5 +25,6 @@ router.post("/register", async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
+router.post("/logout", authController.logout);
 
 module.exports = router;
