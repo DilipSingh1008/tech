@@ -282,8 +282,8 @@ const MediaPreview = ({ type, icon, link, title }) => {
       if (youtubeId) {
         return (
           <iframe
-            width="200"
-            height="120"
+            width="120"
+            height="80"
             src={`https://www.youtube.com/embed/${youtubeId}`}
             title={title}
             frameBorder="0"
@@ -299,8 +299,8 @@ const MediaPreview = ({ type, icon, link, title }) => {
         return (
           <iframe
             src={fbEmbed}
-            width="200"
-            height="120"
+            width="120"
+            height="80"
             style={{ border: "none", overflow: "hidden" }}
             scrolling="no"
             frameBorder="0"
@@ -317,8 +317,8 @@ const MediaPreview = ({ type, icon, link, title }) => {
           return (
             <iframe
               src={igEmbed}
-              width="200"
-              height="120"
+              width="120"
+              height="80"
               style={{ border: "none", overflow: "hidden" }}
               scrolling="no"
               frameBorder="0"

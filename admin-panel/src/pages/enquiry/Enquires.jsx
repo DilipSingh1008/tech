@@ -13,6 +13,7 @@ import {
   FiPlusCircle,
   FiMail,
   FiPhone,
+  FiRefreshCw,
 } from "react-icons/fi";
 import { useTheme } from "../../context/ThemeContext";
 import {
@@ -20,7 +21,9 @@ import {
   useCreateItemMutation,
 } from "../../redux/api/apiSlice.js";
 import Searchbar from "../../components/Searchbar";
-
+import { saveAs } from "file-saver";
+import * as XLSX from "xlsx";
+import { FaFileExcel } from "react-icons/fa";
 const TYPE_COLORS = {
   Support: "text-blue-400 bg-blue-400/10 border-blue-400/20",
   Sales: "text-green-400 bg-green-400/10 border-green-400/20",
@@ -58,6 +61,8 @@ const Enquires = () => {
   const [page, setPage] = useState(1);
   const [sortBy, setSortBy] = useState("date");
   const [order, setOrder] = useState("desc");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
 
   const [selectedEnquiry, setSelectedEnquiry] = useState(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -67,8 +72,19 @@ const Enquires = () => {
   const [showDropdown, setShowDropdown] = useState(false);
 
   // ── RTK Query: fetch enquiries ────────────────────────────────────────────
+  const queryParams = new URLSearchParams({
+    page,
+    limit: LIMIT,
+    sortBy,
+    order,
+    search: searchQuery,
+  });
+
+  if (fromDate) queryParams.append("fromDate", fromDate);
+  if (toDate) queryParams.append("toDate", toDate);
+
   const { data, isLoading } = useGetItemsQuery(
-    `enquiry?page=${page}&limit=${LIMIT}&sortBy=${sortBy}&order=${order}&search=${searchQuery}`,
+    `enquiry?${queryParams.toString()}`,
   );
   const enquiriesData = data?.data || [];
   const totalPages = data?.pagination?.totalPages || 1;
@@ -134,20 +150,94 @@ const Enquires = () => {
         <div className="max-w-5xl mx-auto">
           {/* Header */}
           <div className="flex items-center justify-between mb-4 gap-2">
-            <div className="flex-1 min-w-[150px]">
+            <div className="flex items-center gap-2">
+              {/* Search bar */}
               <Searchbar
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
                   setPage(1);
                 }}
               />
+
+              {/* From Date */}
+              <input
+                type="date"
+                className={`border rounded px-2 py-1 text-sm ${
+                  isDarkMode
+                    ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                    : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
+                }`}
+                value={fromDate}
+                onChange={(e) => {
+                  setFromDate(e.target.value);
+                  setPage(1);
+                }}
+                placeholder="From"
+              />
+
+              {/* To Date */}
+              <input
+                type="date"
+                className={`border rounded px-2 py-1 text-sm ${
+                  isDarkMode
+                    ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                    : "bg-white border-gray-300 text-gray-900 placeholder-gray-500"
+                }`}
+                value={toDate}
+                onChange={(e) => {
+                  setToDate(e.target.value);
+                  setPage(1);
+                }}
+                placeholder="To"
+              />
+
+              {/* Reload Button */}
+              <button
+                onClick={() => {
+                  setSearchQuery("");
+                  setFromDate("");
+                  setToDate("");
+                  setPage(1);
+                }}
+                className={`flex items-center justify-center w-8 h-8 rounded border ${
+                  isDarkMode
+                    ? "border-gray-600 hover:border-gray-400 text-gray-300 hover:text-white"
+                    : "border-gray-300 hover:border-gray-500 text-gray-700 hover:text-gray-900"
+                } transition-colors`}
+              >
+                <FiRefreshCw size={16} />
+              </button>
             </div>
-            <button
-              onClick={() => setIsAddModalOpen(true)}
-              className="flex items-center cursor-pointer gap-1.5 px-3 py-1.5 bg-(--primary) hover:opacity-90 text-white rounded-lg text-xs font-semibold transition-all shadow-sm"
-            >
-              <FiPlusCircle size={14} /> Add Enquiry
-            </button>
+
+            {/* Download Excel */}
+            <div className="flex flex-wrap items-center gap-2">
+              {" "}
+              <button
+                onClick={() => {
+                  const ws = XLSX.utils.json_to_sheet(enquiriesData);
+                  const wb = XLSX.utils.book_new();
+                  XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+                  const excelBuffer = XLSX.write(wb, {
+                    bookType: "xlsx",
+                    type: "array",
+                  });
+                  const blob = new Blob([excelBuffer], {
+                    type: "application/octet-stream",
+                  });
+                  saveAs(blob, "data.xlsx");
+                }}
+                className="flex items-center gap-1 bg-green-500 text-white px-3 py-1 rounded-lg text-sm hover:bg-green-600"
+              >
+                <FaFileExcel /> Download Excel
+              </button>
+              {/* Add Enquiry */}
+              <button
+                onClick={() => setIsAddModalOpen(true)}
+                className="flex items-center cursor-pointer gap-1.5 px-3 py-1.5 bg-(--primary) hover:opacity-90 text-white rounded-lg text-xs font-semibold transition-all shadow-sm"
+              >
+                <FiPlusCircle size={14} /> Add Enquiry
+              </button>
+            </div>
           </div>
 
           {/* Table */}
