@@ -122,3 +122,48 @@ exports.deleteUser = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+exports.getUserPermissions = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id)
+      .populate("role", "name permissions")
+      .populate("permissions.module", "name label");
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    res.json({
+      name: user.name,
+      role: user.role?.name || "",
+      permissions: user.permissions || [],
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.updateUserPermissions = async (req, res) => {
+  try {
+    const { permissions = [] } = req.body;
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const formattedPermissions = permissions.map((p) => ({
+      module: p.module,
+      view: p.all ? true : !!p.view,
+      add: p.all ? true : !!p.add,
+      edit: p.all ? true : !!p.edit,
+      delete: p.all ? true : !!p.delete,
+      all: !!p.all,
+    }));
+
+    user.permissions = formattedPermissions;
+    await user.save();
+
+    res.json({
+      message: "User permissions updated successfully",
+      data: user,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

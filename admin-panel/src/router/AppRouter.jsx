@@ -30,6 +30,8 @@ import DashboardShow from "../pages/dashboard/DashboardShow.jsx";
 import ManageFaqCategory from "../pages/dashboard/faq-category/ManageFaqCategory.jsx";
 import ManageFaq from "../pages/dashboard/faq-category/ManageFaq.jsx";
 import ManagePermissions from "../pages/dashboard/UserPage/ManagePermissions.jsx";
+import ManageModules from "../pages/dashboard/UserPage/ManageModules.jsx";
+import ManageUserPermissions from "../pages/dashboard/UserPage/ManageUserPermissions.jsx";
 import ManageNews from "../pages/dashboard/MangeNews/ManageNews.jsx";
 import NewsForm from "../pages/dashboard/MangeNews/NewsForm.jsx";
 import ManageBlogCategory from "../pages/dashboard/Blog/ManageBlogCategory.jsx";
@@ -40,6 +42,7 @@ import Enquires from "../pages/enquiry/Enquires.jsx";
 import Vendor from "../pages/vendor/Vendor.jsx";
 import ManageCareer from "../pages/dashboard/Career/ManageCareer.jsx";
 import ManageMediaPost from "../pages/dashboard/MediaPost/ManageMediaPost.jsx";
+import ModulePlaceholder from "../pages/dashboard/ModulePlaceholder.jsx";
 // import ProductManagement from "../pages/dashboard/product/ProductCategory";
 // import ThemeToggleButton from "./components/Button";
 
@@ -101,6 +104,14 @@ function AppRouter() {
                 path="/dashboard/manage-permission/:id"
                 element={<ManagePermissions />}
               />
+              <Route
+                path="/dashboard/user-permission/:id"
+                element={<ManageUserPermissions />}
+              />
+              <Route
+                path="/dashboard/manage-modules"
+                element={<ManageModules />}
+              />
 
               <Route
                 path="/dashboard/faq-category"
@@ -130,6 +141,10 @@ function AppRouter() {
               <Route
                 path="/dashboard/Media-Post"
                 element={<ManageMediaPost />}
+              />
+              <Route
+                path="/dashboard/module/:name"
+                element={<ModulePlaceholder />}
               />
             </Route>
 

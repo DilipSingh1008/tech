@@ -3,6 +3,47 @@ const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const Role = require("../models/Role");
+
+const mergePermissions = (rolePermissions = [], userPermissions = []) => {
+  const map = new Map();
+
+  rolePermissions.forEach((p) => {
+    const key = p.module?._id?.toString() || p.module?.toString();
+    if (!key) return;
+    map.set(key, {
+      module: p.module,
+      all: !!p.all,
+      view: !!p.view,
+      add: !!p.add,
+      edit: !!p.edit,
+      delete: !!p.delete,
+    });
+  });
+
+  userPermissions.forEach((p) => {
+    const key = p.module?._id?.toString() || p.module?.toString();
+    if (!key) return;
+    const prev = map.get(key) || {
+      module: p.module,
+      all: false,
+      view: false,
+      add: false,
+      edit: false,
+      delete: false,
+    };
+
+    map.set(key, {
+      module: p.module || prev.module,
+      all: prev.all || !!p.all,
+      view: prev.view || !!p.view,
+      add: prev.add || !!p.add,
+      edit: prev.edit || !!p.edit,
+      delete: prev.delete || !!p.delete,
+    });
+  });
+
+  return Array.from(map.values());
+};
 // ⭐ get profile
 exports.getProfile = async (req, res) => {
   try {
@@ -256,5 +297,35 @@ exports.login = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
+  }
+};
+
+exports.getMyPermissions = async (req, res) => {
+  try {
+    if (req.user.role === "admin") {
+      return res.json({ name: "admin", permissions: [] });
+    }
+
+    const user = await User.findById(req.user.id)
+      .populate({
+        path: "role",
+        select: "name permissions",
+        populate: { path: "permissions.module", select: "name label" },
+      })
+      .populate("permissions.module", "name label");
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const effectivePermissions = mergePermissions(
+      user.role?.permissions || [],
+      user.permissions || []
+    );
+
+    res.json({
+      name: user.role?.name || req.user.role,
+      permissions: effectivePermissions,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };

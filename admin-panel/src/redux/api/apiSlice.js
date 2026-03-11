@@ -28,8 +28,8 @@ export const apiSlice = createApi({
     }),
 
     getItemById: builder.query({
-      query: ({ resource, id }) => ({
-        url: `/${resource}/${id}`,
+      query: ({ resource }) => ({
+        url: `/${resource}`,
         method: "GET",
       }),
       providesTags: ["CRUD"],

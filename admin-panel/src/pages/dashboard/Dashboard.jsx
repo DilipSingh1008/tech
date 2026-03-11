@@ -8,10 +8,9 @@ const DashboardLayout = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
 
   const roleId = localStorage.getItem("roleId");
-  const role = localStorage.getItem("role");
 
- const{data} = useGetItemsQuery(`role/${roleId}/permissions`, {
-    skip: !roleId || role === "admin",
+ const{data} = useGetItemsQuery("auth/my-permissions", {
+    skip: !roleId,
   });
 
   console.log(data)

@@ -10,6 +10,8 @@ const {
   getUsers,
   updateUser,
   deleteUser,
+  getUserPermissions,
+  updateUserPermissions,
 } = require("../controllers/userController");
 
 // CREATE
@@ -44,6 +46,20 @@ router.delete(
   auth(),
   checkPermission("users", "delete"),
   deleteUser
+);
+
+router.get(
+  "/:id/permissions",
+  auth(),
+  checkPermission("users", "view"),
+  getUserPermissions
+);
+
+router.put(
+  "/:id/permissions",
+  auth(),
+  checkPermission("users", "edit"),
+  updateUserPermissions
 );
 
 module.exports = router;

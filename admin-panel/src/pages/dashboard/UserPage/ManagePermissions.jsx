@@ -124,7 +124,7 @@ const ManagePermissions = () => {
     data: roleData,
     isLoading: loadingPerms,
     isError: permsError,
-  } = useGetItemByIdQuery(`role/${roleId}/permissions`, { skip: !roleId });
+  } = useGetItemByIdQuery({resource: `role/${roleId}/permissions`,  skip: !roleId });
 
   const roleName = roleData?.name ?? "";
 
