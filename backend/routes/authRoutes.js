@@ -12,11 +12,8 @@ router.post("/login", adminController.login);
 
 // ⭐ PROFILE ROUTES
 router.get("/profile", auth(), adminController.getProfile);
-<<<<<<< HEAD
 router.get("/my-permissions", auth(), adminController.getMyPermissions);
-=======
 router.post("/logout", authController.logout);
->>>>>>> b86534a8e191f14695608db1a365b23966ed1f3b
 
 router.put(
   "/profile",

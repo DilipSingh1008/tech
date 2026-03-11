@@ -4,7 +4,6 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const Role = require("../models/Role");
 
-<<<<<<< HEAD
 const mergePermissions = (rolePermissions = [], userPermissions = []) => {
   const map = new Map();
 
@@ -46,8 +45,6 @@ const mergePermissions = (rolePermissions = [], userPermissions = []) => {
   return Array.from(map.values());
 };
 // ⭐ get profile
-=======
->>>>>>> b86534a8e191f14695608db1a365b23966ed1f3b
 exports.getProfile = async (req, res) => {
   try {
     let profile;
@@ -335,8 +332,9 @@ exports.login = async (req, res) => {
     }
 
     // ⭐ last login
-    account.lastLogin = new Date();
-    await account.save();
+    await account.updateOne({
+      lastLogin: new Date(),
+    });
 
     const allowedRoles = ["sub-admin", "admin", "super-admin", "user"];
     if (!allowedRoles.includes(roleType)) {
@@ -372,7 +370,6 @@ exports.login = async (req, res) => {
   }
 };
 
-<<<<<<< HEAD
 exports.getMyPermissions = async (req, res) => {
   try {
     if (req.user.role === "admin") {
@@ -391,7 +388,7 @@ exports.getMyPermissions = async (req, res) => {
 
     const effectivePermissions = mergePermissions(
       user.role?.permissions || [],
-      user.permissions || []
+      user.permissions || [],
     );
 
     res.json({
@@ -400,7 +397,8 @@ exports.getMyPermissions = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
-=======
+  }
+};
 exports.logout = async (req, res) => {
   try {
     return res.status(200).json({
@@ -413,6 +411,5 @@ exports.logout = async (req, res) => {
       success: false,
       message: "Logout failed",
     });
->>>>>>> b86534a8e191f14695608db1a365b23966ed1f3b
   }
 };

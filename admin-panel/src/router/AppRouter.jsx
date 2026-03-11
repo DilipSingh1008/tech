@@ -119,8 +119,16 @@ function AppRouter() {
                 <Route path="/dashboard/user" element={<UserPage />} />
                 <Route path="/dashboard/managerole" element={<ManageRole />} />
                 <Route
+                  path="/dashboard/manage-modules"
+                  element={<ManageModules />}
+                />
+                <Route
                   path="/dashboard/manage-permission/:id"
                   element={<ManagePermissions />}
+                />
+                <Route
+                  path="/dashboard/user-permission/:id"
+                  element={<ManageUserPermissions />}
                 />
                 <Route
                   path="/dashboard/faq-category"

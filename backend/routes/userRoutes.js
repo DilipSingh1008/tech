@@ -39,7 +39,6 @@ router.put(
 router.delete("/:id", auth(), checkPermission("users", "delete"), deleteUser);
 router.post("/logout", authController.logout);
 
-<<<<<<< HEAD
 router.get(
   "/:id/permissions",
   auth(),
@@ -54,6 +53,4 @@ router.put(
   updateUserPermissions
 );
 
-=======
->>>>>>> b86534a8e191f14695608db1a365b23966ed1f3b
 module.exports = router;

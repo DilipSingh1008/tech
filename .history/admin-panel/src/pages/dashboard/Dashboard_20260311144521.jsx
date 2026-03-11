@@ -9,9 +9,9 @@ const DashboardLayout = () => {
 
   const roleId = localStorage.getItem("roleId");
 
-//  const{data} = useGetItemsQuery("auth/my-permissions", {
-//     skip: !roleId,
-//   });
+ const{data} = useGetItemsQuery("auth/my-permissions", {
+    skip: !roleId,
+  });
 
   //  const{data} = useGetItemsQuery(`role/${roleId}/permissions`, {
   //     skip: !roleId || role === "admin",

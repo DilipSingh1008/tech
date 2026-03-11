@@ -27,15 +27,14 @@ export const apiSlice = createApi({
     }),
 
     getItemById: builder.query({
-<<<<<<< HEAD
-      query: ({ resource }) => ({
-        url: `/${resource}`,
-=======
-      query: ({ url }) => ({
-        url: `/${url}`,
->>>>>>> b86534a8e191f14695608db1a365b23966ed1f3b
-        method: "GET",
-      }),
+      query: (arg) => {
+        const endpoint =
+          typeof arg === "string" ? arg : (arg?.url || arg?.resource);
+        return {
+          url: `/${endpoint}`,
+          method: "GET",
+        };
+      },
       providesTags: ["CRUD"],
     }),
 

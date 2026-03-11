@@ -45,8 +45,7 @@ const ManageUserPermissions = () => {
 
   const { data: userPermData, isLoading: loadingUser } = useGetItemByIdQuery({
     resource: `user/${userId}/permissions`,
-    skip: !userId,
-  });
+  }, { skip: !userId });
 
   const [updateItem, { isLoading: saving }] = useUpdateItemMutation();
 
@@ -150,4 +149,3 @@ const ManageUserPermissions = () => {
 };
 
 export default ManageUserPermissions;
-

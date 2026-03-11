@@ -144,8 +144,6 @@ exports.getUserPermissions = async (req, res) => {
 exports.updateUserPermissions = async (req, res) => {
   try {
     const { permissions = [] } = req.body;
-    const user = await User.findById(req.params.id);
-    if (!user) return res.status(404).json({ message: "User not found" });
 
     const formattedPermissions = permissions.map((p) => ({
       module: p.module,
@@ -156,14 +154,23 @@ exports.updateUserPermissions = async (req, res) => {
       all: !!p.all,
     }));
 
-    user.permissions = formattedPermissions;
-    await user.save();
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { permissions: formattedPermissions },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
     res.json({
       message: "User permissions updated successfully",
       data: user,
     });
+
   } catch (error) {
+    console.log(error);
     res.status(500).json({ message: error.message });
   }
 };
