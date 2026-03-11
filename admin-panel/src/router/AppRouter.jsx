@@ -30,6 +30,8 @@ import DashboardShow from "../pages/dashboard/DashboardShow.jsx";
 import ManageFaqCategory from "../pages/dashboard/faq-category/ManageFaqCategory.jsx";
 import ManageFaq from "../pages/dashboard/faq-category/ManageFaq.jsx";
 import ManagePermissions from "../pages/dashboard/UserPage/ManagePermissions.jsx";
+import ManageModules from "../pages/dashboard/UserPage/ManageModules.jsx";
+import ManageUserPermissions from "../pages/dashboard/UserPage/ManageUserPermissions.jsx";
 import ManageNews from "../pages/dashboard/MangeNews/ManageNews.jsx";
 import NewsForm from "../pages/dashboard/MangeNews/NewsForm.jsx";
 import ManageBlogCategory from "../pages/dashboard/Blog/ManageBlogCategory.jsx";
@@ -43,6 +45,8 @@ import ManageMediaPost from "../pages/dashboard/MediaPost/ManageMediaPost.jsx";
 import ManageMedia from "../pages/dashboard/ManageMedia/ManageMedia.jsx";
 import MediaItemsList from "../pages/dashboard/ManageMedia/MediaItemsList.jsx";
 import MediaAddEdit from "../pages/dashboard/ManageMedia/AddEditMediaItem.jsx";
+import ModulePlaceholder from "../pages/dashboard/ModulePlaceholder.jsx";
+
 import ProtectedRoute from "../pages/auth/ProtectedRoute.jsx";
 // import ProductManagement from "../pages/dashboard/product/ProductCategory";
 // import ThemeToggleButton from "./components/Button";
@@ -115,8 +119,16 @@ function AppRouter() {
                 <Route path="/dashboard/user" element={<UserPage />} />
                 <Route path="/dashboard/managerole" element={<ManageRole />} />
                 <Route
+                  path="/dashboard/manage-modules"
+                  element={<ManageModules />}
+                />
+                <Route
                   path="/dashboard/manage-permission/:id"
                   element={<ManagePermissions />}
+                />
+                <Route
+                  path="/dashboard/user-permission/:id"
+                  element={<ManageUserPermissions />}
                 />
                 <Route
                   path="/dashboard/faq-category"
@@ -169,6 +181,11 @@ function AppRouter() {
                   path="/dashboard/Manage-media-items/edit/:id"
                   element={<MediaAddEdit />}
                 />
+                <Route
+                path="/dashboard/module/:name"
+                element={<ModulePlaceholder />}
+              />
+
               </Route>
             </Route>
 

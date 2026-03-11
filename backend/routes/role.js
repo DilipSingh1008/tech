@@ -9,7 +9,17 @@ const {
   updatePermissions,
   getPermissions,
   getModules,
+  getAllModules,
+  createModule,
+  updateModule,
+  deleteModule,
 } = require("../controllers/roleController");
+
+router.get("/module/all", getAllModules);
+router.get("/module", getModules);
+router.post("/module", createModule);
+router.put("/module/:id", updateModule);
+router.delete("/module/:id", deleteModule);
 
 router.post("/", createRole);
 router.get("/", getRoles);
@@ -27,7 +37,5 @@ router.get(
   
   getPermissions
 );
-
-router.get("/module", getModules);
 
 module.exports = router;

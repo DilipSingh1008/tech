@@ -33,6 +33,21 @@ const userSchema = new mongoose.Schema(
     },
 
     role: { type: mongoose.Schema.Types.ObjectId, ref: "Role", required: true },
+    permissions: [
+      {
+        module: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Module",
+          required: true,
+        },
+        view: { type: Boolean, default: false },
+        add: { type: Boolean, default: false },
+        edit: { type: Boolean, default: false },
+        delete: { type: Boolean, default: false },
+        all: { type: Boolean, default: false },
+      },
+    ],
+
     phone: {
       type: String,
       default: "",

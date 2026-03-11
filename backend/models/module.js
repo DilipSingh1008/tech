@@ -30,9 +30,31 @@ const moduleSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+
+    view: {
+      type: Boolean,
+      default: true,
+    },
+
+    add: {
+      type: Boolean,
+      default: true,
+    },
+
+    edit: {
+      type: Boolean,
+      default: true,
+    },
+
+    delete: {
+      type: Boolean,
+      default: true,
+    },
   },
-  {collection: "Module"},
-  { timestamps: true }
+  {
+    collection: "Module",
+    timestamps: true,
+  }
 );
 
 module.exports = mongoose.model("Module", moduleSchema);

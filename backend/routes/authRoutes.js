@@ -12,6 +12,7 @@ router.post("/login", adminController.login);
 
 // ⭐ PROFILE ROUTES
 router.get("/profile", auth(), adminController.getProfile);
+router.get("/my-permissions", auth(), adminController.getMyPermissions);
 router.post("/logout", authController.logout);
 
 router.put(

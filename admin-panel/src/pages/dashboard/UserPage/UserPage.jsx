@@ -12,9 +12,11 @@ import {
 import { FiChevronRight, FiChevronLeft } from "react-icons/fi";
 import Searchbar from "../../../components/Searchbar";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 const UserPage = () => {
   const { isDarkMode } = useTheme();
+  const navigate = useNavigate();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
@@ -304,6 +306,19 @@ const UserPage = () => {
                                   </button>
                                   <span className="absolute bottom-full right-0 mb-1 hidden group-hover:block bg-black text-blue-400 text-[10px] px-2 py-2 rounded whitespace-nowrap">
                                     Edit user
+                                  </span>
+                                </div>
+                              )}
+                              {usersPermission?.edit && (
+                                <div className="relative group">
+                                  <button
+                                    onClick={() => navigate(`/dashboard/user-permission/${u._id}`)}
+                                    className="p-1.5 cursor-pointer hover:text-cyan-400"
+                                  >
+                                    P
+                                  </button>
+                                  <span className="absolute bottom-full right-0 mb-1 hidden group-hover:block bg-black text-cyan-300 text-[10px] px-2 py-2 rounded whitespace-nowrap">
+                                    User permissions
                                   </span>
                                 </div>
                               )}

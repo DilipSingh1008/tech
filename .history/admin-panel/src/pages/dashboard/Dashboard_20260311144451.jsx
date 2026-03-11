@@ -2,16 +2,16 @@ import { useState } from "react";
 import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
 import { Outlet } from "react-router-dom";
- import { useGetItemsQuery } from "../../redux/api/apiSlice";
+// import { useGetItemsQuery } from "../../redux/api/apiSlice";
 
 const DashboardLayout = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
 
   const roleId = localStorage.getItem("roleId");
 
-//  const{data} = useGetItemsQuery("auth/my-permissions", {
-//     skip: !roleId,
-//   });
+ const{data} = useGetItemsQuery("auth/my-permissions", {
+    skip: !roleId,
+  });
 
   //  const{data} = useGetItemsQuery(`role/${roleId}/permissions`, {
   //     skip: !roleId || role === "admin",
