@@ -52,7 +52,7 @@ const ClientPage = () => {
 
   // ── RTK Query: fetch clients ──────────────────────────────────────────────
   const { data: clientsData, isLoading } = useGetItemsQuery(
-    `client?page=${page}&limit=${limit}&search=${searchQuery}&sortField=${sortField}&sortOrder=${sortOrder}`
+    `client?page=${page}&limit=${limit}&search=${searchQuery}&sortField=${sortField}&sortOrder=${sortOrder}`,
   );
   const clients = clientsData?.data || [];
   const totalPages = clientsData?.pagination?.totalPages || 1;
@@ -64,14 +64,14 @@ const ClientPage = () => {
   // ── RTK Query: fetch states (only when a country is selected) ─────────────
   const { data: statesData } = useGetItemsQuery(
     `statelocation/${selectedCountry}`,
-    { skip: !selectedCountry }
+    { skip: !selectedCountry },
   );
   const states = statesData?.data || [];
 
   // ── RTK Query: fetch cities (only when a state is selected) ───────────────
   const { data: citiesData } = useGetItemsQuery(
     `statelocation/${selectedState}/all-cities`,
-    { skip: !selectedState }
+    { skip: !selectedState },
   );
   const cities = citiesData?.data || [];
 
@@ -79,7 +79,7 @@ const ClientPage = () => {
   const [createItem] = useCreateItemMutation();
   const [updateItem] = useUpdateItemMutation();
   const [deleteItem] = useDeleteItemMutation();
-  const [patchItem] = usePatchItemMutation()
+  const [patchItem] = usePatchItemMutation();
 
   // ── Sort ──────────────────────────────────────────────────────────────────
   const handleSort = (field) => {
@@ -100,14 +100,20 @@ const ClientPage = () => {
 
   // ── Status Toggle ─────────────────────────────────────────────────────────
   const handleToggleStatus = async (item) => {
-    await patchItem({ url: `client/toggle-status/${item._id}`, data: { status: !item.status } });
+    await patchItem({
+      url: `client/toggle-status/${item._id}`,
+      data: { status: !item.status },
+    });
   };
 
   // ── Submit (create / update) ──────────────────────────────────────────────
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
       if (editingClient) {
-        await updateItem({ url: `client/${editingClient._id}`, data: values }).unwrap();
+        await updateItem({
+          url: `client/${editingClient._id}`,
+          data: values,
+        }).unwrap();
       } else {
         await createItem({ url: "client", data: values }).unwrap();
       }
@@ -131,7 +137,9 @@ const ClientPage = () => {
 
   const ClientSchema = Yup.object().shape({
     name: Yup.string().required("Name is required"),
-    email: Yup.string().email("Enter valid email").required("Email is required"),
+    email: Yup.string()
+      .email("Enter valid email")
+      .required("Email is required"),
     mobile: Yup.string()
       .matches(/^[0-9]{10}$/, "Enter valid 10 digit number")
       .required("Mobile is required"),
@@ -143,16 +151,17 @@ const ClientPage = () => {
   return (
     <div className={`h-screen w-full flex flex-col ${theme.main}`}>
       <main className="flex-1 overflow-y-auto">
-        <div className="max-w-5xl mx-auto p-4">
-
+        <div className="max-w-5xl mx-auto ">
           {/* Top Bar */}
-          <div className="flex items-center justify-between mb-4">
-            <Searchbar
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setPage(1);
-              }}
-            />
+          <div className="flex items-center justify-between mb-4 gap-2">
+            <div className="flex-1 min-w-[150px]">
+              <Searchbar
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setPage(1);
+                }}
+              />
+            </div>
             {clientPermission?.add && (
               <button
                 onClick={() => openModal()}
@@ -164,10 +173,14 @@ const ClientPage = () => {
           </div>
 
           {/* Table */}
-          <div className={`rounded-xl border shadow-sm overflow-hidden ${theme.card}`}>
+          <div
+            className={`rounded-xl border shadow-sm overflow-hidden ${theme.card}`}
+          >
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
-                <thead className={`uppercase tracking-wider font-bold ${theme.header}`}>
+                <thead
+                  className={`uppercase tracking-wider font-bold ${theme.header}`}
+                >
                   <tr>
                     <th className="px-4 py-3">ID</th>
                     <th
@@ -177,7 +190,11 @@ const ClientPage = () => {
                       <div className="flex items-center gap-1">
                         Name
                         <span className="opacity-50 text-[10px]">
-                          {sortField === "name" ? (sortOrder === "asc" ? "▲" : "▼") : "↕"}
+                          {sortField === "name"
+                            ? sortOrder === "asc"
+                              ? "▲"
+                              : "▼"
+                            : "↕"}
                         </span>
                       </div>
                     </th>
@@ -188,7 +205,11 @@ const ClientPage = () => {
                       <div className="flex items-center gap-1">
                         Email
                         <span className="opacity-50 text-[10px]">
-                          {sortField === "email" ? (sortOrder === "asc" ? "▲" : "▼") : "↕"}
+                          {sortField === "email"
+                            ? sortOrder === "asc"
+                              ? "▲"
+                              : "▼"
+                            : "↕"}
                         </span>
                       </div>
                     </th>
@@ -204,7 +225,10 @@ const ClientPage = () => {
                 <tbody className={`divide-y ${theme.divider}`}>
                   {isLoading ? (
                     <tr>
-                      <td colSpan={7} className="text-center py-6 opacity-40 italic">
+                      <td
+                        colSpan={7}
+                        className="text-center py-6 opacity-40 italic"
+                      >
                         Loading...
                       </td>
                     </tr>
@@ -216,8 +240,13 @@ const ClientPage = () => {
                     </tr>
                   ) : (
                     clients.map((c, index) => (
-                      <tr key={c._id} className="hover:bg-indigo-500/5 transition-colors">
-                        <td className="px-4 py-2.5">{(page - 1) * limit + index + 1}</td>
+                      <tr
+                        key={c._id}
+                        className="hover:bg-indigo-500/5 transition-colors"
+                      >
+                        <td className="px-4 py-2.5">
+                          {(page - 1) * limit + index + 1}
+                        </td>
                         <td className="px-4 py-2.5">{c.name}</td>
                         <td className="px-4 py-2.5">{c.email}</td>
                         <td className="px-4 py-2.5">{c.mobile}</td>
@@ -240,7 +269,8 @@ const ClientPage = () => {
                             />
                           </button>
                         </td>
-                        {(clientPermission?.edit || clientPermission?.delete) && (
+                        {(clientPermission?.edit ||
+                          clientPermission?.delete) && (
                           <td className="px-4 py-2.5 text-right">
                             <div className="flex justify-end gap-2">
                               {clientPermission?.edit && (
@@ -270,7 +300,9 @@ const ClientPage = () => {
             </div>
 
             {/* Pagination */}
-            <div className={`flex items-center justify-between p-3 border-t ${theme.divider}`}>
+            <div
+              className={`flex items-center justify-between p-3 border-t ${theme.divider}`}
+            >
               <span className="text-[11px] opacity-60">
                 Showing {clients.length} entries
               </span>
@@ -344,7 +376,6 @@ const ClientPage = () => {
                 >
                   {({ values, setFieldValue }) => (
                     <Form className="space-y-3">
-
                       {/* Name */}
                       <div>
                         <Field
@@ -352,7 +383,11 @@ const ClientPage = () => {
                           placeholder="Name"
                           className="w-full p-2 text-sm rounded-lg border border-gray-300 outline-none focus:border-(--primary)"
                         />
-                        <ErrorMessage name="name" component="div" className="text-red-500 text-xs" />
+                        <ErrorMessage
+                          name="name"
+                          component="div"
+                          className="text-red-500 text-xs"
+                        />
                       </div>
 
                       {/* Email */}
@@ -362,7 +397,11 @@ const ClientPage = () => {
                           placeholder="Email"
                           className="w-full p-2 text-sm rounded-lg border border-gray-300 outline-none focus:border-(--primary)"
                         />
-                        <ErrorMessage name="email" component="div" className="text-red-500 text-xs" />
+                        <ErrorMessage
+                          name="email"
+                          component="div"
+                          className="text-red-500 text-xs"
+                        />
                       </div>
 
                       {/* Mobile */}
@@ -372,7 +411,11 @@ const ClientPage = () => {
                           placeholder="Mobile"
                           className="w-full p-2 text-sm rounded-lg border border-gray-300 outline-none focus:border-(--primary)"
                         />
-                        <ErrorMessage name="mobile" component="div" className="text-red-500 text-xs" />
+                        <ErrorMessage
+                          name="mobile"
+                          component="div"
+                          className="text-red-500 text-xs"
+                        />
                       </div>
 
                       {/* Country */}
@@ -392,10 +435,16 @@ const ClientPage = () => {
                         >
                           <option value="">Select Country</option>
                           {countries.map((c) => (
-                            <option key={c._id} value={c._id}>{c.name}</option>
+                            <option key={c._id} value={c._id}>
+                              {c.name}
+                            </option>
                           ))}
                         </Field>
-                        <ErrorMessage name="country" component="div" className="text-red-500 text-xs" />
+                        <ErrorMessage
+                          name="country"
+                          component="div"
+                          className="text-red-500 text-xs"
+                        />
                       </div>
 
                       {/* State */}
@@ -414,10 +463,16 @@ const ClientPage = () => {
                         >
                           <option value="">Select State</option>
                           {states.map((s) => (
-                            <option key={s._id} value={s._id}>{s.name}</option>
+                            <option key={s._id} value={s._id}>
+                              {s.name}
+                            </option>
                           ))}
                         </Field>
-                        <ErrorMessage name="state" component="div" className="text-red-500 text-xs" />
+                        <ErrorMessage
+                          name="state"
+                          component="div"
+                          className="text-red-500 text-xs"
+                        />
                       </div>
 
                       {/* City */}
@@ -430,10 +485,16 @@ const ClientPage = () => {
                         >
                           <option value="">Select City</option>
                           {cities.map((c) => (
-                            <option key={c._id} value={c._id}>{c.name}</option>
+                            <option key={c._id} value={c._id}>
+                              {c.name}
+                            </option>
                           ))}
                         </Field>
-                        <ErrorMessage name="city" component="div" className="text-red-500 text-xs" />
+                        <ErrorMessage
+                          name="city"
+                          component="div"
+                          className="text-red-500 text-xs"
+                        />
                       </div>
 
                       <button
@@ -448,7 +509,6 @@ const ClientPage = () => {
               </div>
             </div>
           )}
-
         </div>
       </main>
     </div>

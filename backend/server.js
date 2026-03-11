@@ -29,6 +29,9 @@ const clientRoutes = require("./routes/clientRoutes");
 const enquiryRoute = require("./routes/enquiryRoute");
 const vendorRoutes = require("./routes/vendorRoute");
 const mediaPostRoutes = require("./routes/mediaPostRoutes");
+const mediaCategoryRoutes = require("./routes/mediaCategoryRoutes");
+const mediaItemRoutes = require("./routes/mediaItemRoutes");
+
 5558;
 connectDB();
 
@@ -69,7 +72,9 @@ app.use("/api/blogs", blogRoutes);
 app.use("/api/client", clientRoutes);
 app.use("/api/enquiry", enquiryRoute);
 app.use("/api/vendors", vendorRoutes);
-app.use("/api/media-posts", mediaPostRoutes); 
+app.use("/api/media-posts", mediaPostRoutes);
+app.use("/api/media-category", mediaCategoryRoutes);
+app.use("/api/media-items", mediaItemRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

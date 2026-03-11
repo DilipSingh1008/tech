@@ -27,7 +27,7 @@ const ManageCategories = () => {
   // ── Permission Logic ──
   const permissions = useSelector((state) => state.permission.permissions);
   const rawCategoryPermission = permissions?.find(
-    (p) => p.module.name === "categories"
+    (p) => p.module.name === "categories",
   );
   const localRole = localStorage.getItem("role");
   const categoryPermission =
@@ -37,7 +37,7 @@ const ManageCategories = () => {
 
   // ── RTK Query: fetch ──
   const { data, isLoading } = useGetItemsQuery(
-    `categories?page=${page}&limit=${limit}&sortBy=${sortBy}&order=${order}&search=${searchQuery}&catid=null`
+    `categories?page=${page}&limit=${limit}&sortBy=${sortBy}&order=${order}&search=${searchQuery}&catid=null`,
   );
 
   const categories = data?.data || [];
@@ -59,7 +59,10 @@ const ManageCategories = () => {
   // ── Toggle Status ──
   const handleToggleStatus = async (id, currentStatus) => {
     try {
-      await updateItem({ url: `categories/${id}`, data: { status: !currentStatus } });
+      await updateItem({
+        url: `categories/${id}`,
+        data: { status: !currentStatus },
+      });
     } catch (err) {
       console.error("Error toggling status:", err);
       alert(err.error || "Failed to update status");
@@ -68,7 +71,8 @@ const ManageCategories = () => {
 
   // ── Delete ──
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this category?")) return;
+    if (!window.confirm("Are you sure you want to delete this category?"))
+      return;
     try {
       await deleteItem(`categories/${id}`);
     } catch (err) {
@@ -81,7 +85,8 @@ const ManageCategories = () => {
   const handleSave = async (e) => {
     e.preventDefault();
     if (!formData.name.trim()) return alert("Name is required");
-    if (!formData.id && !formData.icon) return alert("Icon is required for new category");
+    if (!formData.id && !formData.icon)
+      return alert("Icon is required for new category");
 
     const payload = new FormData();
     payload.append("name", formData.name);
@@ -133,15 +138,16 @@ const ManageCategories = () => {
     <div className={`h-screen w-full flex flex-col ${theme.main}`}>
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-5xl mx-auto">
-
           {/* Header */}
-          <div className="flex items-center justify-between mb-4">
-            <Searchbar
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setPage(1);
-              }}
-            />
+          <div className="flex items-center justify-between mb-4 gap-2">
+            <div className="flex-1 min-w-[150px]">
+              <Searchbar
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setPage(1);
+                }}
+              />
+            </div>
             {categoryPermission?.add && (
               <button
                 onClick={() => setIsModalOpen(true)}
@@ -153,10 +159,14 @@ const ManageCategories = () => {
           </div>
 
           {/* Table */}
-          <div className={`rounded-xl border shadow-sm overflow-hidden ${theme.card}`}>
+          <div
+            className={`rounded-xl border shadow-sm overflow-hidden ${theme.card}`}
+          >
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
-                <thead className={`uppercase tracking-wider font-bold ${theme.header}`}>
+                <thead
+                  className={`uppercase tracking-wider font-bold ${theme.header}`}
+                >
                   <tr>
                     <th className="px-4 py-3 w-20">ID</th>
                     <th
@@ -166,13 +176,18 @@ const ManageCategories = () => {
                       <div className="flex items-center gap-1">
                         Name
                         <span className="opacity-50 text-[10px]">
-                          {sortBy === "name" ? (order === "asc" ? "▲" : "▼") : "↕"}
+                          {sortBy === "name"
+                            ? order === "asc"
+                              ? "▲"
+                              : "▼"
+                            : "↕"}
                         </span>
                       </div>
                     </th>
                     <th className="px-4 py-3 w-16">Icon</th>
                     <th className="px-4 py-3 w-24">Status</th>
-                    {(categoryPermission?.edit || categoryPermission?.delete) && (
+                    {(categoryPermission?.edit ||
+                      categoryPermission?.delete) && (
                       <th className="px-4 py-3 text-right w-24">Action</th>
                     )}
                   </tr>
@@ -187,7 +202,10 @@ const ManageCategories = () => {
                     </tr>
                   ) : (
                     categories.map((cat, index) => (
-                      <tr key={cat._id} className="hover:bg-indigo-500/5 transition-colors">
+                      <tr
+                        key={cat._id}
+                        className="hover:bg-indigo-500/5 transition-colors"
+                      >
                         <td className="px-4 py-2.5 font-semibold">
                           {(page - 1) * limit + (index + 1)}
                         </td>
@@ -204,7 +222,11 @@ const ManageCategories = () => {
                         <td className="px-4 py-2.5">
                           <div className="w-8 h-8 rounded bg-gray-500/10 border border-gray-500/10 overflow-hidden flex items-center justify-center">
                             <CommonImage
-                              src={cat.icon ? `http://localhost:5000${cat.icon}` : null}
+                              src={
+                                cat.icon
+                                  ? `http://localhost:5000${cat.icon}`
+                                  : null
+                              }
                               alt="category"
                               className="w-full h-full object-cover"
                             />
@@ -213,7 +235,9 @@ const ManageCategories = () => {
 
                         <td className="px-4 py-2.5">
                           <button
-                            onClick={() => handleToggleStatus(cat._id, cat.status)}
+                            onClick={() =>
+                              handleToggleStatus(cat._id, cat.status)
+                            }
                             className={`cursor-pointer w-8 h-4 rounded-full relative transition-colors ${
                               cat.status ? "bg-(--primary)" : "bg-gray-400"
                             }`}
@@ -226,7 +250,8 @@ const ManageCategories = () => {
                           </button>
                         </td>
 
-                        {(categoryPermission?.edit || categoryPermission?.delete) && (
+                        {(categoryPermission?.edit ||
+                          categoryPermission?.delete) && (
                           <td className="px-4 py-2.5 text-right">
                             <div className="flex justify-end gap-2">
                               {categoryPermission?.edit && (
@@ -275,7 +300,9 @@ const ManageCategories = () => {
             </div>
 
             {/* Pagination */}
-            <div className={`flex items-center justify-between p-3 border-t ${theme.divider}`}>
+            <div
+              className={`flex items-center justify-between p-3 border-t ${theme.divider}`}
+            >
               <span className="text-[11px] opacity-60">
                 Showing {categories.length} entries
               </span>
@@ -325,7 +352,10 @@ const ManageCategories = () => {
                   <h3 className="text-sm font-bold">
                     {formData.id ? "Edit Category" : "New Category"}
                   </h3>
-                  <button onClick={closeModal} className="opacity-50 hover:opacity-100">
+                  <button
+                    onClick={closeModal}
+                    className="opacity-50 hover:opacity-100"
+                  >
                     <X size={16} />
                   </button>
                 </div>
@@ -340,7 +370,9 @@ const ManageCategories = () => {
                       required
                       className="w-full p-2 text-sm rounded-lg bg-gray-500/5 border border-gray-500/20 outline-none focus:border-(--primary)"
                       value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
                     />
                   </div>
 
@@ -365,7 +397,9 @@ const ManageCategories = () => {
                       accept="image/*"
                       required={!formData.id}
                       className="w-full text-xs file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-bold file:bg-(--primary) file:text-white cursor-pointer"
-                      onChange={(e) => setFormData({ ...formData, icon: e.target.files[0] })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, icon: e.target.files[0] })
+                      }
                     />
                   </div>
 
@@ -375,8 +409,12 @@ const ManageCategories = () => {
                     className="cursor-pointer w-full py-2 mt-2 bg-(--primary) text-white rounded-lg text-xs font-bold hover:opacity-90 transition-all disabled:opacity-50"
                   >
                     {formData.id
-                      ? updateLoading ? "Updating..." : "Update Category"
-                      : createLoading ? "Creating..." : "Create Category"}
+                      ? updateLoading
+                        ? "Updating..."
+                        : "Update Category"
+                      : createLoading
+                        ? "Creating..."
+                        : "Create Category"}
                   </button>
                 </form>
               </div>

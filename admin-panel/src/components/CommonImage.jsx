@@ -1,8 +1,6 @@
 import React from "react";
 
 const CommonImage = ({ src, alt = "image", className }) => {
-  console.log(src);
-
   const handleError = (e) => {
     e.target.onerror = null;
     e.target.src = "/default-image.png";

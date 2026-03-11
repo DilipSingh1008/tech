@@ -83,16 +83,18 @@ const ManageServicesPage = () => {
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-5xl mx-auto">
           {/* Top bar */}
-          <div className="flex flex-col sm:flex-row justify-between mb-4 gap-2">
-            <Searchbar
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setPage(1);
-              }}
-            />
+          <div className="flex items-center justify-between mb-4 gap-2">
+            <div className="flex-1 min-w-[150px]">
+              <Searchbar
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setPage(1);
+                }}
+              />
+            </div>
             <button
               onClick={() => navigate("/dashboard/service/add")}
-              className="flex items-center cursor-pointer gap-1.5 px-3 py-1.5 bg-(--primary) text-white rounded-lg text-xs font-semibold w-full sm:w-auto"
+              className="flex items-center cursor-pointer gap-1.5 px-3 py-1.5 bg-(--primary) text-white rounded-lg text-xs font-semibold hover:opacity-90 transition-all"
             >
               <Plus size={14} /> Add Service
             </button>

@@ -28,13 +28,12 @@ const adminSchema = new mongoose.Schema(
       default: null,
     },
 
-
     phone: {
       type: String,
       default: "",
     },
 
-    photo: {
+    image: {
       type: String,
       default: "",
     },
@@ -45,21 +44,16 @@ const adminSchema = new mongoose.Schema(
       minlength: 6,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
-
-
 
 // 🔥 password hash
 adminSchema.pre("save", async function () {
-  if (!this.isModified("password")) return ;
+  if (!this.isModified("password")) return;
 
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
-  
 });
-
-
 
 // 🔥 compare password
 adminSchema.methods.comparePassword = async function (password) {

@@ -27,7 +27,9 @@ const ManageFaqCategory = () => {
 
   // ── Permission Logic ──
   const permissions = useSelector((state) => state.permission.permissions);
-  const rawFaqCatPermission = permissions?.find((p) => p.module.name === "faq-category");
+  const rawFaqCatPermission = permissions?.find(
+    (p) => p.module.name === "faq-category",
+  );
   const localRole = localStorage.getItem("role");
   const faqCatPermission =
     localRole === "admin"
@@ -36,7 +38,7 @@ const ManageFaqCategory = () => {
 
   // ── RTK Query: fetch ──
   const { data, isLoading } = useGetItemsQuery(
-    `faq-category?page=${page}&limit=${limit}&search=${searchQuery}&sortField=${sortField}&sortOrder=${sortOrder}`
+    `faq-category?page=${page}&limit=${limit}&search=${searchQuery}&sortField=${sortField}&sortOrder=${sortOrder}`,
   );
 
   const categories = data?.data || [];
@@ -67,7 +69,8 @@ const ManageFaqCategory = () => {
 
   // ── Delete ──
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this category?")) return;
+    if (!window.confirm("Are you sure you want to delete this category?"))
+      return;
     try {
       await deleteItem(`faq-category/${id}`);
     } catch (err) {
@@ -88,7 +91,10 @@ const ManageFaqCategory = () => {
   const handleSubmit = async (values) => {
     try {
       if (editingItem) {
-        await updateItem({ url: `faq-category/${editingItem._id}`, data: values });
+        await updateItem({
+          url: `faq-category/${editingItem._id}`,
+          data: values,
+        });
       } else {
         await createItem({ url: "faq-category", data: values });
       }
@@ -110,9 +116,15 @@ const ManageFaqCategory = () => {
   });
 
   const theme = {
-    main: isDarkMode ? "bg-[#0b0e14] text-slate-300" : "bg-gray-50 text-gray-700",
-    card: isDarkMode ? "bg-[#151b28] border-gray-800" : "bg-white border-gray-200",
-    header: isDarkMode ? "bg-[#1f2637] text-gray-400" : "bg-gray-100 text-gray-500",
+    main: isDarkMode
+      ? "bg-[#0b0e14] text-slate-300"
+      : "bg-gray-50 text-gray-700",
+    card: isDarkMode
+      ? "bg-[#151b28] border-gray-800"
+      : "bg-white border-gray-200",
+    header: isDarkMode
+      ? "bg-[#1f2637] text-gray-400"
+      : "bg-gray-100 text-gray-500",
     divider: isDarkMode ? "divide-gray-800" : "divide-gray-100",
   };
 
@@ -120,18 +132,22 @@ const ManageFaqCategory = () => {
     <div className={`h-screen w-full flex flex-col ${theme.main}`}>
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-5xl mx-auto">
-
           {/* Header */}
-          <div className="flex items-center justify-between mb-4">
-            <Searchbar
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setPage(1);
-              }}
-            />
+          <div className="flex items-center justify-between mb-4 gap-2">
+            <div className="flex-1 min-w-[150px]">
+              <Searchbar
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setPage(1);
+                }}
+              />
+            </div>
             {faqCatPermission?.add && (
               <button
-                onClick={() => { setEditingItem(null); setIsModalOpen(true); }}
+                onClick={() => {
+                  setEditingItem(null);
+                  setIsModalOpen(true);
+                }}
                 className="flex items-center cursor-pointer gap-1.5 px-3 py-1.5 bg-(--primary) text-white rounded-lg text-xs font-semibold hover:opacity-90"
               >
                 <Plus size={14} /> Add Category
@@ -140,10 +156,14 @@ const ManageFaqCategory = () => {
           </div>
 
           {/* Table */}
-          <div className={`rounded-xl border shadow-sm overflow-hidden ${theme.card}`}>
+          <div
+            className={`rounded-xl border shadow-sm overflow-hidden ${theme.card}`}
+          >
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
-                <thead className={`uppercase tracking-wider font-bold ${theme.header}`}>
+                <thead
+                  className={`uppercase tracking-wider font-bold ${theme.header}`}
+                >
                   <tr>
                     <th className="px-4 py-3 w-16">ID</th>
                     <th
@@ -172,20 +192,34 @@ const ManageFaqCategory = () => {
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                   {isLoading ? (
                     <tr>
-                      <td colSpan="5" className="text-center py-6 opacity-40 italic">Loading...</td>
+                      <td
+                        colSpan="5"
+                        className="text-center py-6 opacity-40 italic"
+                      >
+                        Loading...
+                      </td>
                     </tr>
                   ) : categories.length === 0 ? (
                     <tr>
-                      <td colSpan="5" className="text-center py-6 opacity-40">No categories found.</td>
+                      <td colSpan="5" className="text-center py-6 opacity-40">
+                        No categories found.
+                      </td>
                     </tr>
                   ) : (
                     categories.map((item, index) => (
-                      <tr key={item._id} className="hover:bg-indigo-500/5 transition-colors">
+                      <tr
+                        key={item._id}
+                        className="hover:bg-indigo-500/5 transition-colors"
+                      >
                         <td className="px-4 py-2.5 font-semibold">
                           {(page - 1) * limit + index + 1}
                         </td>
-                        <td className="px-4 py-2.5 font-semibold text-sm capitalize">{item.category}</td>
-                        <td className="px-4 py-2.5 text-xs opacity-80 max-w-xs truncate">{item.description}</td>
+                        <td className="px-4 py-2.5 font-semibold text-sm capitalize">
+                          {item.category}
+                        </td>
+                        <td className="px-4 py-2.5 text-xs opacity-80 max-w-xs truncate">
+                          {item.description}
+                        </td>
                         <td className="px-4 py-2.5">
                           <button
                             onClick={() => handleToggleStatus(item._id)}
@@ -201,13 +235,17 @@ const ManageFaqCategory = () => {
                           </button>
                         </td>
 
-                        {(faqCatPermission?.edit || faqCatPermission?.delete) && (
+                        {(faqCatPermission?.edit ||
+                          faqCatPermission?.delete) && (
                           <td className="px-4 py-2.5 text-right">
                             <div className="flex justify-end gap-1">
                               {faqCatPermission?.edit && (
                                 <div className="relative group">
                                   <button
-                                    onClick={() => { setEditingItem(item); setIsModalOpen(true); }}
+                                    onClick={() => {
+                                      setEditingItem(item);
+                                      setIsModalOpen(true);
+                                    }}
                                     className="cursor-pointer p-1.5 hover:text-(--primary)"
                                   >
                                     <Edit3 size={14} />
@@ -243,7 +281,9 @@ const ManageFaqCategory = () => {
             </div>
 
             {/* Pagination */}
-            <div className={`flex items-center justify-between p-3 border-t ${theme.divider}`}>
+            <div
+              className={`flex items-center justify-between p-3 border-t ${theme.divider}`}
+            >
               <span className="text-[11px] opacity-60">
                 Showing {categories.length} entries
               </span>
@@ -315,7 +355,11 @@ const ManageFaqCategory = () => {
                           name="category"
                           className="w-full p-2 text-sm rounded-lg bg-gray-500/5 border border-gray-500/20 outline-none focus:border-(--primary)"
                         />
-                        <ErrorMessage name="category" component="div" className="text-red-500 text-[10px]" />
+                        <ErrorMessage
+                          name="category"
+                          component="div"
+                          className="text-red-500 text-[10px]"
+                        />
                       </div>
 
                       <div>
@@ -328,17 +372,27 @@ const ManageFaqCategory = () => {
                           rows="3"
                           className="w-full p-2 text-sm rounded-lg bg-gray-500/5 border border-gray-500/20 outline-none focus:border-(--primary)"
                         />
-                        <ErrorMessage name="description" component="div" className="text-red-500 text-[10px]" />
+                        <ErrorMessage
+                          name="description"
+                          component="div"
+                          className="text-red-500 text-[10px]"
+                        />
                       </div>
 
                       <button
                         type="submit"
-                        disabled={createLoading || updateLoading || isSubmitting}
+                        disabled={
+                          createLoading || updateLoading || isSubmitting
+                        }
                         className="cursor-pointer w-full py-2 mt-2 bg-(--primary) text-white rounded-lg text-xs font-bold hover:opacity-90 disabled:opacity-50"
                       >
                         {editingItem
-                          ? updateLoading ? "Updating..." : "Update Category"
-                          : createLoading ? "Creating..." : "Create Category"}
+                          ? updateLoading
+                            ? "Updating..."
+                            : "Update Category"
+                          : createLoading
+                            ? "Creating..."
+                            : "Create Category"}
                       </button>
                     </Form>
                   )}

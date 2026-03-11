@@ -29,7 +29,7 @@ const ManageRole = () => {
 
   // ── RTK Query: fetch roles with all params ──
   const { data, isLoading } = useGetItemsQuery(
-    `role?page=${page}&limit=${limit}&search=${searchQuery}&sortBy=${sortBy}&order=${order}`
+    `role?page=${page}&limit=${limit}&search=${searchQuery}&sortBy=${sortBy}&order=${order}`,
   );
 
   const roles = data?.data || [];
@@ -103,15 +103,16 @@ const ManageRole = () => {
     <div className={`h-screen w-full flex flex-col ${theme.main}`}>
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-5xl mx-auto">
-
           {/* Header */}
-          <div className="flex items-center justify-between mb-4">
-            <Searchbar
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setPage(1);
-              }}
-            />
+          <div className="flex items-center justify-between mb-4 gap-2">
+            <div className="flex-1 min-w-[150px]">
+              <Searchbar
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setPage(1);
+                }}
+              />
+            </div>
             <button
               onClick={() => {
                 setEditingRole(null);
@@ -124,10 +125,14 @@ const ManageRole = () => {
           </div>
 
           {/* Table */}
-          <div className={`rounded-xl border shadow-sm overflow-hidden ${theme.card}`}>
+          <div
+            className={`rounded-xl border shadow-sm overflow-hidden ${theme.card}`}
+          >
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
-                <thead className={`uppercase tracking-wider font-bold ${theme.header}`}>
+                <thead
+                  className={`uppercase tracking-wider font-bold ${theme.header}`}
+                >
                   <tr>
                     <th className="px-4 py-3 w-20">ID</th>
                     <th
@@ -147,7 +152,10 @@ const ManageRole = () => {
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                   {isLoading ? (
                     <tr>
-                      <td colSpan="5" className="text-center py-6 opacity-40 italic">
+                      <td
+                        colSpan="5"
+                        className="text-center py-6 opacity-40 italic"
+                      >
                         Loading...
                       </td>
                     </tr>
@@ -173,14 +181,18 @@ const ManageRole = () => {
 
                         <td
                           className="px-4 py-2.5 hover:text-blue-400 font-semibold cursor-pointer text-sm capitalize"
-                          onClick={() => navigate(`/dashboard/manage-permission/${role._id}`)}
+                          onClick={() =>
+                            navigate(`/dashboard/manage-permission/${role._id}`)
+                          }
                         >
                           Manage
                         </td>
 
                         <td className="px-4 py-2.5">
                           <button
-                            onClick={() => handleToggleStatus(role._id, role.status)}
+                            onClick={() =>
+                              handleToggleStatus(role._id, role.status)
+                            }
                             className={`cursor-pointer w-8 h-4 rounded-full relative transition-colors ${
                               role.status ? "bg-(--primary)" : "bg-gray-400"
                             }`}
@@ -218,7 +230,9 @@ const ManageRole = () => {
             </div>
 
             {/* Pagination */}
-            <div className={`flex items-center justify-between p-3 border-t ${theme.divider}`}>
+            <div
+              className={`flex items-center justify-between p-3 border-t ${theme.divider}`}
+            >
               <span className="text-[11px] opacity-60">
                 Showing {roles.length} entries
               </span>
@@ -311,7 +325,6 @@ const ManageRole = () => {
               </div>
             </div>
           )}
-
         </div>
       </main>
     </div>

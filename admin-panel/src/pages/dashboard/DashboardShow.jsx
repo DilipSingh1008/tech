@@ -10,10 +10,22 @@ import {
 import { useGetItemsQuery } from "../../redux/api/apiSlice";
 
 const DashboardShow = () => {
-  const { data: roleRes, isLoading: rolesLoading, refetch: refetchRoles } = useGetItemsQuery("user");
-  const { data: serviceRes, isLoading: servicesLoading, refetch: refetchServices } = useGetItemsQuery("services");
-  const { data: productRes, isLoading: productsLoading, refetch: refetchProducts } = useGetItemsQuery("product-item");
-
+  const {
+    data: roleRes,
+    isLoading: rolesLoading,
+    refetch: refetchRoles,
+  } = useGetItemsQuery("user");
+  const {
+    data: serviceRes,
+    isLoading: servicesLoading,
+    refetch: refetchServices,
+  } = useGetItemsQuery("services");
+  const {
+    data: productRes,
+    isLoading: productsLoading,
+    refetch: refetchProducts,
+  } = useGetItemsQuery("product-category");
+  console.log(productRes);
   const { isDarkMode } = useTheme();
 
   // Derive loading state directly from RTK Query
@@ -39,7 +51,6 @@ const DashboardShow = () => {
     subText: isDarkMode ? "text-gray-400" : "text-gray-500",
     headerText: isDarkMode ? "text-white" : "text-gray-900",
   };
-
 
   const handleRefresh = () => {
     refetchRoles();

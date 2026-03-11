@@ -18,7 +18,6 @@ export const apiSlice = createApi({
   baseQuery,
   tagTypes: ["CRUD"],
   endpoints: (builder) => ({
-    
     getItems: builder.query({
       query: (resource) => ({
         url: `/${resource}`,
@@ -28,8 +27,13 @@ export const apiSlice = createApi({
     }),
 
     getItemById: builder.query({
+<<<<<<< HEAD
       query: ({ resource }) => ({
         url: `/${resource}`,
+=======
+      query: ({ url }) => ({
+        url: `/${url}`,
+>>>>>>> b86534a8e191f14695608db1a365b23966ed1f3b
         method: "GET",
       }),
       providesTags: ["CRUD"],
@@ -37,14 +41,14 @@ export const apiSlice = createApi({
 
     createItem: builder.mutation({
       query: ({ url, data }) => {
-        console.log("kk",url)
-        console.log(data)
+        console.log("kk", url);
+        console.log(data);
 
         return {
-        url: `/${url}`,
-        method: "POST",
-        body: data,
-      }
+          url: `/${url}`,
+          method: "POST",
+          body: data,
+        };
       },
       invalidatesTags: ["CRUD"],
     }),
@@ -74,7 +78,13 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ["CRUD"],
     }),
-
+    logout: builder.mutation({
+      query: () => ({
+        url: "admin/logout",
+        method: "POST",
+      }),
+    }),
+    
   }),
 });
 
@@ -85,4 +95,5 @@ export const {
   useUpdateItemMutation,
   usePatchItemMutation,
   useDeleteItemMutation,
+  useLogoutMutation,
 } = apiSlice;

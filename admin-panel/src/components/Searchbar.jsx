@@ -13,7 +13,7 @@ const Searchbar = ({ value, onChange }) => {
 
   return (
     <div
-      className={`hidden md:flex items-center px-3 py-1.5 rounded-lg border ${bgColor} ${borderColor} transition-all`}
+      className={`flex items-center px-3 py-1.5 rounded-lg border ${bgColor} ${borderColor} transition-all w-full max-w-xs`}
     >
       <Search
         size={14}
@@ -22,7 +22,7 @@ const Searchbar = ({ value, onChange }) => {
       <input
         type="text"
         placeholder="Search..."
-        className={`bg-transparent border-none focus:outline-none text-xs w-40 ${textColor}`}
+        className={`bg-transparent border-none focus:outline-none text-xs w-full ${textColor}`}
         value={value}
         onChange={onChange}
       />

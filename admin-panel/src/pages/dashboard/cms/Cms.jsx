@@ -37,7 +37,7 @@ const Cms = () => {
 
   // ── RTK Query: fetch ──
   const { data, isLoading } = useGetItemsQuery(
-    `cms?page=${page}&limit=${limit}&sortBy=${sortBy}&order=${order}&search=${searchQuery}`
+    `cms?page=${page}&limit=${limit}&sortBy=${sortBy}&order=${order}&search=${searchQuery}`,
   );
 
   const cmsData = data?.data || [];
@@ -74,16 +74,25 @@ const Cms = () => {
   // ── Toggle Status ──
   const handleToggle = async (cmsId, currentStatus) => {
     try {
-      await patchItem({ url: `cms/toggle/${cmsId}`, data: { status: !currentStatus } });
+      await patchItem({
+        url: `cms/toggle/${cmsId}`,
+        data: { status: !currentStatus },
+      });
     } catch (err) {
       console.error(err);
     }
   };
 
   const theme = {
-    main: isDarkMode ? "bg-[#0b0e14] text-slate-300" : "bg-gray-50 text-gray-700",
-    card: isDarkMode ? "bg-[#151b28] border-gray-800" : "bg-white border-gray-200",
-    header: isDarkMode ? "bg-[#1f2637] text-gray-400" : "bg-gray-100 text-gray-500",
+    main: isDarkMode
+      ? "bg-[#0b0e14] text-slate-300"
+      : "bg-gray-50 text-gray-700",
+    card: isDarkMode
+      ? "bg-[#151b28] border-gray-800"
+      : "bg-white border-gray-200",
+    header: isDarkMode
+      ? "bg-[#1f2637] text-gray-400"
+      : "bg-gray-100 text-gray-500",
     divider: isDarkMode ? "divide-gray-800" : "divide-gray-100",
   };
 
@@ -91,15 +100,16 @@ const Cms = () => {
     <div className={`h-screen w-full flex flex-col ${theme.main}`}>
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-5xl mx-auto">
-
           {/* Header */}
-          <div className="flex items-center justify-between mb-4">
-            <Searchbar
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setPage(1);
-              }}
-            />
+          <div className="flex items-center justify-between mb-4 gap-2">
+            <div className="flex-1 min-w-[150px]">
+              <Searchbar
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setPage(1);
+                }}
+              />
+            </div>
             {cmsPermission?.add && (
               <button
                 onClick={() => navigate("/dashboard/add-cms")}
@@ -111,10 +121,14 @@ const Cms = () => {
           </div>
 
           {/* Table */}
-          <div className={`rounded-xl border shadow-sm overflow-hidden ${theme.card}`}>
+          <div
+            className={`rounded-xl border shadow-sm overflow-hidden ${theme.card}`}
+          >
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
-                <thead className={`uppercase tracking-wider font-bold ${theme.header}`}>
+                <thead
+                  className={`uppercase tracking-wider font-bold ${theme.header}`}
+                >
                   <tr>
                     <th className="px-4 py-3 w-16">ID</th>
                     <th
@@ -143,29 +157,42 @@ const Cms = () => {
                 <tbody className={`divide-y ${theme.divider}`}>
                   {isLoading ? (
                     <tr>
-                      <td colSpan={5} className="px-4 py-10 text-center opacity-40 italic">
+                      <td
+                        colSpan={5}
+                        className="px-4 py-10 text-center opacity-40 italic"
+                      >
                         Loading...
                       </td>
                     </tr>
                   ) : cmsData.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="px-4 py-10 text-center opacity-40">
+                      <td
+                        colSpan={5}
+                        className="px-4 py-10 text-center opacity-40"
+                      >
                         No CMS pages found.
                       </td>
                     </tr>
                   ) : (
                     cmsData.map((page_, index) => (
-                      <tr key={page_._id} className="hover:bg-(--primary)/5 transition-colors">
+                      <tr
+                        key={page_._id}
+                        className="hover:bg-(--primary)/5 transition-colors"
+                      >
                         <td className="px-4 py-2.5 font-mono opacity-50 text-[10px]">
                           {(page - 1) * limit + (index + 1)}
                         </td>
-                        <td className="px-4 py-2.5 font-semibold text-sm">{page_.title}</td>
+                        <td className="px-4 py-2.5 font-semibold text-sm">
+                          {page_.title}
+                        </td>
                         <td className="px-4 py-2.5 font-mono text-[11px] opacity-60">
                           /{page_.slug}
                         </td>
                         <td className="px-4 py-2.5">
                           <button
-                            onClick={() => handleToggle(page_._id, page_.status)}
+                            onClick={() =>
+                              handleToggle(page_._id, page_.status)
+                            }
                             className={`relative inline-flex cursor-pointer h-5 w-9 items-center rounded-full transition-colors ${
                               page_.status ? "bg-(--primary)" : "bg-gray-400"
                             }`}
@@ -184,7 +211,11 @@ const Cms = () => {
                               {cmsPermission?.edit && (
                                 <div className="relative group">
                                   <button
-                                    onClick={() => navigate(`/dashboard/edit-cms/${page_._id}`)}
+                                    onClick={() =>
+                                      navigate(
+                                        `/dashboard/edit-cms/${page_._id}`,
+                                      )
+                                    }
                                     className="p-1.5 text-gray-400 cursor-pointer hover:text-(--primary) hover:bg-(--primary)/10 rounded-md transition-all"
                                   >
                                     <FiEdit2 size={14} />
@@ -206,7 +237,9 @@ const Cms = () => {
                                     <FiTrash2 size={14} />
                                   </button>
                                   <span className="absolute bottom-full right-0 mb-2 opacity-0 group-hover:opacity-100 transition bg-black text-red-400 text-[10px] px-2 py-1 rounded whitespace-nowrap pointer-events-none z-50">
-                                    {deleteLoading ? "Deleting..." : "Delete page"}
+                                    {deleteLoading
+                                      ? "Deleting..."
+                                      : "Delete page"}
                                     <span className="absolute top-full right-2 border-4 border-transparent border-t-black"></span>
                                   </span>
                                 </div>
@@ -222,7 +255,9 @@ const Cms = () => {
             </div>
 
             {/* Pagination */}
-            <div className={`flex items-center justify-between p-3 border-t ${theme.divider}`}>
+            <div
+              className={`flex items-center justify-between p-3 border-t ${theme.divider}`}
+            >
               <span className="text-[11px] opacity-60">
                 Showing {cmsData.length} entries
               </span>

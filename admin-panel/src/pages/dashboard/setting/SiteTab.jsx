@@ -13,7 +13,7 @@ const SiteSettingsForm = () => {
   const [previews, setPreviews] = useState({ logo: null, favicon: null });
 
   // ── RTK Query: fetch ──
-  const { data: res } = useGetItemsQuery("setting/site");
+  const { data: res, refetch } = useGetItemsQuery("setting/site");
   const fetchedData = res?.data;
 
   // ── RTK Query: mutation ──
@@ -23,8 +23,12 @@ const SiteSettingsForm = () => {
   useEffect(() => {
     if (fetchedData) {
       setPreviews({
-        logo: fetchedData.logo ? `http://localhost:5000${fetchedData.logo}` : null,
-        favicon: fetchedData.favicon ? `http://localhost:5000${fetchedData.favicon}` : null,
+        logo: fetchedData.logo
+          ? `http://localhost:5000${fetchedData.logo}`
+          : null,
+        favicon: fetchedData.favicon
+          ? `http://localhost:5000${fetchedData.favicon}`
+          : null,
       });
     }
   }, [fetchedData]);
@@ -39,7 +43,9 @@ const SiteSettingsForm = () => {
 
   const validationSchema = Yup.object().shape({
     site_name: Yup.string().min(3, "Too Short!").required("Required"),
-    site_address: Yup.string().min(10, "Address too short").required("Required"),
+    site_address: Yup.string()
+      .min(10, "Address too short")
+      .required("Required"),
   });
 
   const theme = {
@@ -59,20 +65,27 @@ const SiteSettingsForm = () => {
     const file = event.currentTarget.files[0];
     if (file) {
       setFieldValue(fieldName, file);
-      setPreviews((prev) => ({ ...prev, [fieldName]: URL.createObjectURL(file) }));
+      setPreviews((prev) => ({
+        ...prev,
+        [fieldName]: URL.createObjectURL(file),
+      }));
     }
   };
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
       const formData = new FormData();
+      formData.append("folder", "settings");
+
       formData.append("site_name", values.site_name);
       formData.append("site_address", values.site_address);
       if (values.logo) formData.append("logo", values.logo);
       if (values.favicon) formData.append("favicon", values.favicon);
-      formData.append("folder", "settings");
-
+      // for (let pair of formData.entries()) {
+      //   console.log(pair[0], pair[1]);
+      // }
       await updateItem({ url: "setting/site", data: formData });
+      await refetch();
       alert("Settings updated successfully!");
     } catch (error) {
       console.error("Submit Error:", error);
@@ -94,22 +107,32 @@ const SiteSettingsForm = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Site Name */}
               <div>
-                <label className={`block text-[10px] font-bold uppercase mb-1 tracking-wider ${theme.label}`}>
+                <label
+                  className={`block text-[10px] font-bold uppercase mb-1 tracking-wider ${theme.label}`}
+                >
                   Site Name
                 </label>
                 <Field
                   name="site_name"
                   placeholder="Enter site name"
                   className={`w-full p-2.5 text-sm rounded-lg border outline-none transition-all ${theme.input} ${
-                    errors.site_name && touched.site_name ? "border-red-500" : ""
+                    errors.site_name && touched.site_name
+                      ? "border-red-500"
+                      : ""
                   }`}
                 />
-                <ErrorMessage name="site_name" component="div" className="text-red-400 text-[10px] mt-1" />
+                <ErrorMessage
+                  name="site_name"
+                  component="div"
+                  className="text-red-400 text-[10px] mt-1"
+                />
               </div>
 
               {/* Office Address */}
               <div>
-                <label className={`block text-[10px] font-bold uppercase mb-1 tracking-wider ${theme.label}`}>
+                <label
+                  className={`block text-[10px] font-bold uppercase mb-1 tracking-wider ${theme.label}`}
+                >
                   Office Address
                 </label>
                 <Field
@@ -118,10 +141,16 @@ const SiteSettingsForm = () => {
                   rows="1"
                   placeholder="Enter office address"
                   className={`w-full p-2.5 text-sm rounded-lg border outline-none transition-all resize-none ${theme.input} ${
-                    errors.site_address && touched.site_address ? "border-red-500" : ""
+                    errors.site_address && touched.site_address
+                      ? "border-red-500"
+                      : ""
                   }`}
                 />
-                <ErrorMessage name="site_address" component="div" className="text-red-400 text-[10px] mt-1" />
+                <ErrorMessage
+                  name="site_address"
+                  component="div"
+                  className="text-red-400 text-[10px] mt-1"
+                />
               </div>
             </div>
 
@@ -132,7 +161,9 @@ const SiteSettingsForm = () => {
                 { label: "Favicon", name: "favicon" },
               ].map((item) => (
                 <div key={item.name} className="flex flex-col gap-4">
-                  <label className={`block text-[10px] font-bold uppercase tracking-wider ${theme.label}`}>
+                  <label
+                    className={`block text-[10px] font-bold uppercase tracking-wider ${theme.label}`}
+                  >
                     {item.label}
                   </label>
 
@@ -146,7 +177,9 @@ const SiteSettingsForm = () => {
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <span className="text-[10px] opacity-40 italic">No Image Uploaded</span>
+                      <span className="text-[10px] opacity-40 italic">
+                        No Image Uploaded
+                      </span>
                     )}
                   </div>
 
@@ -154,7 +187,9 @@ const SiteSettingsForm = () => {
                     <input
                       type="file"
                       accept="image/*"
-                      onChange={(e) => handleFileChange(e, setFieldValue, item.name)}
+                      onChange={(e) =>
+                        handleFileChange(e, setFieldValue, item.name)
+                      }
                       className="hidden"
                       id={`file-${item.name}`}
                     />

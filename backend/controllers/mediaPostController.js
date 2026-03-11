@@ -9,7 +9,7 @@ exports.createMediaPost = async (req, res) => {
     if (!req.file)
       return res.status(400).json({ success: false, error: "Image required" });
 
-    const imagePath = `/uploads/media-post/${req.file.filename}`;
+    const imagePath = `/uploads/media-posts/${req.file.filename}`;
 
     const newPost = await MediaPost.create({
       title,
@@ -19,7 +19,7 @@ exports.createMediaPost = async (req, res) => {
       image: imagePath,
       isDeleted: false,
     });
-
+    // console.log(newPost);
     res.json({ success: true, data: newPost });
   } catch (err) {
     console.error(err);

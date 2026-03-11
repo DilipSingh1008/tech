@@ -29,7 +29,9 @@ const UserPage = () => {
   // ── Permission Logic ──
   const permissions = useSelector((state) => state.permission.permissions);
   const roleType = useSelector((state) => state.permission.roleName);
-  const rawUsersPermission = permissions?.find((p) => p.module.name === "users");
+  const rawUsersPermission = permissions?.find(
+    (p) => p.module.name === "users",
+  );
   const localRole = localStorage.getItem("role");
   const usersPermission =
     localRole === "admin"
@@ -38,7 +40,7 @@ const UserPage = () => {
 
   // ── RTK Query: fetch users ──
   const { data: usersRes, isLoading } = useGetItemsQuery(
-    `user?page=${page}&limit=${limit}&search=${searchQuery}&sortBy=${sortBy}&order=${order}`
+    `user?page=${page}&limit=${limit}&search=${searchQuery}&sortBy=${sortBy}&order=${order}`,
   );
 
   const users = usersRes?.data || [];
@@ -135,30 +137,41 @@ const UserPage = () => {
   });
 
   const theme = {
-    main: isDarkMode ? "bg-[#0b0e14] text-slate-300" : "bg-gray-50 text-gray-700",
-    card: isDarkMode ? "bg-[#151b28] border-gray-800" : "bg-white border-gray-200",
-    header: isDarkMode ? "bg-[#1f2637] text-gray-400" : "bg-gray-100 text-gray-500",
+    main: isDarkMode
+      ? "bg-[#0b0e14] text-slate-300"
+      : "bg-gray-50 text-gray-700",
+    card: isDarkMode
+      ? "bg-[#151b28] border-gray-800"
+      : "bg-white border-gray-200",
+    header: isDarkMode
+      ? "bg-[#1f2637] text-gray-400"
+      : "bg-gray-100 text-gray-500",
     divider: isDarkMode ? "divide-gray-800" : "divide-gray-100",
   };
 
-  const fieldClass = "w-full p-2 text-sm rounded-lg bg-gray-500/5 border border-gray-500/20 outline-none focus:border-(--primary)";
+  const fieldClass =
+    "w-full p-2 text-sm rounded-lg bg-gray-500/5 border border-gray-500/20 outline-none focus:border-(--primary)";
 
   return (
     <div className={`h-screen w-full flex flex-col ${theme.main}`}>
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-5xl mx-auto">
-
           {/* Header */}
-          <div className="flex items-center justify-between mb-4">
-            <Searchbar
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setPage(1);
-              }}
-            />
+          <div className="flex items-center justify-between mb-4 gap-2">
+            <div className="flex-1 min-w-[150px]">
+              <Searchbar
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setPage(1);
+                }}
+              />
+            </div>
             {usersPermission?.add && (
               <button
-                onClick={() => { setEditingUser(null); setIsModalOpen(true); }}
+                onClick={() => {
+                  setEditingUser(null);
+                  setIsModalOpen(true);
+                }}
                 className="flex items-center cursor-pointer gap-1.5 px-3 py-1.5 bg-(--primary) text-white rounded-lg text-xs font-semibold hover:opacity-90 transition-all"
               >
                 <Plus size={14} /> Add User
@@ -167,30 +180,40 @@ const UserPage = () => {
           </div>
 
           {/* Table */}
-          <div className={`rounded-xl border shadow-sm overflow-hidden ${theme.card}`}>
+          <div
+            className={`rounded-xl border shadow-sm overflow-hidden ${theme.card}`}
+          >
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
-                <thead className={`uppercase tracking-wider font-bold ${theme.header}`}>
+                <thead
+                  className={`uppercase tracking-wider font-bold ${theme.header}`}
+                >
                   <tr>
                     <th className="px-4 py-3 w-20">ID</th>
                     <th
                       className="px-4 py-3 cursor-pointer hover:text-(--primary) transition-colors"
                       onClick={() => handleSort("name")}
                     >
-                      <div className="flex items-center gap-1">Name <SortIcon field="name" /></div>
+                      <div className="flex items-center gap-1">
+                        Name <SortIcon field="name" />
+                      </div>
                     </th>
                     <th className="px-4 py-3">Last Login</th>
                     <th
                       className="px-4 py-3 cursor-pointer hover:text-(--primary) transition-colors"
                       onClick={() => handleSort("email")}
                     >
-                      <div className="flex items-center gap-1">Email <SortIcon field="email" /></div>
+                      <div className="flex items-center gap-1">
+                        Email <SortIcon field="email" />
+                      </div>
                     </th>
                     <th
                       className="px-4 py-3 w-24 cursor-pointer hover:text-(--primary) transition-colors"
                       onClick={() => handleSort("role")}
                     >
-                      <div className="flex items-center gap-1">Role <SortIcon field="role" /></div>
+                      <div className="flex items-center gap-1">
+                        Role <SortIcon field="role" />
+                      </div>
                     </th>
                     <th className="px-4 py-3 w-24">Photo</th>
                     <th className="px-4 py-3 w-24">Status</th>
@@ -203,24 +226,43 @@ const UserPage = () => {
                 <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                   {isLoading ? (
                     <tr>
-                      <td colSpan={8} className="px-4 py-10 text-center opacity-40 italic">Loading...</td>
+                      <td
+                        colSpan={8}
+                        className="px-4 py-10 text-center opacity-40 italic"
+                      >
+                        Loading...
+                      </td>
                     </tr>
                   ) : users.length === 0 ? (
                     <tr>
-                      <td colSpan={8} className="px-4 py-10 text-center opacity-40">No users found.</td>
+                      <td
+                        colSpan={8}
+                        className="px-4 py-10 text-center opacity-40"
+                      >
+                        No users found.
+                      </td>
                     </tr>
                   ) : (
                     users.map((u, index) => (
-                      <tr key={u._id} className="hover:bg-indigo-500/5 transition-colors">
+                      <tr
+                        key={u._id}
+                        className="hover:bg-indigo-500/5 transition-colors"
+                      >
                         <td className="px-4 py-2.5 font-semibold">
                           {(page - 1) * limit + index + 1}
                         </td>
-                        <td className="px-4 py-2.5 font-semibold text-sm">{u.name}</td>
+                        <td className="px-4 py-2.5 font-semibold text-sm">
+                          {u.name}
+                        </td>
                         <td className="px-4 py-2.5 text-sm">
-                          {u.lastLogin ? new Date(u.lastLogin).toLocaleString() : "N/A"}
+                          {u.lastLogin
+                            ? new Date(u.lastLogin).toLocaleString()
+                            : "N/A"}
                         </td>
                         <td className="px-4 py-2.5 text-sm">{u.email}</td>
-                        <td className="px-4 py-2.5 text-sm capitalize">{u.role?.name || u.role}</td>
+                        <td className="px-4 py-2.5 text-sm capitalize">
+                          {u.role?.name || u.role}
+                        </td>
                         <td className="px-4 py-2.5">
                           <div className="w-8 h-8 rounded bg-gray-500/10 border border-gray-500/10 overflow-hidden flex items-center justify-center">
                             {u.image ? (
@@ -254,7 +296,10 @@ const UserPage = () => {
                               {usersPermission?.edit && (
                                 <div className="relative group">
                                   <button
-                                    onClick={() => { setEditingUser(u); setIsModalOpen(true); }}
+                                    onClick={() => {
+                                      setEditingUser(u);
+                                      setIsModalOpen(true);
+                                    }}
                                     className="p-1.5 cursor-pointer hover:text-(--primary)"
                                   >
                                     <Edit3 size={14} />
@@ -301,8 +346,12 @@ const UserPage = () => {
             </div>
 
             {/* Pagination */}
-            <div className={`flex items-center justify-between p-3 border-t ${theme.divider}`}>
-              <span className="text-[11px] opacity-60">Showing {users.length} entries</span>
+            <div
+              className={`flex items-center justify-between p-3 border-t ${theme.divider}`}
+            >
+              <span className="text-[11px] opacity-60">
+                Showing {users.length} entries
+              </span>
               <div className="flex items-center gap-1">
                 <button
                   disabled={page === 1 || isLoading}
@@ -345,7 +394,10 @@ const UserPage = () => {
                   <h3 className="text-sm font-bold">
                     {editingUser ? "Edit User" : "New User"}
                   </h3>
-                  <button onClick={closeModal} className="opacity-50 hover:opacity-100">
+                  <button
+                    onClick={closeModal}
+                    className="opacity-50 hover:opacity-100"
+                  >
                     <X size={16} />
                   </button>
                 </div>
@@ -369,29 +421,52 @@ const UserPage = () => {
                           Name <span className="text-red-500 text-sm">*</span>
                         </label>
                         <Field type="text" name="name" className={fieldClass} />
-                        <ErrorMessage name="name" component="div" className="text-red-500 text-[10px]" />
+                        <ErrorMessage
+                          name="name"
+                          component="div"
+                          className="text-red-500 text-[10px]"
+                        />
                       </div>
 
                       <div>
                         <label className="block text-[10px] font-bold opacity-50 uppercase mb-1">
                           Email <span className="text-red-500 text-sm">*</span>
                         </label>
-                        <Field type="email" name="email" className={fieldClass} />
-                        <ErrorMessage name="email" component="div" className="text-red-500 text-[10px] mt-1" />
+                        <Field
+                          type="email"
+                          name="email"
+                          className={fieldClass}
+                        />
+                        <ErrorMessage
+                          name="email"
+                          component="div"
+                          className="text-red-500 text-[10px] mt-1"
+                        />
                       </div>
 
                       {!editingUser && (
                         <div>
                           <label className="block text-[10px] font-bold opacity-50 uppercase mb-1">
-                            Password <span className="text-red-500 text-sm">*</span>
+                            Password{" "}
+                            <span className="text-red-500 text-sm">*</span>
                           </label>
-                          <Field type="password" name="password" className={fieldClass} />
-                          <ErrorMessage name="password" component="div" className="text-red-500 text-[10px]" />
+                          <Field
+                            type="password"
+                            name="password"
+                            className={fieldClass}
+                          />
+                          <ErrorMessage
+                            name="password"
+                            component="div"
+                            className="text-red-500 text-[10px]"
+                          />
                         </div>
                       )}
 
                       <div>
-                        <label className="block text-[10px] font-bold opacity-50 uppercase mb-1">Role</label>
+                        <label className="block text-[10px] font-bold opacity-50 uppercase mb-1">
+                          Role
+                        </label>
                         <Field
                           as="select"
                           name="role"
@@ -402,16 +477,22 @@ const UserPage = () => {
                             .filter((r) => r.status === true)
                             .map((role) => (
                               <option key={role._id} value={role._id}>
-                                {role.name.charAt(0).toUpperCase() + role.name.slice(1)}
+                                {role.name.charAt(0).toUpperCase() +
+                                  role.name.slice(1)}
                               </option>
                             ))}
                         </Field>
-                        <ErrorMessage name="role" component="div" className="text-red-500 text-[10px]" />
+                        <ErrorMessage
+                          name="role"
+                          component="div"
+                          className="text-red-500 text-[10px]"
+                        />
                       </div>
 
                       <div>
                         <label className="block text-[10px] font-bold opacity-50 uppercase mb-1">
-                          User Image <span className="text-red-500 text-sm">*</span>
+                          User Image{" "}
+                          <span className="text-red-500 text-sm">*</span>
                         </label>
                         <input
                           type="file"
@@ -424,12 +505,20 @@ const UserPage = () => {
                         />
                         {values.image && (
                           <img
-                            src={values.image instanceof File ? URL.createObjectURL(values.image) : values.image}
+                            src={
+                              values.image instanceof File
+                                ? URL.createObjectURL(values.image)
+                                : values.image
+                            }
                             alt="user"
                             className="w-16 h-16 object-cover rounded mt-2"
                           />
                         )}
-                        <ErrorMessage name="image" component="div" className="text-red-500 text-[10px]" />
+                        <ErrorMessage
+                          name="image"
+                          component="div"
+                          className="text-red-500 text-[10px]"
+                        />
                       </div>
 
                       <button
@@ -438,8 +527,12 @@ const UserPage = () => {
                         className="w-full cursor-pointer py-2 mt-2 bg-(--primary) text-white rounded-lg text-xs font-bold hover:opacity-90 transition-all disabled:opacity-50"
                       >
                         {editingUser
-                          ? updateLoading ? "Updating..." : "Update User"
-                          : createLoading ? "Creating..." : "Create User"}
+                          ? updateLoading
+                            ? "Updating..."
+                            : "Update User"
+                          : createLoading
+                            ? "Creating..."
+                            : "Create User"}
                       </button>
                     </Form>
                   )}

@@ -18,7 +18,7 @@ import { useParams } from "react-router-dom";
 import Searchbar from "../../../components/Searchbar";
 import { FiChevronRight, FiChevronLeft } from "react-icons/fi";
 import { useSelector } from "react-redux";
-
+import CommonImage from "../../../components/CommonImage.jsx";
 const Subcategory = () => {
   const { isDarkMode } = useTheme();
   const { id: parentId } = useParams();
@@ -29,10 +29,9 @@ const Subcategory = () => {
   const [page, setPage] = useState(1);
   const [limit] = useState(5);
 
-  // ── Permission Logic ──
   const permissions = useSelector((state) => state.permission.permissions);
   const rawSubcategoryPermission = permissions?.find(
-    (p) => p.module.name === "categories"
+    (p) => p.module.name === "categories",
   );
   const localRole = localStorage.getItem("role");
   const subcategoryPermission =
@@ -40,30 +39,29 @@ const Subcategory = () => {
       ? { add: true, edit: true, delete: true, view: true }
       : rawSubcategoryPermission;
 
-  // ── RTK Query: fetch ──
   const { data, isLoading } = useGetItemsQuery(
-    `categories?catid=${parentId}&page=${page}&limit=${limit}&search=${searchQuery}`
+    `categories?catid=${parentId}&page=${page}&limit=${limit}&search=${searchQuery}`,
   );
 
   const categories = data?.data || [];
   const totalPages = data?.pagination?.totalPages || 1;
 
-  // ── RTK Query: mutations ──
   const [createItem, { isLoading: createLoading }] = useCreateItemMutation();
   const [updateItem, { isLoading: updateLoading }] = useUpdateItemMutation();
   const [deleteItem] = useDeleteItemMutation();
 
-  // ── Toggle Status ──
   const handleToggleStatus = async (id, currentStatus) => {
     try {
-      await updateItem({ url: `categories/${id}`, data: { status: !currentStatus } });
+      await updateItem({
+        url: `categories/${id}`,
+        data: { status: !currentStatus },
+      });
     } catch (err) {
       console.error("Error toggling status:", err);
       alert(err.error || "Failed to update status");
     }
   };
 
-  // ── Save (Create / Update) ──
   const handleSave = async (e) => {
     e.preventDefault();
     if (!formData.name.trim()) return alert("Name is required");
@@ -91,7 +89,8 @@ const Subcategory = () => {
 
   // ── Delete ──
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this subcategory?")) return;
+    if (!window.confirm("Are you sure you want to delete this subcategory?"))
+      return;
     try {
       await deleteItem(`categories/${id}`);
     } catch (err) {
@@ -125,12 +124,11 @@ const Subcategory = () => {
         Loading...
       </div>
     );
-
+  console.log(categories);
   return (
     <div className={`h-screen w-full flex flex-col ${theme.main}`}>
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-5xl mx-auto p-4">
-
           {/* Header */}
           <div className="flex items-center justify-between mb-4">
             <Searchbar
@@ -150,16 +148,21 @@ const Subcategory = () => {
           </div>
 
           {/* Table */}
-          <div className={`rounded-xl border shadow-sm overflow-hidden ${theme.card}`}>
+          <div
+            className={`rounded-xl border shadow-sm overflow-hidden ${theme.card}`}
+          >
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
-                <thead className={`uppercase tracking-wider font-bold ${theme.header}`}>
+                <thead
+                  className={`uppercase tracking-wider font-bold ${theme.header}`}
+                >
                   <tr>
                     <th className="px-4 py-3 w-20">ID</th>
                     <th className="px-4 py-3">Name</th>
                     <th className="px-4 py-3 w-16">Icon</th>
                     <th className="px-4 py-3 w-24">Status</th>
-                    {(subcategoryPermission?.edit || subcategoryPermission?.delete) && (
+                    {(subcategoryPermission?.edit ||
+                      subcategoryPermission?.delete) && (
                       <th className="px-4 py-3 text-right w-24">Action</th>
                     )}
                   </tr>
@@ -174,7 +177,10 @@ const Subcategory = () => {
                     </tr>
                   ) : (
                     categories.map((cat, index) => (
-                      <tr key={cat._id} className="hover:bg-indigo-500/5 transition-colors">
+                      <tr
+                        key={cat._id}
+                        className="hover:bg-indigo-500/5 transition-colors"
+                      >
                         <td className="px-4 py-2.5 font-semibold">
                           {(page - 1) * limit + (index + 1)}
                         </td>
@@ -183,20 +189,22 @@ const Subcategory = () => {
                         </td>
                         <td className="px-4 py-2.5">
                           <div className="w-8 h-8 rounded bg-gray-500/10 border border-gray-500/10 overflow-hidden flex items-center justify-center">
-                            {cat.icon ? (
-                              <img
-                                src={`http://localhost:5000${cat.icon}`}
-                                alt="icon"
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <ImageIcon size={14} className="opacity-30" />
-                            )}
+                            <CommonImage
+                              src={
+                                cat.icon
+                                  ? `http://localhost:5000${cat.icon}`
+                                  : null
+                              }
+                              alt={cat.title}
+                              className="w-16 h-10 object-cover rounded"
+                            />
                           </div>
                         </td>
                         <td className="px-4 py-2.5">
                           <button
-                            onClick={() => handleToggleStatus(cat._id, cat.status)}
+                            onClick={() =>
+                              handleToggleStatus(cat._id, cat.status)
+                            }
                             className={`cursor-pointer w-8 h-4 rounded-full relative transition-colors ${
                               cat.status ? "bg-(--primary)" : "bg-gray-400"
                             }`}
@@ -209,7 +217,8 @@ const Subcategory = () => {
                           </button>
                         </td>
 
-                        {(subcategoryPermission?.edit || subcategoryPermission?.delete) && (
+                        {(subcategoryPermission?.edit ||
+                          subcategoryPermission?.delete) && (
                           <td className="px-4 py-2.5 text-right">
                             <div className="flex justify-end gap-1">
                               <button className="p-1.5 cursor-pointer hover:text-(--primary) transition-colors">
@@ -262,7 +271,9 @@ const Subcategory = () => {
             </div>
 
             {/* Pagination */}
-            <div className={`flex items-center justify-between p-3 border-t ${theme.divider}`}>
+            <div
+              className={`flex items-center justify-between p-3 border-t ${theme.divider}`}
+            >
               <span className="text-[11px] opacity-60">
                 Showing {categories.length} entries
               </span>
@@ -312,7 +323,10 @@ const Subcategory = () => {
                   <h3 className="text-sm font-bold">
                     {formData.id ? "Edit SubCategory" : "New SubCategory"}
                   </h3>
-                  <button onClick={closeModal} className="opacity-50 hover:opacity-100">
+                  <button
+                    onClick={closeModal}
+                    className="opacity-50 hover:opacity-100"
+                  >
                     <X size={16} />
                   </button>
                 </div>
@@ -327,7 +341,9 @@ const Subcategory = () => {
                       required
                       className="w-full p-2 text-sm rounded-lg bg-gray-500/5 border border-gray-500/20 outline-none focus:border-(--primary)"
                       value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
                     />
                   </div>
 
@@ -352,7 +368,9 @@ const Subcategory = () => {
                       accept="image/*"
                       required={!formData.id}
                       className="w-full text-xs file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[10px] file:font-bold file:bg-(--primary) file:text-white hover:file:bg-(--primary) cursor-pointer"
-                      onChange={(e) => setFormData({ ...formData, icon: e.target.files[0] })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, icon: e.target.files[0] })
+                      }
                     />
                   </div>
 
@@ -362,8 +380,12 @@ const Subcategory = () => {
                     className="w-full py-2 mt-2 bg-(--primary) text-white rounded-lg text-xs font-bold hover:opacity-90 transition-all disabled:opacity-50"
                   >
                     {formData.id
-                      ? updateLoading ? "Updating..." : "Update SubCategory"
-                      : createLoading ? "Creating..." : "Create SubCategory"}
+                      ? updateLoading
+                        ? "Updating..."
+                        : "Update SubCategory"
+                      : createLoading
+                        ? "Creating..."
+                        : "Create SubCategory"}
                   </button>
                 </form>
               </div>

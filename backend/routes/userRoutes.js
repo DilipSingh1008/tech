@@ -4,7 +4,7 @@ const upload = require("../middlewares/upload");
 
 const auth = require("../middlewares/auth");
 const checkPermission = require("../middlewares/permission");
-
+const authController = require("../controllers/adminController");
 const {
   createUser,
   getUsers,
@@ -20,16 +20,11 @@ router.post(
   auth(),
   checkPermission("users", "add"),
   upload.single("image"),
-  createUser
+  createUser,
 );
 
 // GET
-router.get(
-  "/",
-  auth(),
-  checkPermission("users", "view"),
-  getUsers
-);
+router.get("/", auth(), checkPermission("users", "view"), getUsers);
 
 // UPDATE
 router.put(
@@ -37,17 +32,14 @@ router.put(
   auth(),
   checkPermission("users", "edit"),
   upload.single("image"),
-  updateUser
+  updateUser,
 );
 
 // DELETE
-router.delete(
-  "/:id",
-  auth(),
-  checkPermission("users", "delete"),
-  deleteUser
-);
+router.delete("/:id", auth(), checkPermission("users", "delete"), deleteUser);
+router.post("/logout", authController.logout);
 
+<<<<<<< HEAD
 router.get(
   "/:id/permissions",
   auth(),
@@ -62,4 +54,6 @@ router.put(
   updateUserPermissions
 );
 
+=======
+>>>>>>> b86534a8e191f14695608db1a365b23966ed1f3b
 module.exports = router;

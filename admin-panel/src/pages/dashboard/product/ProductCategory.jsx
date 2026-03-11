@@ -96,13 +96,15 @@ const ProductCategory = () => {
       <main className="flex-1 overflow-y-auto">
         <div className="max-w-5xl mx-auto">
           {/* Top Bar */}
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-6">
-            <Searchbar
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setPage(1);
-              }}
-            />
+          <div className="flex items-center justify-between mb-4 gap-2">
+            <div className="flex-1 min-w-[150px]">
+              <Searchbar
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setPage(1);
+                }}
+              />
+            </div>
             {productPermission?.add && (
               <button
                 onClick={() => navigate("/dashboard/products/add")}

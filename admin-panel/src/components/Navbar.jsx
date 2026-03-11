@@ -3,6 +3,10 @@ import ThemeToggleButton from "./Button";
 import { useContext, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+import { useLogoutMutation } from "../redux/api/apiSlice";
+import { useDispatch } from "react-redux";
+import { apiSlice } from "../redux/api/apiSlice";
+import { useGetItemsQuery } from "../redux/api/apiSlice";
 // import { useLocation } from "react-router-dom";
 const getPageTitle = () => {
   const path = location.pathname;
@@ -26,20 +30,15 @@ const getPageTitle = () => {
   if (path.startsWith("/dashboard/faq-category")) return "FAQ";
   if (path.startsWith("/dashboard/manage-faq")) return "Manage FAQ";
   if (path.startsWith("/dashboard/manage-news")) return "Manage News";
-  if (path.startsWith("/dashboard/Manage-Blog-Categor")) return "Blog Categorie";
+  if (path.startsWith("/dashboard/Manage-Blog-Categor"))
+    return "Blog Categorie";
   if (path.startsWith("/dashboard/Manage-Blog")) return "Manage Blog";
   if (path.startsWith("/dashboard/Client")) return "Clients";
-  if (path.startsWith("/dashboard/enquiry")) return "Enquiry";
-
-
-
-  
-  
-
-
-
-
-
+  if (path.startsWith("/dashboard/vendor")) return "Vendor";
+  if (path.startsWith("/dashboard/career")) return "Career";
+  if (path.startsWith("/dashboard/Media-Post")) return "Media-Post";
+  if (path.startsWith("/dashboard/Manage-media")) return "Manage-media";
+  if (path.startsWith("/dashboard/Manage-media-items")) return "media-items";
 
   return "Dashboard"; // default
 };
@@ -48,6 +47,12 @@ const Navbar = ({ onMenuClick }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef();
   // const location = useLocation();
+
+  const [logoutApi] = useLogoutMutation();
+  const dispatch = useDispatch();
+  const { data } = useGetItemsQuery("admin/profile");
+
+  const userData = data?.data || {};
 
   const { logout } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -61,9 +66,23 @@ const Navbar = ({ onMenuClick }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleLogout = () => {
-    logout();
-    navigate("/");
+  const handleLogout = async () => {
+    try {
+      let res = await logoutApi().unwrap();
+      console.log("object", res);
+
+      localStorage.removeItem("token");
+      localStorage.removeItem("role");
+      localStorage.removeItem("roleId");
+
+      dispatch(apiSlice.util.resetApiState());
+
+      logout();
+
+      navigate("/");
+    } catch (error) {
+      console.log("Logout failed", error);
+    }
   };
 
   return (
@@ -130,18 +149,18 @@ const Navbar = ({ onMenuClick }) => {
         </div>
         {/* Profile */}
         <div className="flex items-center gap-3 group cursor-pointer pl-1">
-          <div className="text-right hidden lg:block">
+          <div className="text-right  lg:block">
             <p
               className="text-xs font-bold leading-none mb-1"
               style={{ color: "var(--text-main)" }}
             >
-              Akash Sharma
+              {userData?.fullName || "User"}
             </p>
             <p
               className="text-[10px] font-bold uppercase"
               style={{ color: "var(--primary)" }}
             >
-              Admin
+              {userData?.role?.name || userData?.role || ""}
             </p>
           </div>
           <div className="relative" ref={dropdownRef}>
@@ -160,7 +179,7 @@ const Navbar = ({ onMenuClick }) => {
             {/* Dropdown */}
             {isDropdownOpen && (
               <div
-                className="absolute top-full right-0 mt-2 w-40 rounded-lg shadow-lg border z-50 overflow-hidden"
+                className="absolute top-full right-0 mt-2 w-40 rounded-lg shadow-lg border z-50 enoverflow-hidden"
                 style={{
                   backgroundColor: "var(--card-bg)",
                   borderColor: "var(--border-color)",
